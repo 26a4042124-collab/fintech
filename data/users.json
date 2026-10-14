@@ -1,0 +1,22 @@
+[
+  {
+    "id": "usr_001",
+    "username": "nguyen_van_a",
+    "password": "password123",
+    "full_name": "Nguyễn Văn A",
+    "email": "nguyenvana@gmail.com",
+    "occupation": "Nhân viên văn phòng",
+    "monthly_income": 18000000,
+    "connected_banks": ["Vietcombank", "Techcombank", "MB Bank"]
+  },
+  {
+    "id": "usr_002",
+    "username": "demo",
+    "password": "123",
+    "full_name": "Người dùng Thử nghiệm",
+    "email": "demo@finlab.vn",
+    "occupation": "Freelancer",
+    "monthly_income": 20000000,
+    "connected_banks": ["Vietcombank"]
+  }
+]
