@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Tạo tài khoản{% endblock %}
+{% block body %}
+<div class="auth-wrapper">
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-orange-2"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="auth-header">
+    <a href="{{ url_for('register_otp') }}" class="auth-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1 class="auth-title">Thông tin cá nhân</h1>
+    <p class="auth-subtitle">Điền thông tin để hoàn tất tạo tài khoản</p>
+  </div>
+
+  <div class="auth-body">
+    {% if error %}
+    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register_create') }}">
+      <div class="form-group">
+        <label class="form-label">Họ và tên</label>
+        <input type="text" name="full_name" class="form-input"
+          placeholder="Ví dụ: Nguyễn Thị Bích"
+          value="{{ form_data.get('full_name', '') }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-input"
+          placeholder="email@example.com"
+          value="{{ form_data.get('email', '') }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mật khẩu</label>
+        <div class="input-wrapper">
+          <input type="password" name="password" class="form-input" id="pw1"
+            placeholder="Tối thiểu 6 ký tự" required>
+          <span class="input-suffix" onclick="togglePw('pw1', this)">
+            <i class="fa-regular fa-eye"></i>
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Xác nhận mật khẩu</label>
+        <div class="input-wrapper">
+          <input type="password" name="confirm_password" class="form-input" id="pw2"
+            placeholder="Nhập lại mật khẩu" required>
+          <span class="input-suffix" onclick="togglePw('pw2', this)">
+            <i class="fa-regular fa-eye"></i>
+          </span>
+        </div>
+      </div>
+      <div class="mt-8"></div>
+      <button type="submit" class="btn-primary">
+        Tiếp tục <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePw(id, el) {
+  const input = document.getElementById(id);
+  const icon = el.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa-regular fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa-regular fa-eye';
+  }
+}
+</script>
+{% endblock %}

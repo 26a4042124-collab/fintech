@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Chào mừng{% endblock %}
+
+{% block body %}
+<div class="landing-wrapper">
+  <!-- Blobs -->
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-orange-2"></div>
+  <div class="blob blob-gold"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Slide 1 -->
+  <div class="slide active" id="slide-1">
+    <div class="slide-illustration">
+      <div class="brand-logo">
+        <div class="brand-logo-icon">🪙</div>
+        <div class="brand-logo-name">fin<span>lab</span></div>
+        <p style="font-size:14px; color:rgba(255,255,255,0.5); margin-top:4px; text-align:center; font-weight:500;">
+          Trợ lý tài chính thông minh
+        </p>
+      </div>
+    </div>
+    <div class="slide-text">
+      <h1 class="slide-title">Theo dõi chi tiết<br><span>dòng tiền</span> của bạn.</h1>
+      <p class="slide-subtitle">FinLab kết nối tài khoản ngân hàng, phân tích chi tiêu bằng AI và giúp bạn đạt mục tiêu tài chính.</p>
+    </div>
+    <div class="slide-dots">
+      <div class="dot active" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+      <div class="dot" id="dot-3"></div>
+    </div>
+    <div class="slide-actions">
+      <button class="btn-primary" onclick="nextSlide()">Tiếp tục <i class="fa-solid fa-arrow-right"></i></button>
+      <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+    </div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="slide" id="slide-2">
+    <div class="slide-illustration">
+      <div class="slide-feature-icon">🏦</div>
+    </div>
+    <div class="slide-text">
+      <h1 class="slide-title">Kết nối <span>Open Banking</span><br>tự động đồng bộ</h1>
+      <p class="slide-subtitle">Liên kết Vietcombank, Techcombank, MB Bank — lịch sử giao dịch cập nhật theo thời gian thực, không cần nhập tay.</p>
+    </div>
+    <div class="slide-dots">
+      <div class="dot" id="dot-1b"></div>
+      <div class="dot active" id="dot-2b"></div>
+      <div class="dot" id="dot-3b"></div>
+    </div>
+    <div class="slide-actions">
+      <button class="btn-primary" onclick="nextSlide()">Tiếp tục <i class="fa-solid fa-arrow-right"></i></button>
+      <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+    </div>
+  </div>
+
+  <!-- Slide 3 -->
+  <div class="slide" id="slide-3">
+    <div class="slide-illustration">
+      <div class="slide-feature-icon">🎯</div>
+    </div>
+    <div class="slide-text">
+      <h1 class="slide-title">AI phát hiện<br><span>rò rỉ chi tiêu</span> ngầm</h1>
+      <p class="slide-subtitle">Gói subscription bị quên, mua sắm đêm khuya, chi tiêu vượt ngưỡng — FinLab AI cảnh báo và đề xuất kế hoạch tiết kiệm.</p>
+    </div>
+    <div class="slide-dots">
+      <div class="dot" id="dot-1c"></div>
+      <div class="dot" id="dot-2c"></div>
+      <div class="dot active" id="dot-3c"></div>
+    </div>
+    <div class="slide-actions">
+      <a href="{{ url_for('register') }}" class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        Bắt đầu miễn phí <i class="fa-solid fa-arrow-right"></i>
+      </a>
+      <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let current = 1;
+  const total = 3;
+  function nextSlide() {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = current < total ? current + 1 : total;
+    document.getElementById('slide-' + current).classList.add('active');
+  }
+</script>
+{% endblock %}

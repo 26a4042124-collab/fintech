@@ -10,6 +10,7 @@ AVAILABLE_BANKS = [
         "name": "Vietcombank",
         "short_name": "VCB",
         "account_no": "1028475938",
+        "description": "STK: 1028475938 · Nhận lương",
         "status": "CONNECTED",
         "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
         "color": "#006837"
@@ -19,6 +20,7 @@ AVAILABLE_BANKS = [
         "name": "Techcombank",
         "short_name": "TCB",
         "account_no": "19038475920",
+        "description": "STK: 19038475920 · Chi tiêu hàng ngày",
         "status": "CONNECTED",
         "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
         "color": "#E31B23"
@@ -28,6 +30,7 @@ AVAILABLE_BANKS = [
         "name": "MB Bank",
         "short_name": "MB",
         "account_no": "0987654321",
+        "description": "STK: 0987654321 · Tiết kiệm số",
         "status": "CONNECTED",
         "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
         "color": "#002060"

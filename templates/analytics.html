@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Phân tích{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
+
+{% block body %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.10;"></div>
+  <div class="blob blob-gold" style="opacity:0.08;"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Phân tích tài chính</div>
+    <div class="top-bar-action"><i class="fa-solid fa-calendar"></i></div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Month badge -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+      <div style="background:var(--accent-light);border:1px solid var(--border-accent);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;color:var(--accent);">
+        📅 Tháng 10/2026
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text-muted);">
+        {{ transactions | length }} giao dịch
+      </div>
+    </div>
+
+    <!-- 50/30/20 Chart Card -->
+    <div class="chart-card">
+      <div class="chart-card-title">
+        <i class="fa-solid fa-chart-pie" style="color:var(--accent);"></i>
+        Quy tắc 50/30/20
+      </div>
+      <div class="chart-card-sub">So sánh chi tiêu thực tế với chuẩn tài chính cá nhân</div>
+
+      <div class="chart-wrap">
+        <canvas id="ruleChart"></canvas>
+      </div>
+
+      <div style="margin-top:20px;">
+        <!-- Needs -->
+        <div class="budget-row">
+          <div class="budget-row-header">
+            <span class="budget-row-label">
+              <span class="dot-color" style="background:#3b82f6;"></span>
+              Thiết yếu (Needs)
+            </span>
+            <span class="budget-row-val">{{ health.needs.percentage }}% / chuẩn 50%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:{{ [health.needs.percentage, 100]|min }}%;background:#3b82f6;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.needs.amount) }}đ</div>
+        </div>
+        <!-- Wants -->
+        <div class="budget-row">
+          <div class="budget-row-header">
+            <span class="budget-row-label">
+              <span class="dot-color" style="background:#f59e0b;"></span>
+              Mong muốn (Wants)
+            </span>
+            <span class="budget-row-val" style="color:{% if health.wants.percentage > 30 %}var(--danger){% else %}var(--text-secondary){% endif %};">
+              {{ health.wants.percentage }}% / chuẩn 30%{% if health.wants.percentage > 30 %} ⚠️{% endif %}
+            </span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:{{ [health.wants.percentage, 100]|min }}%;background:#f59e0b;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.wants.amount) }}đ</div>
+        </div>
+        <!-- Savings -->
+        <div class="budget-row">
+          <div class="budget-row-header">
+            <span class="budget-row-label">
+              <span class="dot-color" style="background:#22c55e;"></span>
+              Tiết kiệm (Savings)
+            </span>
+            <span class="budget-row-val" style="color:{% if health.savings.percentage < 20 %}var(--danger){% else %}var(--success){% endif %};">
+              {{ health.savings.percentage }}% / chuẩn 20%{% if health.savings.percentage < 20 %} ❌{% else %} ✅{% endif %}
+            </span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:{{ [health.savings.percentage, 100]|min }}%;background:#22c55e;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.savings.amount) }}đ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="chart-card">
+      <div class="chart-card-title">
+        <i class="fa-solid fa-bars-staggered" style="color:#a855f7;"></i>
+        Chi tiêu theo danh mục
+      </div>
+      <div class="chart-card-sub">Top danh mục chi tiêu tháng này</div>
+      <div class="chart-wrap chart-wrap-sm">
+        <canvas id="catChart"></canvas>
+      </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="chart-card">
+      <div class="chart-card-title">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--gold);"></i>
+        Đề xuất từ AI
+      </div>
+      <div class="chart-card-sub">Kế hoạch tối ưu chi tiêu tháng tới</div>
+      {% for rec in health.recommendations %}
+      <div class="rec-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>{{ rec }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Leak Summary -->
+    <div class="chart-card">
+      <div class="chart-card-title">
+        <i class="fa-solid fa-droplet" style="color:var(--danger);"></i>
+        Tổng rò rỉ phát hiện
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+        <div style="background:var(--danger-bg);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:12px;color:rgba(239,68,68,0.8);margin-bottom:6px;">Subscriptions</div>
+          <div style="font-size:18px;font-weight:800;color:var(--danger);">-{{ "{:,.0f}".format(health.subscription_leaks.total_amount) }}đ</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ health.subscription_leaks.items|length }} dịch vụ</div>
+        </div>
+        <div style="background:var(--warning-bg);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:16px;text-align:center;">
+          <div style="font-size:12px;color:rgba(245,158,11,0.8);margin-bottom:6px;">Chi tiêu đêm</div>
+          <div style="font-size:18px;font-weight:800;color:var(--warning);">-{{ "{:,.0f}".format(health.impulse_night_spending.total_amount) }}đ</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ health.impulse_night_spending.count }} giao dịch</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+
+  <nav class="bottom-nav">
+    <a href="{{ url_for('dashboard') }}" class="nav-item"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+    <a href="{{ url_for('transactions') }}" class="nav-item"><i class="fa-solid fa-receipt"></i><span>Giao dịch</span></a>
+    <a href="{{ url_for('analytics') }}" class="nav-item active"><i class="fa-solid fa-chart-pie"></i><span>Phân tích</span></a>
+    <a href="{{ url_for('goals') }}" class="nav-item"><i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span></a>
+    <a href="{{ url_for('profile') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Cá nhân</span></a>
+  </nav>
+
+  <script type="application/json" id="analytics-data">{{ health | tojson }}</script>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const d = JSON.parse(document.getElementById('analytics-data').textContent);
+
+  // Doughnut chart 50/30/20
+  const ctx1 = document.getElementById('ruleChart');
+  if (ctx1) {
+    new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels: [`Thiết yếu ${d.needs.percentage}%`, `Mong muốn ${d.wants.percentage}%`, `Tiết kiệm ${d.savings.percentage}%`],
+        datasets: [{
+          data: [d.needs.amount, d.wants.amount, d.savings.amount],
+          backgroundColor: ['#3b82f6', '#f59e0b', '#22c55e'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.65)', boxWidth: 10, padding: 14, font: { size: 12, weight: '600' } } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${(ctx.raw||0).toLocaleString('vi-VN')}đ` } }
+        },
+        cutout: '65%'
+      }
+    });
+  }
+
+  // Bar chart categories
+  const ctx2 = document.getElementById('catChart');
+  if (ctx2 && d.category_breakdown) {
+    const sorted = Object.entries(d.category_breakdown).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(e=>e[0]),
+        datasets: [{ label: 'VNĐ', data: sorted.map(e=>e[1]),
+          backgroundColor: '#FF6B35', borderRadius: 6, maxBarThickness: 20 }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${(ctx.raw||0).toLocaleString('vi-VN')}đ` } }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => (v/1e6).toFixed(1)+'Tr', font:{size:11} } },
+          y: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)', font:{size:11,weight:'600'} } }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

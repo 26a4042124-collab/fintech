@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Cá nhân{% endblock %}
+
+{% block body %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.12;"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Tài khoản</div>
+    <div class="top-bar-action"><i class="fa-solid fa-ellipsis"></i></div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Profile Header -->
+    <div class="profile-header-card">
+      <div class="profile-avatar">{{ user.full_name[0] }}</div>
+      <div class="profile-name">{{ user.full_name }}</div>
+      <div class="profile-meta">{{ user.email }} &bull; {{ user.occupation }}</div>
+      <div style="margin-top:12px;position:relative;z-index:1;">
+        <span style="background:var(--accent-light);border:1px solid var(--border-accent);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--accent);">
+          💰 Thu nhập: {{ "{:,.0f}".format(user.monthly_income) }}đ/tháng
+        </span>
+      </div>
+    </div>
+
+    <!-- Connected Banks -->
+    <div class="setting-group">
+      <div class="setting-group-title">Ngân hàng đã kết nối</div>
+      <div class="glass-card-solid" style="padding:16px;">
+        {% if user.connected_banks %}
+          {% for bank in user.connected_banks %}
+          <span class="bank-chip">
+            <i class="fa-solid fa-circle-check"></i> {{ bank }}
+          </span>
+          {% endfor %}
+        {% else %}
+          <div style="font-size:13px;color:var(--text-muted);text-align:center;padding:8px;">
+            Chưa kết nối ngân hàng nào
+          </div>
+        {% endif %}
+        <div style="margin-top:12px;">
+          <a href="{{ url_for('dashboard') }}" style="font-size:13px;color:var(--accent);font-weight:700;">
+            <i class="fa-solid fa-plus"></i> Thêm ngân hàng
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="setting-group">
+      <div class="setting-group-title">Tài khoản</div>
+      <a href="#" class="setting-item">
+        <div class="setting-item-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="setting-item-text">
+          <div class="setting-item-title">Thông tin cá nhân</div>
+          <div class="setting-item-sub">Cập nhật tên, email, số điện thoại</div>
+        </div>
+        <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+      </a>
+      <a href="#" class="setting-item">
+        <div class="setting-item-icon" style="background:rgba(168,85,247,0.15);color:#a855f7;">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div class="setting-item-text">
+          <div class="setting-item-title">Bảo mật & Mật khẩu</div>
+          <div class="setting-item-sub">Đổi mật khẩu, xác thực 2 lớp</div>
+        </div>
+        <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+      </a>
+      <a href="#" class="setting-item">
+        <div class="setting-item-icon" style="background:rgba(255,107,53,0.15);color:var(--accent);">
+          <i class="fa-solid fa-bullseye"></i>
+        </div>
+        <div class="setting-item-text">
+          <div class="setting-item-title">Mục tiêu tài chính</div>
+          <div class="setting-item-sub">Cập nhật mục tiêu & thu nhập</div>
+        </div>
+        <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+      </a>
+    </div>
+
+    <!-- App Settings -->
+    <div class="setting-group">
+      <div class="setting-group-title">Ứng dụng</div>
+      <a href="#" class="setting-item">
+        <div class="setting-item-icon" style="background:rgba(34,197,94,0.15);color:#22c55e;">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="setting-item-text">
+          <div class="setting-item-title">Thông báo</div>
+          <div class="setting-item-sub">Cảnh báo rò rỉ, mục tiêu, báo cáo</div>
+        </div>
+        <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+      </a>
+      <a href="#" class="setting-item">
+        <div class="setting-item-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div class="setting-item-text">
+          <div class="setting-item-title">Về FinLab</div>
+          <div class="setting-item-sub">Phiên bản 2.0 · Đồ án CNDVTC 2026</div>
+        </div>
+        <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+      </a>
+    </div>
+
+    <!-- Logout -->
+    <a href="{{ url_for('logout') }}" class="setting-item" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);">
+      <div class="setting-item-icon" style="background:rgba(239,68,68,0.15);color:var(--danger);">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </div>
+      <div class="setting-item-text">
+        <div class="setting-item-title" style="color:var(--danger);">Đăng xuất</div>
+        <div class="setting-item-sub">Thoát khỏi tài khoản hiện tại</div>
+      </div>
+      <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
+    </a>
+
+    <!-- Footer -->
+    <div style="text-align:center;padding:24px 0 8px;color:var(--text-muted);font-size:12px;line-height:1.8;">
+      <div>🎓 Học viện Ngân hàng — Khoa CNTT & Kinh tế số</div>
+      <div>Đồ án <strong style="color:var(--text-secondary);">Công nghệ Dịch vụ Tài chính</strong> © 2026</div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="{{ url_for('dashboard') }}" class="nav-item"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+    <a href="{{ url_for('transactions') }}" class="nav-item"><i class="fa-solid fa-receipt"></i><span>Giao dịch</span></a>
+    <a href="{{ url_for('analytics') }}" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Phân tích</span></a>
+    <a href="{{ url_for('goals') }}" class="nav-item"><i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span></a>
+    <a href="{{ url_for('profile') }}" class="nav-item active"><i class="fa-solid fa-user"></i><span>Cá nhân</span></a>
+  </nav>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Xác thực OTP{% endblock %}
+{% block body %}
+<div class="auth-wrapper">
+  <div class="blob blob-orange"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="auth-header">
+    <a href="{{ url_for('register') }}" class="auth-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1 class="auth-title">Xác thực OTP</h1>
+    <p class="auth-subtitle">Nhập mã 6 chữ số đã gửi đến</p>
+  </div>
+
+  <div class="auth-body">
+    <div class="otp-info">
+      <i class="fa-solid fa-mobile-screen-button"></i>
+      <div>Mã OTP đã gửi đến <strong>{{ phone }}</strong><br>
+      <span style="font-size:12px; opacity:0.7;">(Demo: nhập bất kỳ 6 chữ số)</span></div>
+    </div>
+
+    {% if error %}
+    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register_otp') }}" id="otp-form">
+      <div class="otp-inputs">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      </div>
+      <input type="hidden" name="otp" id="otp-hidden">
+
+      <div class="otp-resend">
+        Không nhận được mã?
+        <button type="button" id="resend-btn">Gửi lại (<span id="countdown">60</span>s)</button>
+      </div>
+
+      <button type="submit" class="btn-primary" id="verify-btn" disabled>
+        Xác nhận <i class="fa-solid fa-check"></i>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/otp.js') }}"></script>
+{% endblock %}

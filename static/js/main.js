@@ -1,328 +1,191 @@
 /**
- * FinLab - Main Dashboard Interactivity & Charts
+ * FinLab — Main JS (Dark Theme / Canva Redesign)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initCharts();
-    initTransactionFilters();
-    initOpenBankingModal();
-    initMobileExperience();
+  initChatbot();
+  initBankModal();
+  initToastQueue();
 });
 
 // ==========================================================================
-// 1. Chart.js Initialization
+// Toast Notification
 // ==========================================================================
-function initCharts() {
-    const rawDataElement = document.getElementById('dashboard-data');
-    if (!rawDataElement) return;
+function showToast(message, type = 'info') {
+  // Remove existing
+  const old = document.getElementById('finlab-toast');
+  if (old) old.remove();
 
-    let dashData;
+  const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+  const toast = document.createElement('div');
+  toast.id = 'finlab-toast';
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3200);
+}
+
+function initToastQueue() {
+  // Make globally accessible
+  window.showToast = showToast;
+}
+
+// ==========================================================================
+// Chatbot
+// ==========================================================================
+function initChatbot() {
+  const trigger    = document.getElementById('chatbot-trigger');
+  const triggerTop = document.getElementById('chatbot-fab-top');
+  const win        = document.getElementById('chat-window');
+  const closeBtn   = document.getElementById('chat-close');
+  const input      = document.getElementById('chat-input');
+  const sendBtn    = document.getElementById('chat-send');
+  const msgs       = document.getElementById('chat-messages');
+  const chips      = document.querySelectorAll('.chip');
+
+  if (!win) return;
+
+  function toggleChat() {
+    win.classList.toggle('open');
+    if (win.classList.contains('open') && input) input.focus();
+  }
+
+  if (trigger)    trigger.addEventListener('click', toggleChat);
+  if (triggerTop) triggerTop.addEventListener('click', toggleChat);
+  if (closeBtn)   closeBtn.addEventListener('click', () => win.classList.remove('open'));
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => sendMessage(chip.dataset.q || chip.textContent.trim()));
+  });
+
+  if (sendBtn) sendBtn.addEventListener('click', send);
+  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  function send() {
+    const text = input.value.trim();
+    if (!text) return;
+    sendMessage(text);
+    input.value = '';
+  }
+
+  async function sendMessage(text) {
+    appendMsg('user', text);
+    scrollBottom();
+    const typId = appendTyping();
+    scrollBottom();
+
     try {
-        dashData = JSON.parse(rawDataElement.textContent);
-    } catch (e) {
-        console.error('Failed to parse dashboard data:', e);
-        return;
+      const res  = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      removeTyping(typId);
+      appendMsg('bot', data.reply || 'Xin lỗi, tôi chưa hiểu câu hỏi này!');
+    } catch {
+      removeTyping(typId);
+      appendMsg('bot', 'Lỗi kết nối đến máy chủ AI. Vui lòng thử lại!');
     }
+    scrollBottom();
+  }
 
-    const { needs, wants, savings, category_breakdown } = dashData;
+  function appendMsg(role, text) {
+    const div = document.createElement('div');
+    div.className = `msg msg-${role}`;
+    div.innerHTML = formatText(text);
+    msgs.appendChild(div);
+  }
 
-    // --- Chart 1: 50/30/20 Rule Doughnut Chart ---
-    const ctxRule = document.getElementById('ruleChart');
-    if (ctxRule) {
-        new Chart(ctxRule, {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    `Thiết yếu (${needs.percentage}%)`,
-                    `Mong muốn (${wants.percentage}%)`,
-                    `Tiết kiệm (${savings.percentage}%)`
-                ],
-                datasets: [{
-                    data: [needs.amount, wants.amount, savings.amount],
-                    backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff',
-                    hoverOffset: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            font: { size: 12, weight: '600' },
-                            padding: 16
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const val = context.raw || 0;
-                                return ' ' + context.label + ': ' + val.toLocaleString('vi-VN') + ' VNĐ';
-                            }
-                        }
-                    }
-                },
-                cutout: '68%'
-            }
-        });
-    }
+  function appendTyping() {
+    const id = 'typ-' + Date.now();
+    const div = document.createElement('div');
+    div.id = id;
+    div.className = 'msg msg-bot';
+    div.style.cssText = 'display:flex;gap:5px;align-items:center;padding:10px 14px;';
+    div.innerHTML = `
+      <span style="width:7px;height:7px;background:rgba(255,255,255,0.3);border-radius:50%;animation:bounce 1.2s infinite 0.0s;"></span>
+      <span style="width:7px;height:7px;background:rgba(255,255,255,0.3);border-radius:50%;animation:bounce 1.2s infinite 0.15s;"></span>
+      <span style="width:7px;height:7px;background:rgba(255,255,255,0.3);border-radius:50%;animation:bounce 1.2s infinite 0.3s;"></span>`;
+    msgs.appendChild(div);
+    return id;
+  }
 
-    // --- Chart 2: Category Breakdown Horizontal Bar Chart ---
-    const ctxCategory = document.getElementById('categoryChart');
-    if (ctxCategory && category_breakdown) {
-        const sortedCats = Object.entries(category_breakdown)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 6);
+  function removeTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
 
-        const labels = sortedCats.map(item => item[0]);
-        const dataValues = sortedCats.map(item => item[1]);
+  function scrollBottom() {
+    setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
+  }
 
-        new Chart(ctxCategory, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Số tiền đã chi (VNĐ)',
-                    data: dataValues,
-                    backgroundColor: '#6366f1',
-                    borderRadius: 6,
-                    maxBarThickness: 24
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return ' ' + (context.raw || 0).toLocaleString('vi-VN') + ' VNĐ';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: '#f1f5f9' },
-                        ticks: {
-                            callback: function (val) {
-                                return (val / 1000000).toFixed(1) + 'Tr';
-                            },
-                            font: { size: 11 }
-                        }
-                    },
-                    y: {
-                        grid: { display: false },
-                        ticks: { font: { size: 11, weight: '500' } }
-                    }
-                }
-            }
-        });
-    }
+  function formatText(t) {
+    if (!t) return '';
+    return t
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+  }
 }
 
 // ==========================================================================
-// 2. Transaction Filter & Search
+// Open Banking Modal (Dashboard)
 // ==========================================================================
-function initTransactionFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const searchInput = document.getElementById('search-input');
-    const tableRows = document.querySelectorAll('.fin-table tbody tr');
+function initBankModal() {
+  const overlay   = document.getElementById('modal-bank');
+  const syncBtn   = document.getElementById('btn-sync');
+  const bankCards = document.querySelectorAll('.bank-choice');
+  if (!overlay) return;
 
-    let currentBank = 'ALL';
-    let currentSearch = '';
+  let selectedBank = 'VCB';
 
-    function filterTable() {
-        tableRows.forEach(row => {
-            const rowBank = row.getAttribute('data-bank') || '';
-            const rowText = row.textContent.toLowerCase();
-
-            const matchBank = (currentBank === 'ALL' || rowBank.toLowerCase() === currentBank.toLowerCase());
-            const matchSearch = (!currentSearch || rowText.includes(currentSearch));
-
-            if (matchBank && matchSearch) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentBank = btn.getAttribute('data-bank');
-            filterTable();
-        });
+  bankCards.forEach(card => {
+    card.addEventListener('click', () => {
+      bankCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedBank = card.dataset.bank;
     });
+  });
 
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            currentSearch = e.target.value.trim().toLowerCase();
-            filterTable();
+  // Close on backdrop click
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+
+  if (syncBtn) {
+    syncBtn.addEventListener('click', async () => {
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<span class="spinner"></span> Đang xác thực...';
+      try {
+        const res    = await fetch('/api/sync-bank', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bank_id: selectedBank })
         });
-    }
-}
-
-// ==========================================================================
-// 3. Open Banking Modal & API Sync Simulation
-// ==========================================================================
-function initOpenBankingModal() {
-    const openBtn = document.getElementById('btn-open-banking');
-    const modalOverlay = document.getElementById('modal-bank-sync');
-    const closeBtn = document.getElementById('btn-modal-close');
-    const cancelBtn = document.getElementById('btn-modal-cancel');
-    const confirmSyncBtn = document.getElementById('btn-confirm-sync');
-    const bankCards = document.querySelectorAll('.bank-choice-card');
-
-    let selectedBankId = 'VCB';
-
-    if (!modalOverlay) return;
-
-    function openModal() {
-        modalOverlay.classList.add('open');
-    }
-
-    function closeModal() {
-        modalOverlay.classList.remove('open');
-    }
-
-    if (openBtn) openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
+        const result = await res.json();
+        overlay.classList.remove('open');
+        if (result.success) {
+          showToast(result.message || 'Đồng bộ thành công!', 'success');
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          showToast(result.message || 'Lỗi kết nối!', 'error');
+        }
+      } catch {
+        showToast('Lỗi kết nối đến máy chủ!', 'error');
+      } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Đồng bộ ngay';
+      }
     });
-
-    bankCards.forEach(card => {
-        card.addEventListener('click', () => {
-            bankCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedBankId = card.getAttribute('data-bank-id');
-        });
-    });
-
-    if (confirmSyncBtn) {
-        confirmSyncBtn.addEventListener('click', async () => {
-            confirmSyncBtn.disabled = true;
-            confirmSyncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực OAuth 2.0...';
-
-            try {
-                const response = await fetch('/api/sync-bank', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bank_id: selectedBankId })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    confirmSyncBtn.innerHTML = '<i class="fa-solid fa-check"></i> Đã đồng bộ!';
-                    setTimeout(() => {
-                        closeModal();
-                        showNotification('Thành công', result.message || 'Đồng bộ Open Banking API thành công!');
-                        setTimeout(() => window.location.reload(), 1000);
-                    }, 800);
-                } else {
-                    alert(result.message || 'Lỗi đồng bộ!');
-                    confirmSyncBtn.disabled = false;
-                    confirmSyncBtn.innerHTML = 'Kết nối & Đồng bộ ngay';
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Có lỗi kết nối đến máy chủ!');
-                confirmSyncBtn.disabled = false;
-                confirmSyncBtn.innerHTML = 'Kết nối & Đồng bộ ngay';
-            }
-        });
-    }
+  }
 }
-
-// Simple toast notification
-function showNotification(title, message) {
-    const toast = document.createElement('div');
-    toast.style.position = 'fixed';
-    toast.style.top = '1.5rem';
-    toast.style.right = '1.5rem';
-    toast.style.background = '#0f172a';
-    toast.style.color = '#ffffff';
-    toast.style.padding = '0.9rem 1.4rem';
-    toast.style.borderRadius = '12px';
-    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
-    toast.style.zIndex = '9999';
-    toast.style.fontSize = '0.88rem';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.gap = '0.65rem';
-    toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.15rem;"></i> <div><strong>${title}</strong><div style="font-size: 0.78rem; opacity: 0.85;">${message}</div></div>`;
-
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.4s ease';
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
-}
-
-// ==========================================================================
-// 4. Mobile App Responsive Experience & Simulator Toggle
-// ==========================================================================
-function initMobileExperience() {
-    const toggleBtn = document.getElementById('btn-toggle-device');
-    const toggleText = document.getElementById('toggle-device-text');
-    const mobileNavItems = document.querySelectorAll('.mobile-bottom-nav .mobile-nav-item');
-    const mobileAiBtn = document.getElementById('mobile-nav-ai-btn');
-    const chatbotTrigger = document.getElementById('chatbot-trigger');
-
-    // 1. Mobile Simulator Toggle (For PC / Laptop Presentation)
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const isSimulator = document.body.classList.toggle('mobile-simulator-active');
-            toggleBtn.classList.toggle('active', isSimulator);
-
-            if (isSimulator) {
-                toggleText.textContent = 'Chế độ Web';
-                toggleBtn.querySelector('i').className = 'fa-solid fa-desktop';
-                showNotification('Chế độ Mobile App', 'Đang giả lập màn hình ứng dụng di động cho buổi thuyết trình.');
-            } else {
-                toggleText.textContent = 'Chế độ App';
-                toggleBtn.querySelector('i').className = 'fa-solid fa-mobile-screen';
-                showNotification('Chế độ Web Desktop', 'Đã quay trở lại chế độ xem bảng điều khiển toàn màn hình.');
-            }
-        });
-    }
-
-    // 2. Mobile Bottom Nav Tab Navigation
-    mobileNavItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (item.id === 'mobile-nav-ai-btn') return;
-
-            mobileNavItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            const targetId = item.getAttribute('href');
-            if (targetId && targetId.startsWith('#')) {
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-        });
-    });
-
-    // 3. Connect mobile nav AI button to Chatbot toggle
-    if (mobileAiBtn && chatbotTrigger) {
-        mobileAiBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            chatbotTrigger.click();
-        });
-    }
-}
-

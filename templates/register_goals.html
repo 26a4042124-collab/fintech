@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Mục tiêu tài chính{% endblock %}
+{% block body %}
+<div class="auth-wrapper">
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-gold"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="auth-header">
+    <a href="{{ url_for('register_create') }}" class="auth-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <h1 class="auth-title">Mục tiêu tài chính 🎯</h1>
+    <p class="auth-subtitle">Chọn những gì bạn muốn đạt được.<br>AI sẽ cá nhân hóa lời khuyên cho bạn.</p>
+  </div>
+
+  <div class="auth-body">
+    {% if error %}
+    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register_goals') }}" id="goals-form">
+      <div class="goals-grid">
+        {% set goal_list = [
+          ("saving",    "💰", "Tiết kiệm",      "rgba(255,107,53,0.15)",  "#FF6B35"),
+          ("invest",    "📈", "Đầu tư",         "rgba(34,197,94,0.15)",   "#22c55e"),
+          ("control",   "🛡️", "Kiểm soát\nchi tiêu", "rgba(59,130,246,0.15)", "#3b82f6"),
+          ("debt",      "💳", "Trả nợ",         "rgba(239,68,68,0.15)",   "#ef4444"),
+          ("house",     "🏠", "Mua nhà / xe",   "rgba(168,85,247,0.15)",  "#a855f7"),
+          ("travel",    "✈️", "Du lịch",        "rgba(255,215,0,0.15)",   "#FFD700"),
+        ] %}
+        {% for val, icon, label, bg, color in goal_list %}
+        <label class="goal-card" id="gc-{{ val }}">
+          <input type="checkbox" name="goals" value="{{ val }}"
+                 onchange="toggleGoalCard('gc-{{ val }}', this)">
+          <div class="goal-card-icon" style="background:{{ bg }}; color:{{ color }}; font-size:24px;">
+            {{ icon }}
+          </div>
+          <div class="goal-card-label">{{ label }}</div>
+        </label>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-primary">
+        Bắt đầu hành trình <i class="fa-solid fa-rocket"></i>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleGoalCard(cardId, checkbox) {
+  const card = document.getElementById(cardId);
+  if (checkbox.checked) {
+    card.classList.add('selected');
+  } else {
+    card.classList.remove('selected');
+  }
+}
+</script>
+{% endblock %}

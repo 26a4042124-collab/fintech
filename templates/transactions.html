@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Giao dịch{% endblock %}
+{% block body %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.10;"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Lịch sử giao dịch</div>
+    <div class="top-bar-action"><i class="fa-solid fa-sliders"></i></div>
+  </div>
+
+  <div class="page-content">
+    <!-- Summary strip -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div class="glass-card-solid" style="padding:16px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Tổng thu</div>
+        <div style="font-size:16px;font-weight:800;color:var(--success);">+{{ "{:,.0f}".format(health.income) }}đ</div>
+      </div>
+      <div class="glass-card-solid" style="padding:16px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Tổng chi</div>
+        <div style="font-size:16px;font-weight:800;color:var(--danger);">-{{ "{:,.0f}".format(health.total_expense) }}đ</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="Tìm giao dịch...">
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <button class="filter-pill active" data-bank="ALL">Tất cả</button>
+      <button class="filter-pill" data-bank="Vietcombank">Vietcombank</button>
+      <button class="filter-pill" data-bank="Techcombank">Techcombank</button>
+      <button class="filter-pill" data-bank="MB Bank">MB Bank</button>
+    </div>
+
+    <!-- Transaction list -->
+    <div id="txn-list">
+      {% for t in transactions %}
+      {% set icons = {
+        'INCOME': ('fa-arrow-down', '#22c55e', 'rgba(34,197,94,0.15)'),
+        'NEEDS': ('fa-shield', '#3b82f6', 'rgba(59,130,246,0.15)'),
+        'WANTS': ('fa-bag-shopping', '#f59e0b', 'rgba(245,158,11,0.15)'),
+        'SAVINGS': ('fa-piggy-bank', '#a855f7', 'rgba(168,85,247,0.15)')
+      } %}
+      {% set ico = icons.get(t.ai_bucket, ('fa-circle-dot', '#64748b', 'rgba(100,116,139,0.15)')) %}
+      <div class="txn-item" data-bank="{{ t.bank }}"
+        style="background:var(--bg-card-solid);border-radius:14px;padding:12px 14px;margin-bottom:8px;">
+        <div class="txn-icon" style="background:{{ ico[2] }};color:{{ ico[1] }};">
+          <i class="fa-solid {{ ico[0] }}"></i>
+        </div>
+        <div class="txn-info">
+          <div class="txn-name">{{ t.description[:36] }}{% if t.description|length > 36 %}...{% endif %}</div>
+          <div class="txn-meta">
+            {% if 'Vietcom' in t.bank %}<span class="txn-bank-tag tag-vcb">VCB</span>
+            {% elif 'Techcom' in t.bank %}<span class="txn-bank-tag tag-tcb">TCB</span>
+            {% else %}<span class="txn-bank-tag tag-mbb">MB</span>{% endif %}
+            <span>{{ t.timestamp[:10] }}</span>
+            {% if t.is_subscription %}<span class="badge badge-sub"><i class="fa-solid fa-repeat"></i> Sub</span>{% endif %}
+            {% if t.is_night_spending %}<span class="badge badge-night"><i class="fa-solid fa-moon"></i> Đêm</span>{% endif %}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="txn-amount {% if t.type == 'INFLOW' %}amt-in{% else %}amt-out{% endif %}">
+            {{ '+' if t.type == 'INFLOW' else '-' }}{{ "{:,.0f}".format(t.amount) }}đ
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+            <span class="badge
+              {% if t.ai_bucket == 'INCOME' %}badge-income
+              {% elif t.ai_bucket == 'NEEDS' %}badge-needs
+              {% elif t.ai_bucket == 'WANTS' %}badge-wants
+              {% elif t.ai_bucket == 'SAVINGS' %}badge-savings
+              {% endif %}">{{ t.ai_category }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <i class="fa-solid fa-receipt"></i>
+      <p>Không tìm thấy giao dịch</p>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="{{ url_for('dashboard') }}" class="nav-item"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+    <a href="{{ url_for('transactions') }}" class="nav-item active"><i class="fa-solid fa-receipt"></i><span>Giao dịch</span></a>
+    <a href="{{ url_for('analytics') }}" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Phân tích</span></a>
+    <a href="{{ url_for('goals') }}" class="nav-item"><i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span></a>
+    <a href="{{ url_for('profile') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Cá nhân</span></a>
+  </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const filterBtns = document.querySelectorAll('.filter-pill');
+const searchInput = document.getElementById('search-input');
+const txnItems = document.querySelectorAll('.txn-item');
+const emptyState = document.getElementById('empty-state');
+let activeBank = 'ALL';
+
+function filterTxns() {
+  let visible = 0;
+  const q = searchInput.value.trim().toLowerCase();
+  txnItems.forEach(item => {
+    const bank = item.dataset.bank || '';
+    const text = item.textContent.toLowerCase();
+    const bankMatch = activeBank === 'ALL' || bank === activeBank;
+    const textMatch = !q || text.includes(q);
+    item.style.display = bankMatch && textMatch ? '' : 'none';
+    if (bankMatch && textMatch) visible++;
+  });
+  emptyState.style.display = visible === 0 ? '' : 'none';
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeBank = btn.dataset.bank;
+    filterTxns();
+  });
+});
+searchInput.addEventListener('input', filterTxns);
+</script>
+{% endblock %}
