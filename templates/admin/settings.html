@@ -1,0 +1,160 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Cài đặt Hệ thống{% endblock %}
+{% block page_title %}Cài đặt Hệ thống (Settings){% endblock %}
+
+{% block content %}
+<div class="panel-card" style="max-width: 860px;">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">
+                <i class="fa-solid fa-sliders" style="color: #6366f1;"></i>
+                Cấu Hình Tham Số Vận Hành FinLab Enterprise
+            </div>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                Quản lý các thông số cốt lõi của nền tảng, cơ chế phiên đăng nhập, và tiêu chuẩn tuân thủ an toàn bảo mật.
+            </p>
+        </div>
+    </div>
+
+    <form id="settings-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Tên ứng dụng nền tảng:
+                </label>
+                <input type="text" id="setting-app-name" class="form-control-admin" style="width: 100%;" value="{{ settings.app_name }}">
+            </div>
+
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Phiên bản phát hành:
+                </label>
+                <input type="text" id="setting-app-version" class="form-control-admin" style="width: 100%;" value="{{ settings.app_version }}" readonly style="opacity: 0.7;">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Đơn vị tiền tệ hiển thị:
+                </label>
+                <select id="setting-currency" class="form-control-admin" style="width: 100%;">
+                    <option value="VNĐ" {% if settings.currency == 'VNĐ' %}selected{% endif %}>VNĐ (Đồng Việt Nam)</option>
+                    <option value="USD" {% if settings.currency == 'USD' %}selected{% endif %}>USD (Đô la Mỹ)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Định dạng ngày tháng:
+                </label>
+                <select id="setting-date-format" class="form-control-admin" style="width: 100%;">
+                    <option value="DD/MM/YYYY" {% if settings.date_format == 'DD/MM/YYYY' %}selected{% endif %}>DD/MM/YYYY (Việt Nam)</option>
+                    <option value="YYYY-MM-DD" {% if settings.date_format == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD (ISO chuẩn)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Thời gian hiệu lực phiên đăng nhập (Session Timeout):
+                </label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="number" id="setting-session-timeout" class="form-control-admin" style="width: 100%;" value="{{ settings.session_timeout_minutes }}" min="15" max="1440">
+                    <span style="font-size: 0.8rem; color: #94a3b8;">phút</span>
+                </div>
+            </div>
+
+            <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">
+                    Chính sách độ dài mật khẩu tối thiểu:
+                </label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="number" id="setting-min-pwd-len" class="form-control-admin" style="width: 100%;" value="{{ settings.min_password_length }}" min="6" max="20">
+                    <span style="font-size: 0.8rem; color: #94a3b8;">ký tự</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #0f172a; border-radius: 10px; border: 1px solid var(--admin-border);">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-shield-halved" style="color: #10b981; margin-right: 4px;"></i>
+                Tiêu chuẩn Tuân thủ &amp; Chế độ Sandbox
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.82rem;">
+                <div>
+                    <span style="font-weight: 600; color: #cbd5e1;">Môi trường Open Banking Sandbox:</span>
+                    <div style="font-size: 0.72rem; color: #64748b;">Mô phỏng kết nối OAuth 2.0 tới VCB, TCB, MB Bank</div>
+                </div>
+                <input type="checkbox" id="setting-sandbox-enabled" {% if settings.open_banking_sandbox %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #6366f1;">
+            </div>
+
+            <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.5; border-top: 1px solid var(--admin-border); padding-top: 0.65rem;">
+                <strong>Tiêu chuẩn áp dụng:</strong> {{ settings.compliance_standard }}
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn-admin btn-admin-primary" id="btn-save-settings">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu thiết lập hệ thống
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('btn-save-settings').addEventListener('click', async () => {
+        const app_name = document.getElementById('setting-app-name').value.trim();
+        const currency = document.getElementById('setting-currency').value;
+        const date_format = document.getElementById('setting-date-format').value;
+        const session_timeout_minutes = parseInt(document.getElementById('setting-session-timeout').value) || 60;
+        const min_password_length = parseInt(document.getElementById('setting-min-pwd-len').value) || 6;
+        const open_banking_sandbox = document.getElementById('setting-sandbox-enabled').checked;
+
+        if (!app_name) {
+            alert('Vui lòng nhập tên ứng dụng!');
+            return;
+        }
+
+        const payload = {
+            app_name,
+            currency,
+            date_format,
+            session_timeout_minutes,
+            min_password_length,
+            open_banking_sandbox
+        };
+
+        const btn = document.getElementById('btn-save-settings');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+
+        try {
+            const res = await fetch('/admin/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Cài đặt hệ thống', result.message, true);
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(result.message || 'Lỗi lưu cài đặt!');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu thiết lập hệ thống';
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu thiết lập hệ thống';
+        }
+    });
+</script>
+{% endblock %}

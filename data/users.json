@@ -1,13 +1,207 @@
 [
   {
+    "id": "usr_admin",
+    "username": "admin",
+    "password": "admin123",
+    "full_name": "Quản trị viên Hệ thống",
+    "email": "admin@finlab.vn",
+    "role": "admin",
+    "status": "active",
+    "created_at": "2026-01-01",
+    "occupation": "Quản trị viên Hệ thống",
+    "monthly_income": 30000000,
+    "connected_banks": [
+      "Vietcombank",
+      "Techcombank",
+      "MB Bank"
+    ],
+    "budget_ratio": {
+      "needs": 50,
+      "wants": 30,
+      "savings": 20
+    },
+    "savings_goals": [
+      {
+        "id": "goal_admin_1",
+        "name": "Nâng cấp Máy chủ & Hạ tầng AI",
+        "target_amount": 50000000,
+        "current_amount": 32000000,
+        "deadline": "2026-12-31",
+        "icon": "fa-server",
+        "color": "#6366f1",
+        "category": "Hạ tầng"
+      }
+    ],
+    "round_up_enabled": true,
+    "round_up": {
+      "enabled": true,
+      "step": 10000,
+      "accumulated_total": 350000,
+      "target_goal_id": "goal_admin_1"
+    },
+    "category_limits": {
+      "Ăn uống & Cà phê ngoài": 4000000,
+      "Mua sắm cá nhân": 2000000,
+      "Nhà ở & Hóa đơn tiện ích": 6000000,
+      "Thực phẩm & Đi chợ": 5000000,
+      "Đi lại & Xăng xe": 1500000,
+      "Giải trí & Phim ảnh": 1000000
+    },
+    "category_budgets": {
+      "Ăn uống & Cà phê ngoài": 4000000,
+      "Mua sắm cá nhân": 2000000,
+      "Nhà ở & Hóa đơn tiện ích": 6000000,
+      "Thực phẩm & Đi chợ": 5000000,
+      "Đi lại & Xăng xe": 1500000,
+      "Giải trí & Phim ảnh": 1000000
+    },
+    "open_banking_consent": {
+      "view_balance": true,
+      "view_history": true,
+      "ai_analytics": true
+    },
+    "consents": [
+      {
+        "bank_id": "VCB",
+        "bank_name": "Vietcombank",
+        "account_no": "1028475938",
+        "status": "ACTIVE",
+        "granted_at": "2026-09-01",
+        "expires_at": "2026-11-30",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "consent_id": "CONSENT_ADMIN_VCB"
+      }
+    ]
+  },
+  {
     "id": "usr_001",
     "username": "nguyen_van_a",
     "password": "password123",
     "full_name": "Nguyễn Văn A",
     "email": "nguyenvana@gmail.com",
+    "role": "user",
+    "status": "active",
+    "created_at": "2026-01-15",
     "occupation": "Nhân viên văn phòng",
     "monthly_income": 18000000,
-    "connected_banks": ["Vietcombank", "Techcombank", "MB Bank"]
+    "connected_banks": [
+      "Vietcombank",
+      "Techcombank",
+      "MB Bank"
+    ],
+    "budget_ratio": {
+      "needs": 55,
+      "wants": 25,
+      "savings": 20
+    },
+    "savings_goals": [
+      {
+        "id": "goal_1",
+        "name": "Quỹ khẩn cấp 3 tháng",
+        "target_amount": 20000000,
+        "current_amount": 8500000,
+        "deadline": "2026-12-31",
+        "icon": "fa-shield-halved",
+        "color": "#10b981",
+        "category": "Quỹ dự phòng"
+      },
+      {
+        "id": "goal_2",
+        "name": "Mua Laptop AI & Đồ họa",
+        "target_amount": 25000000,
+        "current_amount": 14000000,
+        "deadline": "2027-02-28",
+        "icon": "fa-laptop",
+        "color": "#3b82f6",
+        "category": "Công nghệ"
+      },
+      {
+        "id": "goal_3",
+        "name": "Du lịch Đà Lạt Nghỉ dưỡng",
+        "target_amount": 8000000,
+        "current_amount": 3200000,
+        "deadline": "2026-11-20",
+        "icon": "fa-plane-departure",
+        "color": "#f59e0b",
+        "category": "Du lịch"
+      }
+    ],
+    "round_up_enabled": true,
+    "round_up": {
+      "enabled": true,
+      "step": 10000,
+      "accumulated_total": 142000,
+      "target_goal_id": "goal_1"
+    },
+    "category_limits": {
+      "Ăn uống & Cà phê ngoài": 3500000,
+      "Mua sắm cá nhân": 1500000,
+      "Nhà ở & Hóa đơn tiện ích": 5000000,
+      "Thực phẩm & Đi chợ": 4000000,
+      "Đi lại & Xăng xe": 1000000,
+      "Giải trí & Phim ảnh": 800000
+    },
+    "category_budgets": {
+      "Ăn uống & Cà phê ngoài": 3500000,
+      "Mua sắm cá nhân": 1500000,
+      "Nhà ở & Hóa đơn tiện ích": 5000000,
+      "Thực phẩm & Đi chợ": 4000000,
+      "Đi lại & Xăng xe": 1000000,
+      "Giải trí & Phim ảnh": 800000
+    },
+    "open_banking_consent": {
+      "view_balance": true,
+      "view_history": true,
+      "ai_analytics": true
+    },
+    "consents": [
+      {
+        "bank_id": "VCB",
+        "bank_name": "Vietcombank",
+        "account_no": "1028475938",
+        "status": "ACTIVE",
+        "granted_at": "2026-10-16",
+        "expires_at": "2026-12-31",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "consent_id": "CONSENT_VCB_20260901_01"
+      },
+      {
+        "bank_id": "TCB",
+        "bank_name": "Techcombank",
+        "account_no": "19038475920",
+        "status": "ACTIVE",
+        "granted_at": "2026-09-15",
+        "expires_at": "2026-12-15",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "consent_id": "CONSENT_TCB_20260915_02"
+      },
+      {
+        "bank_id": "MBB",
+        "bank_name": "MB Bank",
+        "account_no": "0987654321",
+        "status": "ACTIVE",
+        "granted_at": "2026-10-01",
+        "expires_at": "2026-12-31",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "consent_id": "CONSENT_MBB_20261001_03"
+      }
+    ]
   },
   {
     "id": "usr_002",
@@ -15,8 +209,74 @@
     "password": "123",
     "full_name": "Người dùng Thử nghiệm",
     "email": "demo@finlab.vn",
+    "role": "user",
+    "status": "active",
+    "created_at": "2026-02-10",
     "occupation": "Freelancer",
     "monthly_income": 20000000,
-    "connected_banks": ["Vietcombank"]
+    "connected_banks": [
+      "Vietcombank"
+    ],
+    "budget_ratio": {
+      "needs": 60,
+      "wants": 20,
+      "savings": 20
+    },
+    "savings_goals": [
+      {
+        "id": "goal_demo_1",
+        "name": "Quỹ dự phòng Freelance 6 tháng",
+        "target_amount": 30000000,
+        "current_amount": 10000000,
+        "deadline": "2027-03-31",
+        "icon": "fa-piggy-bank",
+        "color": "#10b981",
+        "category": "Quỹ dự phòng"
+      }
+    ],
+    "round_up_enabled": true,
+    "round_up": {
+      "enabled": true,
+      "step": 10000,
+      "accumulated_total": 85000,
+      "target_goal_id": "goal_demo_1"
+    },
+    "category_limits": {
+      "Ăn uống & Cà phê ngoài": 3000000,
+      "Mua sắm cá nhân": 2000000,
+      "Nhà ở & Hóa đơn tiện ích": 6000000,
+      "Thực phẩm & Đi chợ": 4000000,
+      "Đi lại & Xăng xe": 1200000,
+      "Giải trí & Phim ảnh": 1000000
+    },
+    "category_budgets": {
+      "Ăn uống & Cà phê ngoài": 3000000,
+      "Mua sắm cá nhân": 2000000,
+      "Nhà ở & Hóa đơn tiện ích": 6000000,
+      "Thực phẩm & Đi chợ": 4000000,
+      "Đi lại & Xăng xe": 1200000,
+      "Giải trí & Phim ảnh": 1000000
+    },
+    "open_banking_consent": {
+      "view_balance": true,
+      "view_history": true,
+      "ai_analytics": true
+    },
+    "consents": [
+      {
+        "bank_id": "VCB",
+        "bank_name": "Vietcombank",
+        "account_no": "1028475938",
+        "status": "ACTIVE",
+        "granted_at": "2026-09-01",
+        "expires_at": "2026-11-30",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "consent_id": "CONSENT_DEMO_VCB"
+      }
+    ]
   }
 ]

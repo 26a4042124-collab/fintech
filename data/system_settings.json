@@ -1,0 +1,18 @@
+{
+  "app_name": "FinLab PFM & Open Banking",
+  "app_version": "v2.5 Enterprise",
+  "currency": "VNĐ",
+  "date_format": "DD/MM/YYYY",
+  "session_timeout_minutes": 60,
+  "min_password_length": 6,
+  "open_banking_sandbox": true,
+  "ai_nlp_engine": "FinNLP Tokenizer v2.5",
+  "compliance_standard": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
+  "security_mode": "Strict RBAC & E2EE",
+  "max_goals_per_user": 10,
+  "default_budget_ratio": {
+    "needs": 50,
+    "wants": 30,
+    "savings": 20
+  }
+}

@@ -1,0 +1,316 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quản lý Danh mục Hệ thống{% endblock %}
+{% block page_title %}Danh mục Hệ thống (Category Management){% endblock %}
+
+{% block content %}
+<div class="panel-card">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">
+                <i class="fa-solid fa-tags" style="color: #6366f1;"></i>
+                Danh Mục Thu Chi Mặc Định &amp; Quy Tắc Ánh Xạ NLP
+            </div>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                Quản lý các danh mục chi tiêu/thu nhập phục vụ cho mô hình AI phân loại tự động và tính toán 50/30/20.
+            </p>
+        </div>
+        <button class="btn-admin btn-admin-primary" onclick="openAddCategoryModal()">
+            <i class="fa-solid fa-plus"></i> Thêm danh mục mới
+        </button>
+    </div>
+
+    <!-- Category Tabs: Expense vs Income -->
+    <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--admin-border); margin-bottom: 1.25rem;">
+        <button class="btn-admin btn-tab active-tab" id="tab-expense-btn" onclick="switchCategoryTab('EXPENSE')">
+            <i class="fa-solid fa-arrow-trend-down" style="color: #ef4444;"></i> Danh mục Chi tiêu (Expense)
+        </button>
+        <button class="btn-admin btn-tab" id="tab-income-btn" onclick="switchCategoryTab('INCOME')">
+            <i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i> Danh mục Thu nhập (Income)
+        </button>
+    </div>
+
+    <!-- Category List Table -->
+    <div class="table-responsive">
+        <table class="admin-table" id="categories-table">
+            <thead>
+                <tr>
+                    <th>Icon</th>
+                    <th>Tên danh mục</th>
+                    <th>Loại</th>
+                    <th>Rổ ngân sách</th>
+                    <th>Từ khóa NLP ánh xạ</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr class="cat-row cat-type-{{ cat.type }}" data-id="{{ cat.id }}" data-type="{{ cat.type }}">
+                    <td>
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: {{ cat.color }}20; color: {{ cat.color }}; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 1px solid {{ cat.color }}40;">
+                            <i class="fa-solid {{ cat.icon }}"></i>
+                        </div>
+                    </td>
+                    <td style="font-weight: 700; color: #ffffff;">
+                        {{ cat.name }}
+                        {% if cat.is_default %}
+                        <span style="font-size: 0.65rem; background: #1e293b; color: #94a3b8; padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 4px;">Mặc định</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if cat.type == 'INCOME' %}
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                            THU NHẬP
+                        </span>
+                        {% else %}
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #f87171; background: rgba(239, 68, 68, 0.15); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                            CHI TIÊU
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if cat.bucket == 'NEEDS' %}
+                        <span class="badge-role" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6;">Thiết yếu (Needs)</span>
+                        {% elif cat.bucket == 'WANTS' %}
+                        <span class="badge-role" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b;">Mong muốn (Wants)</span>
+                        {% elif cat.bucket == 'SAVINGS' %}
+                        <span class="badge-role" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981;">Tiết kiệm (Savings)</span>
+                        {% else %}
+                        <span class="badge-role" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf; border: 1px solid #14b8a6;">Thu nhập</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.3rem; flex-wrap: wrap; max-width: 360px;">
+                            {% for kw in cat.keywords[:4] %}
+                            <span style="background: #0f172a; border: 1px solid var(--admin-border); color: #cbd5e1; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace;">{{ kw }}</span>
+                            {% endfor %}
+                            {% if cat.keywords|length > 4 %}
+                            <span style="font-size: 0.7rem; color: #64748b;">+{{ cat.keywords|length - 4 }}</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if not cat.is_hidden %}
+                        <span class="badge-status badge-active"><i class="fa-solid fa-eye"></i> Đang dùng</span>
+                        {% else %}
+                        <span class="badge-status badge-locked"><i class="fa-solid fa-eye-slash"></i> Đang ẩn</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem;">
+                            <button class="btn-admin btn-admin-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="openEditCategoryModal('{{ cat.id }}', '{{ cat.name }}', '{{ cat.type }}', '{{ cat.bucket }}', '{{ cat.icon }}', '{{ cat.color }}', '{{ cat.keywords|join(', ') }}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                            </button>
+                            <button class="btn-admin btn-admin-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; color: {{ '#34d399' if cat.is_hidden else '#fbbf24' }};" onclick="toggleHideCategory('{{ cat.id }}', '{{ cat.name }}', {{ 'true' if cat.is_hidden else 'false' }})">
+                                <i class="fa-solid {{ 'fa-eye' if cat.is_hidden else 'fa-eye-slash' }}"></i>
+                                {{ 'Hiện' if cat.is_hidden else 'Ẩn' }}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Safety Notice -->
+    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 8px; font-size: 0.78rem; color: #cbd5e1;">
+        <i class="fa-solid fa-shield-halved" style="color: #818cf8; margin-right: 4px;"></i>
+        <strong>Quy tắc An toàn Dữ liệu:</strong> Các danh mục hệ thống đang được liên kết trong lịch sử giao dịch không được xóa cứng (hard delete) để tránh gây sai lệch báo cáo tài chính của người dùng, mà chỉ được phép chuyển sang trạng thái <strong>Ẩn</strong>.
+    </div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- MODAL: THÊM / CHỈNH SỬA DANH MỤC -->
+<!-- ==================================================================== -->
+<div class="admin-modal-overlay" id="modal-category-form">
+    <div class="admin-modal-box">
+        <div class="admin-modal-header">
+            <div class="admin-modal-title" id="cat-modal-title">
+                <i class="fa-solid fa-tag" style="color: #6366f1;"></i>
+                Thêm Danh Mục Mới
+            </div>
+            <button onclick="closeAdminModal('modal-category-form')" style="background:none; border:none; color:#94a3b8; font-size:1.1rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <input type="hidden" id="form-cat-id">
+
+            <div style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Tên danh mục:</label>
+                <input type="text" id="form-cat-name" class="form-control-admin" placeholder="Ví dụ: Bảo hiểm nhân thọ, Thuê văn phòng..." style="width: 100%;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Loại giao dịch:</label>
+                    <select id="form-cat-type" class="form-control-admin" style="width: 100%;">
+                        <option value="EXPENSE">Chi tiêu (Expense)</option>
+                        <option value="INCOME">Thu nhập (Income)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Rổ phân bổ:</label>
+                    <select id="form-cat-bucket" class="form-control-admin" style="width: 100%;">
+                        <option value="NEEDS">Thiết yếu (Needs)</option>
+                        <option value="WANTS">Mong muốn (Wants)</option>
+                        <option value="SAVINGS">Tiết kiệm (Savings)</option>
+                        <option value="INCOME">Thu nhập (Income)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Icon FontAwesome:</label>
+                    <input type="text" id="form-cat-icon" class="form-control-admin" placeholder="fa-tag" value="fa-tag" style="width: 100%;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Màu sắc (HEX):</label>
+                    <input type="color" id="form-cat-color" value="#6366f1" style="width: 100%; height: 38px; border-radius: 8px; border: 1px solid var(--admin-border-light); background: #0f172a; cursor: pointer;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 0.35rem;">Từ khóa nhận diện NLP (cách nhau bởi dấu phẩy):</label>
+                <textarea id="form-cat-keywords" class="form-control-admin" rows="3" placeholder="BAO HIEM, PRUDENTIAL, MANULIFE..." style="width: 100%; font-family: monospace;"></textarea>
+            </div>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-secondary" onclick="closeAdminModal('modal-category-form')">Hủy</button>
+            <button class="btn-admin btn-admin-primary" id="btn-save-category">Lưu danh mục</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-tab {
+        background: transparent;
+        color: #94a3b8;
+        border-radius: 8px 8px 0 0;
+        border: none;
+        border-bottom: 2px solid transparent;
+        padding: 0.65rem 1rem;
+    }
+    .btn-tab:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .btn-tab.active-tab {
+        color: white;
+        border-bottom: 2px solid #6366f1;
+        background: rgba(99, 102, 241, 0.1);
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentTab = 'EXPENSE';
+
+    function switchCategoryTab(type) {
+        currentTab = type;
+        document.getElementById('tab-expense-btn').classList.toggle('active-tab', type === 'EXPENSE');
+        document.getElementById('tab-income-btn').classList.toggle('active-tab', type === 'INCOME');
+
+        const rows = document.querySelectorAll('.cat-row');
+        rows.forEach(r => {
+            const catType = r.getAttribute('data-type');
+            r.style.display = (catType === type) ? '' : 'none';
+        });
+    }
+
+    // Default to Expense tab
+    document.addEventListener('DOMContentLoaded', () => {
+        switchCategoryTab('EXPENSE');
+    });
+
+    function openAddCategoryModal() {
+        document.getElementById('cat-modal-title').innerHTML = '<i class="fa-solid fa-plus" style="color: #6366f1;"></i> Thêm Danh Mục Mới';
+        document.getElementById('form-cat-id').value = '';
+        document.getElementById('form-cat-name').value = '';
+        document.getElementById('form-cat-type').value = currentTab;
+        document.getElementById('form-cat-bucket').value = currentTab === 'INCOME' ? 'INCOME' : 'WANTS';
+        document.getElementById('form-cat-icon').value = 'fa-tag';
+        document.getElementById('form-cat-color').value = '#6366f1';
+        document.getElementById('form-cat-keywords').value = '';
+        openAdminModal('modal-category-form');
+    }
+
+    function openEditCategoryModal(id, name, type, bucket, icon, color, keywords) {
+        document.getElementById('cat-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color: #6366f1;"></i> Chỉnh Sửa Danh Mục';
+        document.getElementById('form-cat-id').value = id;
+        document.getElementById('form-cat-name').value = name;
+        document.getElementById('form-cat-type').value = type;
+        document.getElementById('form-cat-bucket').value = bucket;
+        document.getElementById('form-cat-icon').value = icon;
+        document.getElementById('form-cat-color').value = color;
+        document.getElementById('form-cat-keywords').value = keywords;
+        openAdminModal('modal-category-form');
+    }
+
+    // Submit Add / Edit
+    document.getElementById('btn-save-category').addEventListener('click', async () => {
+        const id = document.getElementById('form-cat-id').value;
+        const name = document.getElementById('form-cat-name').value.trim();
+        const type = document.getElementById('form-cat-type').value;
+        const bucket = document.getElementById('form-cat-bucket').value;
+        const icon = document.getElementById('form-cat-icon').value.trim();
+        const color = document.getElementById('form-cat-color').value;
+        const kwRaw = document.getElementById('form-cat-keywords').value;
+
+        if (!name) {
+            alert('Vui lòng nhập tên danh mục!');
+            return;
+        }
+
+        const keywords = kwRaw.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
+
+        const payload = { id, name, type, bucket, icon, color, keywords };
+
+        try {
+            const url = id ? `/admin/api/categories/${id}` : '/admin/api/categories';
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Thành công', result.message, true);
+                closeAdminModal('modal-category-form');
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(result.message || 'Lỗi lưu danh mục!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+        }
+    });
+
+    // Toggle Hide / Show
+    window.toggleHideCategory = async function(catId, catName, currentlyHidden) {
+        const actionText = currentlyHidden ? 'HIỆN' : 'ẨN';
+        if (!confirm(`Bạn có chắc muốn ${actionText} danh mục '${catName}'?`)) return;
+
+        try {
+            const res = await fetch(`/admin/api/categories/${catId}/toggle-hidden`, { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Thành công', result.message, true);
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(result.message || 'Lỗi thao tác!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+        }
+    };
+</script>
+{% endblock %}

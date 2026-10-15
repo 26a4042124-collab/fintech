@@ -1,0 +1,399 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quản lý Người dùng{% endblock %}
+{% block page_title %}Quản lý Người dùng (User Management){% endblock %}
+
+{% block content %}
+<div class="panel-card">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">
+                <i class="fa-solid fa-users-gear" style="color: #6366f1;"></i>
+                Danh Sách Tài Khoản Người Dùng &amp; Phân Quyền (RBAC)
+            </div>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                <i class="fa-solid fa-shield-halved" style="color: #10b981;"></i>
+                Tuân thủ Nghị định 13/2023/NĐ-CP: Admin chỉ quản lý tài khoản &amp; phân quyền, không can thiệp số dư và lịch sử giao dịch cá nhân.
+            </p>
+        </div>
+        <div style="font-size: 0.82rem; color: #94a3b8;">
+            Tổng: <strong style="color: white;" id="user-count-display">{{ users|length }}</strong> người dùng
+        </div>
+    </div>
+
+    <!-- Search & Filter Toolbar -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; flex: 1;">
+            <div style="position: relative; min-width: 260px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.85rem;"></i>
+                <input type="text" id="user-search-input" class="form-control-admin" placeholder="Tìm theo tên, email, username..." style="padding-left: 2.2rem; width: 100%;">
+            </div>
+
+            <select id="filter-status" class="form-control-admin" style="min-width: 160px;">
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động (Active)</option>
+                <option value="locked">Bị khóa (Locked)</option>
+            </select>
+
+            <select id="filter-role" class="form-control-admin" style="min-width: 140px;">
+                <option value="ALL">Tất cả vai trò</option>
+                <option value="admin">Quản trị (Admin)</option>
+                <option value="user">Người dùng (User)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- User Data Table -->
+    <div class="table-responsive">
+        <table class="admin-table" id="users-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Họ và Tên</th>
+                    <th>Email / Tên đăng nhập</th>
+                    <th>Ngày đăng ký</th>
+                    <th>Vai trò (Role)</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: right;">Hành động quản trị</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr class="user-row" data-id="{{ u.id }}" data-name="{{ u.full_name|lower }}" data-email="{{ u.email|lower }}" data-username="{{ u.username|lower }}" data-status="{{ u.status }}" data-role="{{ u.role }}">
+                    <td style="font-family: monospace; color: #94a3b8; font-size: 0.78rem;">{{ u.id }}</td>
+                    <td style="font-weight: 700; color: #ffffff;">{{ u.full_name }}</td>
+                    <td>
+                        <div style="font-size: 0.82rem; color: #e2e8f0;">{{ u.email }}</div>
+                        <div style="font-size: 0.72rem; color: #64748b; font-family: monospace;">@{{ u.username }}</div>
+                    </td>
+                    <td style="font-size: 0.78rem; color: #94a3b8;">{{ u.created_at or '2026-01-01' }}</td>
+                    <td>
+                        {% if u.role == 'admin' %}
+                        <span class="badge-role badge-admin"><i class="fa-solid fa-shield"></i> ADMIN</span>
+                        {% else %}
+                        <span class="badge-role badge-user">USER</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.status == 'active' %}
+                        <span class="badge-status badge-active">
+                            <span class="status-dot-pulse" style="width: 5px; height: 5px;"></span> Hoạt động
+                        </span>
+                        {% else %}
+                        <span class="badge-status badge-locked">
+                            <i class="fa-solid fa-lock"></i> Đã khóa
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem;">
+                            <!-- Xem chi tiết an toàn -->
+                            <button class="btn-admin btn-admin-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="viewUserDetails('{{ u.id }}', '{{ u.full_name }}', '{{ u.email }}', '{{ u.username }}', '{{ u.role }}', '{{ u.status }}', '{{ u.created_at }}', '{{ u.connected_banks|join(', ') }}')">
+                                <i class="fa-solid fa-eye"></i> Chi tiết
+                            </button>
+
+                            <!-- Khóa / Mở khóa -->
+                            <button class="btn-admin {{ 'btn-admin-primary' if u.status == 'locked' else 'btn-admin-secondary' }}" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; color: {{ '#34d399' if u.status == 'locked' else '#f87171' }};" onclick="confirmToggleStatus('{{ u.id }}', '{{ u.full_name }}', '{{ u.status }}')">
+                                <i class="fa-solid {{ 'fa-lock-open' if u.status == 'locked' else 'fa-lock' }}"></i>
+                                {{ 'Mở khóa' if u.status == 'locked' else 'Khóa' }}
+                            </button>
+
+                            <!-- Phân quyền Role -->
+                            <button class="btn-admin btn-admin-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="confirmChangeRole('{{ u.id }}', '{{ u.full_name }}', '{{ u.role }}')">
+                                <i class="fa-solid fa-arrows-rotate"></i> Phân quyền
+                            </button>
+
+                            <!-- Đặt lại mật khẩu -->
+                            <button class="btn-admin btn-admin-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="confirmResetPassword('{{ u.id }}', '{{ u.username }}')">
+                                <i class="fa-solid fa-key"></i> Đặt lại MK
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- MODAL 1: XEM CHI TIẾT NGƯỜI DÙNG (TUÂN THỦ NGHỊ ĐỊNH 13) -->
+<!-- ==================================================================== -->
+<div class="admin-modal-overlay" id="modal-user-details">
+    <div class="admin-modal-box">
+        <div class="admin-modal-header">
+            <div class="admin-modal-title">
+                <i class="fa-solid fa-id-card" style="color: #6366f1;"></i>
+                Thông Tin Tài Khoản Người Dùng
+            </div>
+            <button onclick="closeAdminModal('modal-user-details')" style="background:none; border:none; color:#94a3b8; font-size:1.1rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <div style="background: #0f172a; border: 1px solid var(--admin-border); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: white;" id="detail-fullname">Nguyễn Văn A</h3>
+                        <div style="font-size: 0.78rem; color: #94a3b8;" id="detail-email">nguyenvana@gmail.com</div>
+                    </div>
+                    <span id="detail-role-badge" class="badge-role badge-user">USER</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.8rem; border-top: 1px solid var(--admin-border); padding-top: 0.75rem;">
+                    <div>
+                        <span style="color: #64748b;">Mã người dùng:</span>
+                        <div style="font-weight: 700; color: #ffffff; font-family: monospace;" id="detail-id">usr_001</div>
+                    </div>
+                    <div>
+                        <span style="color: #64748b;">Tên đăng nhập:</span>
+                        <div style="font-weight: 700; color: #ffffff; font-family: monospace;" id="detail-username">nguyen_van_a</div>
+                    </div>
+                    <div>
+                        <span style="color: #64748b;">Ngày đăng ký:</span>
+                        <div style="font-weight: 700; color: #ffffff;" id="detail-created-at">2026-01-15</div>
+                    </div>
+                    <div>
+                        <span style="color: #64748b;">Trạng thái tài khoản:</span>
+                        <div style="font-weight: 700;" id="detail-status-text">Đang hoạt động</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Ngân hàng liên kết qua Open Banking:</span>
+                <div style="margin-top: 0.4rem; padding: 0.65rem 0.85rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--admin-border); font-size: 0.82rem; color: #34d399;" id="detail-banks">
+                    Vietcombank, Techcombank, MB Bank
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; padding: 0.65rem 0.85rem; background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 8px; font-size: 0.75rem; color: #93c5fd;">
+                <i class="fa-solid fa-lock" style="margin-right: 4px;"></i>
+                <strong>Nguyên tắc Bảo mật Quyền Riêng Tư (Nghị định 13/2023/NĐ-CP):</strong> Hệ thống tuân thủ thiết kế Zero-Access đối với số dư tài khoản ngân hàng và lịch sử giao dịch cá nhân của người dùng.
+            </div>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-secondary" onclick="closeAdminModal('modal-user-details')">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- MODAL 2: XÁC NHẬN KHÓA / MỞ KHÓA TÀI KHOẢN -->
+<!-- ==================================================================== -->
+<div class="admin-modal-overlay" id="modal-confirm-status">
+    <div class="admin-modal-box">
+        <div class="admin-modal-header">
+            <div class="admin-modal-title">
+                <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i>
+                Xác Nhận Thay Đổi Trạng Thái Tài Khoản
+            </div>
+            <button onclick="closeAdminModal('modal-confirm-status')" style="background:none; border:none; color:#94a3b8; font-size:1.1rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <input type="hidden" id="action-user-id">
+            <p id="status-modal-prompt">Bạn có chắc chắn muốn thay đổi trạng thái tài khoản này?</p>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.5rem;">
+                Hành động này sẽ được ghi nhận vào Nhật ký An ninh Hệ thống (Audit Logs).
+            </p>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-secondary" onclick="closeAdminModal('modal-confirm-status')">Hủy</button>
+            <button class="btn-admin btn-admin-primary" id="btn-submit-toggle-status">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- MODAL 3: PHÂN QUYỀN (CHANGE ROLE) -->
+<!-- ==================================================================== -->
+<div class="admin-modal-overlay" id="modal-change-role">
+    <div class="admin-modal-box">
+        <div class="admin-modal-header">
+            <div class="admin-modal-title">
+                <i class="fa-solid fa-user-shield" style="color: #8b5cf6;"></i>
+                Phân Quyền Vai Trò Người Dùng (RBAC)
+            </div>
+            <button onclick="closeAdminModal('modal-change-role')" style="background:none; border:none; color:#94a3b8; font-size:1.1rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="admin-modal-body">
+            <input type="hidden" id="role-user-id">
+            <p style="margin-bottom: 0.85rem;" id="role-modal-prompt">Chọn vai trò mới cho tài khoản:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.65rem; background: #0f172a; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--admin-border); cursor: pointer;">
+                    <input type="radio" name="new_role_choice" value="user" id="role-opt-user">
+                    <div>
+                        <div style="font-weight: 700; color: white;">USER (Người dùng thông thường)</div>
+                        <div style="font-size: 0.72rem; color: #94a3b8;">Có quyền quản lý tài chính cá nhân, mục tiêu, heo đất. Không vào được Admin Portal.</div>
+                    </div>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 0.65rem; background: #0f172a; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--admin-border); cursor: pointer;">
+                    <input type="radio" name="new_role_choice" value="admin" id="role-opt-admin">
+                    <div>
+                        <div style="font-weight: 700; color: #c084fc;">ADMIN (Quản trị viên)</div>
+                        <div style="font-size: 0.72rem; color: #94a3b8;">Toàn quyền truy cập Admin Portal, quản lý danh mục, người dùng và nhật ký an ninh.</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="btn-admin btn-admin-secondary" onclick="closeAdminModal('modal-change-role')">Hủy</button>
+            <button class="btn-admin btn-admin-primary" id="btn-submit-change-role">Cập nhật quyền</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Realtime Search & Filters
+    const searchInput = document.getElementById('user-search-input');
+    const filterStatus = document.getElementById('filter-status');
+    const filterRole = document.getElementById('filter-role');
+    const userRows = document.querySelectorAll('.user-row');
+    const userCountDisplay = document.getElementById('user-count-display');
+
+    function applyUserFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        const statusVal = filterStatus.value;
+        const roleVal = filterRole.value;
+
+        let visibleCount = 0;
+
+        userRows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const email = row.getAttribute('data-email');
+            const username = row.getAttribute('data-username');
+            const status = row.getAttribute('data-status');
+            const role = row.getAttribute('data-role');
+
+            const matchQuery = !query || name.includes(query) || email.includes(query) || username.includes(query);
+            const matchStatus = statusVal === 'ALL' || status === statusVal;
+            const matchRole = roleVal === 'ALL' || role === roleVal;
+
+            if (matchQuery && matchStatus && matchRole) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (userCountDisplay) userCountDisplay.textContent = visibleCount;
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyUserFilters);
+    if (filterStatus) filterStatus.addEventListener('change', applyUserFilters);
+    if (filterRole) filterRole.addEventListener('change', applyUserFilters);
+
+    // View Details Modal
+    window.viewUserDetails = function(id, name, email, username, role, status, createdAt, banks) {
+        document.getElementById('detail-id').textContent = id;
+        document.getElementById('detail-fullname').textContent = name;
+        document.getElementById('detail-email').textContent = email;
+        document.getElementById('detail-username').textContent = '@' + username;
+        document.getElementById('detail-created-at').textContent = createdAt || '2026-01-01';
+        document.getElementById('detail-banks').textContent = banks || 'Chưa liên kết ngân hàng';
+
+        const roleBadge = document.getElementById('detail-role-badge');
+        roleBadge.className = 'badge-role ' + (role === 'admin' ? 'badge-admin' : 'badge-user');
+        roleBadge.textContent = role.toUpperCase();
+
+        const statusEl = document.getElementById('detail-status-text');
+        statusEl.textContent = status === 'active' ? 'Đang hoạt động' : 'Bị khóa';
+        statusEl.style.color = status === 'active' ? '#34d399' : '#f87171';
+
+        openAdminModal('modal-user-details');
+    };
+
+    // Toggle Status
+    window.confirmToggleStatus = function(userId, fullname, currentStatus) {
+        document.getElementById('action-user-id').value = userId;
+        const newStatus = currentStatus === 'active' ? 'Khóa (Locked)' : 'Mở khóa (Active)';
+        document.getElementById('status-modal-prompt').innerHTML = `Bạn có chắc muốn thực hiện hành động <strong>${newStatus}</strong> đối với tài khoản <strong>${fullname}</strong>?`;
+        openAdminModal('modal-confirm-status');
+    };
+
+    document.getElementById('btn-submit-toggle-status').addEventListener('click', async () => {
+        const userId = document.getElementById('action-user-id').value;
+        try {
+            const res = await fetch(`/admin/api/users/${userId}/toggle-status`, { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Thành công', result.message, true);
+                closeAdminModal('modal-confirm-status');
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(result.message || 'Lỗi thao tác!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+        }
+    });
+
+    // Change Role
+    window.confirmChangeRole = function(userId, fullname, currentRole) {
+        document.getElementById('role-user-id').value = userId;
+        document.getElementById('role-modal-prompt').innerHTML = `Phân quyền vai trò mới cho tài khoản: <strong>${fullname}</strong>`;
+        if (currentRole === 'admin') {
+            document.getElementById('role-opt-admin').checked = true;
+        } else {
+            document.getElementById('role-opt-user').checked = true;
+        }
+        openAdminModal('modal-change-role');
+    };
+
+    document.getElementById('btn-submit-change-role').addEventListener('click', async () => {
+        const userId = document.getElementById('role-user-id').value;
+        const selectedRole = document.querySelector('input[name="new_role_choice"]:checked').value;
+
+        try {
+            const res = await fetch(`/admin/api/users/${userId}/role`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: selectedRole })
+            });
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Phân quyền thành công', result.message, true);
+                closeAdminModal('modal-change-role');
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                alert(result.message || 'Lỗi cập nhật quyền!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+        }
+    });
+
+    // Reset Password
+    window.confirmResetPassword = async function(userId, username) {
+        const newPwd = prompt(`Nhập mật khẩu mới cho tài khoản '@${username}':`, 'password123');
+        if (!newPwd) return;
+
+        try {
+            const res = await fetch(`/admin/api/users/${userId}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: newPwd })
+            });
+            const result = await res.json();
+            if (result.success) {
+                showAdminToast('Đặt lại mật khẩu', result.message, true);
+            } else {
+                alert(result.message || 'Lỗi đặt lại mật khẩu!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối máy chủ!');
+        }
+    };
+</script>
+{% endblock %}

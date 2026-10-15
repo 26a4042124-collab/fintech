@@ -1,8 +1,10 @@
 import json
 import os
 import time
+from datetime import datetime, timedelta
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'mock_transactions.json')
+USERS_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'users.json')
 
 AVAILABLE_BANKS = [
     {
@@ -11,8 +13,9 @@ AVAILABLE_BANKS = [
         "short_name": "VCB",
         "account_no": "1028475938",
         "status": "CONNECTED",
-        "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
-        "color": "#006837"
+        "api_standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "color": "#006837",
+        "icon": "fa-building-columns"
     },
     {
         "id": "TCB",
@@ -20,8 +23,9 @@ AVAILABLE_BANKS = [
         "short_name": "TCB",
         "account_no": "19038475920",
         "status": "CONNECTED",
-        "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
-        "color": "#E31B23"
+        "api_standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "color": "#E31B23",
+        "icon": "fa-building-columns"
     },
     {
         "id": "MBB",
@@ -29,24 +33,43 @@ AVAILABLE_BANKS = [
         "short_name": "MB",
         "account_no": "0987654321",
         "status": "CONNECTED",
-        "api_standard": "Open API v2.1 (Circular 64/2024/TT-NHNN)",
-        "color": "#002060"
+        "api_standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "color": "#002060",
+        "icon": "fa-building-columns"
     }
 ]
 
 def get_available_banks():
     return AVAILABLE_BANKS
 
-def fetch_open_banking_transactions(bank_filter=None):
+def fetch_open_banking_transactions(bank_filter=None, user_consents=None):
     """
     Giả lập gọi Open Banking RESTful API (GET /api/v1/accounts/transactions)
-    để đồng bộ lịch sử giao dịch từ các ngân hàng đối tác theo chuẩn OAuth 2.0.
+    Có kiểm tra ủy quyền dữ liệu (Consent Check) tuân thủ Nghị định 13/2023/NĐ-CP.
+    Nếu quyền 'read_transactions' bị thu hồi (Revoked), giao dịch từ ngân hàng đó sẽ tạm thời bị ngắt.
     """
     if not os.path.exists(DATA_FILE):
         return []
         
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        transactions = json.load(f)
+        try:
+            transactions = json.load(f)
+        except Exception:
+            return []
+
+    # Kiểm tra Consent nếu có danh sách ủy quyền của người dùng
+    if user_consents:
+        # Lập danh sách các ngân hàng được phép đọc giao dịch
+        allowed_bank_names = []
+        for consent in user_consents:
+            if consent.get("status") == "ACTIVE" and consent.get("scopes", {}).get("read_transactions", True):
+                allowed_bank_names.append(consent.get("bank_name", "").lower())
+                
+        # Lọc giao dịch
+        transactions = [
+            t for t in transactions 
+            if any(bname in t.get("bank", "").lower() for bname in allowed_bank_names)
+        ]
         
     if bank_filter and bank_filter != 'ALL':
         transactions = [t for t in transactions if t.get('bank', '').lower() == bank_filter.lower()]
@@ -62,11 +85,17 @@ def simulate_bank_connection(bank_id):
     if not bank:
         return {"success": False, "message": "Ngân hàng không hợp lệ"}
         
+    now = datetime.now()
+    expiry = now + timedelta(days=90) # Chuẩn 90 ngày của Open Banking Consent
+    
     return {
         "success": True,
         "bank": bank["name"],
+        "bank_id": bank["id"],
         "account_no": bank["account_no"],
-        "scope": "read:transactions read:balance",
+        "scope": "read:transactions read:balance analyze:ai_pfm",
         "consent_id": f"CONSENT_{bank_id}_{int(time.time())}",
+        "granted_at": now.strftime("%Y-%m-%d"),
+        "expires_at": expiry.strftime("%Y-%m-%d"),
         "message": f"Kết nối Open Banking API thành công với {bank['name']}!"
     }

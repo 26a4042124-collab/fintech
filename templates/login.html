@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Đăng nhập - FinLab | AI Financial Assistant</title>
+    <title>Đăng nhập - FinLab | AI Financial Assistant &amp; Open Banking</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +18,34 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .demo-buttons-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-top: 1.25rem;
+        }
+        .btn-quick-admin {
+            width: 100%;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            color: #e0e7ff;
+            border: 1px solid #4338ca;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .btn-quick-admin:hover {
+            background: linear-gradient(135deg, #312e81, #4338ca);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+        }
     </style>
 </head>
 <body class="login-body">
@@ -27,11 +55,11 @@
                 <i class="fa-solid fa-chart-pie"></i>
             </div>
             <h1 class="login-title">FinLab</h1>
-            <p class="login-subtitle">Trợ lý Quản lý Tài chính & Cảnh báo Rò rỉ Chi tiêu (AI & Open Banking)</p>
+            <p class="login-subtitle">Trợ lý Quản lý Tài chính Thông minh &amp; Open Banking Prototype</p>
         </div>
 
         {% if error %}
-        <div class="alert-danger">
+        <div class="alert-danger" style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
             <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
         </div>
         {% endif %}
@@ -56,10 +84,16 @@
             </button>
         </form>
 
-        <button type="button" class="btn-quick-demo" id="btn-quick-demo">
-            <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
-            Đăng nhập nhanh: <strong>Nguyễn Văn A</strong> (Demo 1 chạm)
-        </button>
+        <div class="demo-buttons-group">
+            <button type="button" class="btn-quick-demo" id="btn-quick-demo">
+                <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+                Đăng nhập User: <strong>Nguyễn Văn A</strong> (Demo PFM)
+            </button>
+            <button type="button" class="btn-quick-admin" id="btn-quick-admin">
+                <i class="fa-solid fa-shield-halved" style="color: #a5b4fc;"></i>
+                Đăng nhập Admin: <strong>Quản trị FinLab</strong> (Trang Admin)
+            </button>
+        </div>
 
         <div class="login-footer">
             <p>Học viện Ngân hàng - Khoa CNTT &amp; Kinh tế số</p>
@@ -71,6 +105,12 @@
         document.getElementById('btn-quick-demo').addEventListener('click', function() {
             document.getElementById('username').value = 'nguyen_van_a';
             document.getElementById('password').value = 'password123';
+            document.getElementById('login-form').submit();
+        });
+
+        document.getElementById('btn-quick-admin').addEventListener('click', function() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
             document.getElementById('login-form').submit();
         });
     </script>

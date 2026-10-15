@@ -1,59 +1,80 @@
+import json
+import os
 import re
 from datetime import datetime
 
-# Từ điển ánh xạ từ khóa (NLP Token Dictionary) trong chuyển khoản ngân hàng Việt Nam
-CATEGORY_RULES = {
-    "INCOME": {
+CATEGORIES_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'categories.json')
+
+DEFAULT_RULES = {
+    "cat_income_salary": {
         "keywords": ["LUONG", "THUONG", "CHUYEN LUONG", "SALARY", "BONUS", "THU NHAP"],
-        "category_name": "Thu nhập tiền lương",
+        "name": "Thu nhập tiền lương",
         "bucket": "INCOME"
     },
-    "HOUSING_UTILITIES": {
+    "cat_needs_housing": {
         "keywords": ["THUE NHA", "TIEN DIEN", "EVN", "NUOC SACH", "INTERNET", "VNPT", "VIETTEL", "FPT", "DIEN THOAI TRA SAU"],
-        "category_name": "Nhà ở & Hóa đơn tiện ích",
+        "name": "Nhà ở & Hóa đơn tiện ích",
         "bucket": "NEEDS"
     },
-    "FOOD_ESSENTIAL": {
+    "cat_needs_food": {
         "keywords": ["WINMART", "COOPMART", "BACH HOA XANH", "THUC PHAM", "SIEU THI", "CHO "],
-        "category_name": "Thực phẩm & Đi chợ",
+        "name": "Thực phẩm & Đi chợ",
         "bucket": "NEEDS"
     },
-    "FOOD_DINING": {
+    "cat_wants_dining": {
         "keywords": ["HIGHLANDS", "PHUC LONG", "THE COFFEE HOUSE", "COM TRUA", "BUN CHA", "COM TAM", "PHO BO", "BUN DAU", "LAU MANWAH", "GRABFOOD", "SHOPEEFOOD"],
-        "category_name": "Ăn uống & Cà phê ngoài",
+        "name": "Ăn uống & Cà phê ngoài",
         "bucket": "WANTS"
     },
-    "TRANSPORT": {
+    "cat_needs_transport": {
         "keywords": ["GRAB", "BE CAR", "BE BIKE", "XANH SM", "PETROLIMEX", "XANG", "GUI XE"],
-        "category_name": "Đi lại & Xăng xe",
+        "name": "Đi lại & Xăng xe",
         "bucket": "NEEDS"
     },
-    "SHOPPING": {
+    "cat_wants_shopping": {
         "keywords": ["SHOPEE", "TIKTOK SHOP", "LAZADA", "THOI TRANG", "MY PHAM", "TAI NGHE", "GIAY"],
-        "category_name": "Mua sắm cá nhân",
+        "name": "Mua sắm cá nhân",
         "bucket": "WANTS"
     },
-    "DIGITAL_SUBSCRIPTION": {
+    "cat_wants_subscription": {
         "keywords": ["NETFLIX", "SPOTIFY", "APPLE.COM/BILL", "ICLOUD", "YOUTUBE", "CHATGPT", "GYM"],
-        "category_name": "Dịch vụ số định kỳ (Subscription)",
+        "name": "Dịch vụ số định kỳ (Subscription)",
         "bucket": "WANTS"
     },
-    "ENTERTAINMENT": {
+    "cat_wants_entertainment": {
         "keywords": ["CGV", "LOTTE CINEMA", "KARAOKE", "VE XEM PHIM", "DU LICH"],
-        "category_name": "Giải trí & Phim ảnh",
+        "name": "Giải trí & Phim ảnh",
         "bucket": "WANTS"
     },
-    "HEALTHCARE_EDUCATION": {
+    "cat_needs_healthcare": {
         "keywords": ["PHARMACITY", "LONG CHAU", "BENH VIEN", "KHAM BENH", "THUOC", "KHOA HOC", "TIENG ANH", "HOC PHI"],
-        "category_name": "Y tế & Giáo dục",
+        "name": "Y tế & Giáo dục",
         "bucket": "NEEDS"
     },
-    "SAVINGS_INVESTMENT": {
+    "cat_savings_investment": {
         "keywords": ["TIET KIEM", "TICH LUY", "CHUNG CHI QUY", "DAU TU", "SAVINGS"],
-        "category_name": "Tiết kiệm & Tích sản",
+        "name": "Tiết kiệm & Tích sản",
         "bucket": "SAVINGS"
     }
 }
+
+def load_categories():
+    if not os.path.exists(CATEGORIES_FILE):
+        return []
+    try:
+        with open(CATEGORIES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_categories(categories):
+    try:
+        with open(CATEGORIES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(categories, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error saving categories: {e}")
+        return False
 
 def is_night_time(timestamp_str):
     """
@@ -70,28 +91,50 @@ def is_night_time(timestamp_str):
 def categorize_transaction(description, timestamp_str=""):
     """
     Mô hình AI/NLP xử lý ngôn ngữ tự nhiên:
-    Phân tích chuỗi văn bản không dấu của ngân hàng -> gán nhãn danh mục và rổ 50/30/20.
+    Đọc từ điển động từ categories.json -> gán nhãn danh mục và rổ 50/30/20.
     """
     desc_upper = description.upper()
+    categories = load_categories()
     
-    # Quét qua các tập luật từ điển
-    for rule_key, rule_data in CATEGORY_RULES.items():
+    # 1. Quét danh mục động từ file cấu hình
+    if categories:
+        for cat in categories:
+            # Bỏ qua nếu danh mục bị ẩn
+            if cat.get("is_hidden", False):
+                continue
+                
+            keywords = cat.get("keywords", [])
+            for kw in keywords:
+                if re.search(r'\b' + re.escape(kw) + r'\b', desc_upper) or kw in desc_upper:
+                    night_flag = is_night_time(timestamp_str) and cat.get("bucket") == "WANTS"
+                    is_sub = "SUBSCRIPTION" in cat.get("id", "").upper() or "ĐỊNH KỲ" in cat.get("name", "").upper()
+                    return {
+                        "rule_key": cat.get("id"),
+                        "category": cat.get("name"),
+                        "bucket": cat.get("bucket"),
+                        "is_night_spending": night_flag,
+                        "is_subscription": is_sub,
+                        "confidence_score": 0.95
+                    }
+                    
+    # 2. Fallback sang luật mặc định nếu file categories lỗi hoặc chưa khớp
+    for rule_key, rule_data in DEFAULT_RULES.items():
         for kw in rule_data["keywords"]:
             if re.search(r'\b' + re.escape(kw) + r'\b', desc_upper) or kw in desc_upper:
                 night_flag = is_night_time(timestamp_str) and rule_data["bucket"] == "WANTS"
-                is_sub = rule_key == "DIGITAL_SUBSCRIPTION"
+                is_sub = "cat_wants_subscription" == rule_key
                 return {
                     "rule_key": rule_key,
-                    "category": rule_data["category_name"],
+                    "category": rule_data["name"],
                     "bucket": rule_data["bucket"],
                     "is_night_spending": night_flag,
                     "is_subscription": is_sub,
-                    "confidence_score": 0.94
+                    "confidence_score": 0.92
                 }
-                
-    # Mặc định nếu không khớp từ khóa
+
+    # 3. Mặc định nếu không khớp từ khóa
     return {
-        "rule_key": "OTHER_EXPENSES",
+        "rule_key": "cat_wants_other",
         "category": "Chi tiêu khác",
         "bucket": "WANTS",
         "is_night_spending": is_night_time(timestamp_str),

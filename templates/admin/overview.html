@@ -1,0 +1,306 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Tổng quan Hệ thống{% endblock %}
+{% block page_title %}Tổng quan (Overview){% endblock %}
+
+{% block content %}
+<!-- 4 Thẻ KPIs Đầu Trang -->
+<div class="kpi-grid">
+    <!-- Total Users -->
+    <div class="kpi-card blue">
+        <div class="kpi-header">
+            <span class="kpi-title">Tổng người dùng</span>
+            <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_users }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">tài khoản</span></div>
+        <div class="kpi-subtext" style="color: #34d399;">
+            <i class="fa-solid fa-arrow-trend-up"></i> +15% so với tháng trước
+        </div>
+    </div>
+
+    <!-- Active Users -->
+    <div class="kpi-card emerald">
+        <div class="kpi-header">
+            <span class="kpi-title">Đang hoạt động (Active)</span>
+            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ active_users }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">tài khoản</span></div>
+        <div class="kpi-subtext">
+            <span>Tỷ lệ khả dụng: {{ "%.0f"|format((active_users / [total_users, 1]|max) * 100) }}%</span>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="kpi-card purple">
+        <div class="kpi-header">
+            <span class="kpi-title">Danh mục hệ thống</span>
+            <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.15); color: #c084fc;">
+                <i class="fa-solid fa-tags"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_categories }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">danh mục</span></div>
+        <div class="kpi-subtext" style="color: #c084fc;">
+            <i class="fa-solid fa-brain"></i> Ánh xạ NLP Tokenizer AI
+        </div>
+    </div>
+
+    <!-- System Events -->
+    <div class="kpi-card amber">
+        <div class="kpi-header">
+            <span class="kpi-title">Sự kiện ghi nhận (Audit)</span>
+            <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_events }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">nhật ký</span></div>
+        <div class="kpi-subtext" style="color: #60a5fa;">
+            <i class="fa-solid fa-shield-check"></i> Tuân thủ NĐ 13/2023
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem;">
+    <!-- Line Chart: Xu hướng Đăng ký -->
+    <div class="panel-card" style="margin-bottom: 0;">
+        <div class="panel-header">
+            <div class="panel-title">
+                <i class="fa-solid fa-chart-line" style="color: #6366f1;"></i>
+                Xu Hướng Đăng Ký Tài Khoản Mới Theo Tháng (2026)
+            </div>
+            <span style="font-size: 0.75rem; color: #94a3b8;">Dữ liệu hệ thống</span>
+        </div>
+        <div style="height: 250px; position: relative;">
+            <canvas id="registrationChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Doughnut Chart: Trạng thái Active vs Locked -->
+    <div class="panel-card" style="margin-bottom: 0;">
+        <div class="panel-header">
+            <div class="panel-title">
+                <i class="fa-solid fa-user-shield" style="color: #10b981;"></i>
+                Tài Khoản Hoạt Động vs Khóa
+            </div>
+            <span style="font-size: 0.75rem; color: #94a3b8;">Tỷ lệ an ninh</span>
+        </div>
+        <div style="height: 250px; position: relative;">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Grid 2: Ngân hàng liên kết + Trạng thái Hệ thống & Recent Activities -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem;">
+    <!-- Doughnut: Phân bổ Ngân hàng -->
+    <div class="panel-card" style="margin-bottom: 0;">
+        <div class="panel-header">
+            <div class="panel-title">
+                <i class="fa-solid fa-building-columns" style="color: #3b82f6;"></i>
+                Phân Bổ Người Dùng Theo Ngân Hàng Liên Kết
+            </div>
+            <span style="font-size: 0.75rem; color: #94a3b8;">Open API v2.1</span>
+        </div>
+        <div style="height: 220px; position: relative;">
+            <canvas id="bankDistChart"></canvas>
+        </div>
+    </div>
+
+    <!-- System Health Widget -->
+    <div class="panel-card" style="margin-bottom: 0;">
+        <div class="panel-header">
+            <div class="panel-title">
+                <i class="fa-solid fa-microchip" style="color: #ec4899;"></i>
+                Báo Cáo Trạng Thái Hạ Tầng &amp; Sandbox API
+            </div>
+            <span class="badge-status badge-active">Bình thường</span>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--admin-border);">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <i class="fa-solid fa-server" style="color: #60a5fa;"></i>
+                    <span style="font-size: 0.82rem; font-weight: 600;">Flask Core Server</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #34d399; font-weight: 700;">Python 3.12 / WSGI</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--admin-border);">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <i class="fa-solid fa-memory" style="color: #a78bfa;"></i>
+                    <span style="font-size: 0.82rem; font-weight: 600;">Bộ nhớ tiêu thụ (Memory)</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #ffffff; font-weight: 700;">28.4 MB (Tối ưu)</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--admin-border);">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <i class="fa-solid fa-network-wired" style="color: #34d399;"></i>
+                    <span style="font-size: 0.82rem; font-weight: 600;">Open Banking Gateway (AIS)</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #34d399; font-weight: 700;">3/3 Bank APIs Sẵn sàng</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--admin-border);">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <i class="fa-solid fa-shield-virus" style="color: #fbbf24;"></i>
+                    <span style="font-size: 0.82rem; font-weight: 600;">Bảo vệ Dữ liệu PFM</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #a5b4fc; font-weight: 700;">E2EE / Zero Plaintext Log</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities Table -->
+<div class="panel-card">
+    <div class="panel-header">
+        <div class="panel-title">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #f59e0b;"></i>
+            Nhật Ký Quản Trị Gần Đây (Recent Activities)
+        </div>
+        <a href="/admin/audit-logs" class="btn-admin btn-admin-secondary" style="font-size: 0.75rem;">
+            Xem tất cả nhật ký <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Người thực hiện</th>
+                    <th>Hành động</th>
+                    <th>Đối tượng</th>
+                    <th>Kết quả</th>
+                    <th>Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td style="font-family: monospace; color: #94a3b8; font-size: 0.78rem;">{{ log.timestamp }}</td>
+                    <td><strong style="color: #60a5fa;">{{ log.actor }}</strong></td>
+                    <td>
+                        <span style="background: #1e293b; color: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-family: monospace; font-weight: 700;">
+                            {{ log.action }}
+                        </span>
+                    </td>
+                    <td style="color: #e2e8f0;">{{ log.target }}</td>
+                    <td>
+                        {% if log.result == 'Success' %}
+                        <span class="badge-status badge-active"><i class="fa-solid fa-check"></i> Success</span>
+                        {% else %}
+                        <span class="badge-status badge-locked"><i class="fa-solid fa-xmark"></i> Failed</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #94a3b8; font-size: 0.8rem; max-width: 320px;">{{ log.details }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const bankDistData = {{ bank_counts | tojson }};
+    const activeCount = {{ active_users }};
+    const lockedCount = {{ locked_users }};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Line Chart: Xu hướng Đăng ký
+        const ctxReg = document.getElementById('registrationChart');
+        if (ctxReg) {
+            new Chart(ctxReg, {
+                type: 'line',
+                data: {
+                    labels: ['T5/2026', 'T6/2026', 'T7/2026', 'T8/2026', 'T9/2026', 'T10/2026'],
+                    datasets: [{
+                        label: 'Số tài khoản mới',
+                        data: [1, 2, 2, 3, 3, {{ total_users }}],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#818cf8',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, color: '#94a3b8' },
+                            grid: { color: '#1f293d' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Doughnut Chart: Active vs Locked
+        const ctxStatus = document.getElementById('statusChart');
+        if (ctxStatus) {
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Đang hoạt động (Active)', 'Bị khóa (Locked)'],
+                    datasets: [{
+                        data: [activeCount, lockedCount],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#131c2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // 3. Doughnut Chart: Bank Distribution
+        const ctxBank = document.getElementById('bankDistChart');
+        if (ctxBank) {
+            new Chart(ctxBank, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(bankDistData),
+                    datasets: [{
+                        data: Object.values(bankDistData),
+                        backgroundColor: ['#006837', '#E31B23', '#002060', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#131c2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

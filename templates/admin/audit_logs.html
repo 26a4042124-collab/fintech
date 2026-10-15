@@ -1,0 +1,144 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Nhật ký Quản trị &amp; Bảo mật{% endblock %}
+{% block page_title %}Nhật ký Bảo mật (Audit Logs){% endblock %}
+
+{% block content %}
+<div class="panel-card">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">
+                <i class="fa-solid fa-shield-halved" style="color: #f59e0b;"></i>
+                Nhật Ký Sự Kiện Hệ Thống &amp; Kiểm Toán An Ninh
+            </div>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                Ghi nhận bất biến mọi hành vi nhạy cảm của người dùng và quản trị viên, tuân thủ <strong>Nghị định 13/2023/NĐ-CP</strong> về Bảo vệ Dữ liệu Cá nhân.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="/admin/api/audit-logs/export" class="btn-admin btn-admin-secondary" style="font-size: 0.78rem;" download>
+                <i class="fa-solid fa-download"></i> Xuất file JSON
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div style="display: flex; gap: 0.85rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center;">
+        <div style="position: relative; min-width: 280px; flex: 1;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.85rem;"></i>
+            <input type="text" id="log-search-input" class="form-control-admin" placeholder="Tìm theo người thực hiện, hành động, đối tượng..." style="padding-left: 2.2rem; width: 100%;">
+        </div>
+
+        <select id="log-action-filter" class="form-control-admin" style="min-width: 180px;">
+            <option value="ALL">Tất cả hành động</option>
+            <option value="USER_LOGIN">Đăng nhập User</option>
+            <option value="ADMIN_LOGIN">Đăng nhập Admin</option>
+            <option value="Khóa tài khoản">Khóa tài khoản</option>
+            <option value="Mở khóa tài khoản">Mở khóa tài khoản</option>
+            <option value="Thay đổi vai trò">Thay đổi vai trò (Role)</option>
+            <option value="Thêm danh mục">Thêm danh mục</option>
+            <option value="Chỉnh sửa danh mục">Chỉnh sửa danh mục</option>
+            <option value="Ẩn danh mục">Ẩn danh mục</option>
+            <option value="Lưu cài đặt hệ thống">Lưu cài đặt hệ thống</option>
+        </select>
+
+        <select id="log-result-filter" class="form-control-admin" style="min-width: 140px;">
+            <option value="ALL">Tất cả kết quả</option>
+            <option value="Success">Thành công (Success)</option>
+            <option value="Failed">Thất bại (Failed)</option>
+        </select>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="table-responsive">
+        <table class="admin-table" id="audit-table">
+            <thead>
+                <tr>
+                    <th>Mã ID</th>
+                    <th>Thời gian</th>
+                    <th>Người thực hiện</th>
+                    <th>Hành động (Sự kiện)</th>
+                    <th>Đối tượng tác động</th>
+                    <th>Kết quả</th>
+                    <th>Chi tiết nhật ký</th>
+                    <th>Địa chỉ IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="log-row" data-actor="{{ log.actor|lower }}" data-action="{{ log.action }}" data-target="{{ log.target|lower }}" data-result="{{ log.result }}" data-details="{{ log.details|lower }}">
+                    <td style="font-family: monospace; color: #64748b; font-size: 0.72rem;">{{ log.id }}</td>
+                    <td style="font-family: monospace; color: #94a3b8; font-size: 0.78rem; white-space: nowrap;">{{ log.timestamp }}</td>
+                    <td>
+                        <strong style="color: #60a5fa;">{{ log.actor }}</strong>
+                    </td>
+                    <td>
+                        <span style="background: #1e293b; color: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-family: monospace; font-weight: 700;">
+                            {{ log.action }}
+                        </span>
+                    </td>
+                    <td style="color: #ffffff; font-weight: 600;">{{ log.target }}</td>
+                    <td>
+                        {% if log.result == 'Success' %}
+                        <span class="badge-status badge-active"><i class="fa-solid fa-check"></i> Success</span>
+                        {% else %}
+                        <span class="badge-status badge-locked"><i class="fa-solid fa-xmark"></i> Failed</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #cbd5e1; font-size: 0.8rem; max-width: 380px;">{{ log.details }}</td>
+                    <td style="font-family: monospace; color: #64748b; font-size: 0.75rem;">{{ log.ip or '127.0.0.1' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 1rem; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between;">
+        <span>Hiển thị <strong id="log-count-display">{{ logs|length }}</strong> bản ghi kiểm toán gần nhất</span>
+        <span>Mã hóa bảo vệ toàn vẹn: SHA-256 Checksum</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const searchInput = document.getElementById('log-search-input');
+    const actionFilter = document.getElementById('log-action-filter');
+    const resultFilter = document.getElementById('log-result-filter');
+    const logRows = document.querySelectorAll('.log-row');
+    const countDisplay = document.getElementById('log-count-display');
+
+    function applyLogFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        const actionVal = actionFilter.value;
+        const resultVal = resultFilter.value;
+
+        let visibleCount = 0;
+
+        logRows.forEach(row => {
+            const actor = row.getAttribute('data-actor');
+            const action = row.getAttribute('data-action');
+            const target = row.getAttribute('data-target');
+            const result = row.getAttribute('data-result');
+            const details = row.getAttribute('data-details');
+
+            const matchQuery = !query || actor.includes(query) || action.toLowerCase().includes(query) || target.includes(query) || details.includes(query);
+            const matchAction = actionVal === 'ALL' || action.includes(actionVal);
+            const matchResult = resultVal === 'ALL' || result === resultVal;
+
+            if (matchQuery && matchAction && matchResult) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (countDisplay) countDisplay.textContent = visibleCount;
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyLogFilters);
+    if (actionFilter) actionFilter.addEventListener('change', applyLogFilters);
+    if (resultFilter) resultFilter.addEventListener('change', applyLogFilters);
+</script>
+{% endblock %}

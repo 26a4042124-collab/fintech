@@ -1,0 +1,707 @@
+[
+  {
+    "id": "LOG_7891037",
+    "timestamp": "2026-10-16 03:58:11",
+    "actor": "admin",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7867831",
+    "timestamp": "2026-10-16 03:57:47",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7865719",
+    "timestamp": "2026-10-16 03:57:45",
+    "actor": "nguyen_van_a",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7845055",
+    "timestamp": "2026-10-16 03:57:25",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7843430",
+    "timestamp": "2026-10-16 03:57:23",
+    "actor": "nguyen_van_a",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808612",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808576",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808539",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808508",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808479",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808413",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808369",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7808283",
+    "timestamp": "2026-10-16 03:56:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726823",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726770",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726738",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726703",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726662",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726575",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726543",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7726442",
+    "timestamp": "2026-10-16 03:55:26",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7403286",
+    "timestamp": "2026-10-16 03:50:03",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7403221",
+    "timestamp": "2026-10-16 03:50:03",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7403168",
+    "timestamp": "2026-10-16 03:50:03",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7403104",
+    "timestamp": "2026-10-16 03:50:03",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7403041",
+    "timestamp": "2026-10-16 03:50:03",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7402978",
+    "timestamp": "2026-10-16 03:50:02",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7402949",
+    "timestamp": "2026-10-16 03:50:02",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7402857",
+    "timestamp": "2026-10-16 03:50:02",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7222111",
+    "timestamp": "2026-10-16 03:47:02",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7222066",
+    "timestamp": "2026-10-16 03:47:02",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7222026",
+    "timestamp": "2026-10-16 03:47:02",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7221929",
+    "timestamp": "2026-10-16 03:47:01",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7221899",
+    "timestamp": "2026-10-16 03:47:01",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7221819",
+    "timestamp": "2026-10-16 03:47:01",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7172962",
+    "timestamp": "2026-10-16 03:46:12",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249868",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Lưu cài đặt hệ thống",
+    "target": "Cấu hình FinLab",
+    "result": "Success",
+    "details": "Cập nhật các tham số cấu hình hệ thống",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249842",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Ẩn danh mục",
+    "target": "Bảo hiểm nhân thọ (cat_custom_249792)",
+    "result": "Success",
+    "details": "Chuyển trạng thái hiển thị của danh mục sang Ẩn",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249809",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Thêm danh mục",
+    "target": "Bảo hiểm nhân thọ (cat_custom_249792)",
+    "result": "Success",
+    "details": "Tạo mới danh mục EXPENSE - Rổ NEEDS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249767",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Mở khóa tài khoản",
+    "target": "demo (usr_002)",
+    "result": "Success",
+    "details": "Chuyển trạng thái người dùng từ 'locked' sang 'active'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249731",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249692",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "demo",
+    "action": "Đăng nhập thất bại",
+    "target": "Hệ thống FinLab",
+    "result": "Failed",
+    "details": "Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ ban quản trị FinLab!",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249682",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "demo",
+    "action": "Đăng nhập tài khoản bị khóa",
+    "target": "usr_002",
+    "result": "Failed",
+    "details": "Người dùng thử đăng nhập nhưng tài khoản đang ở trạng thái locked",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249643",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249617",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Khóa tài khoản",
+    "target": "demo (usr_002)",
+    "result": "Success",
+    "details": "Chuyển trạng thái người dùng từ 'active' sang 'locked'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249252",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249226",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "nguyen_van_a",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249058",
+    "timestamp": "2026-10-16 03:30:49",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_315556",
+    "timestamp": "2026-10-16 03:15:15",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (user)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_311650",
+    "timestamp": "2026-10-16 03:15:11",
+    "username": "admin",
+    "action": "USER_LOGOUT",
+    "details": "Người dùng đăng xuất khỏi hệ thống",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_102098",
+    "timestamp": "2026-10-16 03:11:42",
+    "username": "admin",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (admin)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_99986",
+    "timestamp": "2026-10-16 03:11:39",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGOUT",
+    "details": "Người dùng đăng xuất khỏi hệ thống",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_51585",
+    "timestamp": "2026-10-16 03:10:51",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (user)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_49803",
+    "timestamp": "2026-10-16 03:10:49",
+    "username": "admin",
+    "action": "USER_LOGOUT",
+    "details": "Người dùng đăng xuất khỏi hệ thống",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_18429",
+    "timestamp": "2026-10-16 03:10:18",
+    "username": "admin",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (admin)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_829612",
+    "timestamp": "2026-10-16 02:50:29",
+    "username": "admin",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (admin)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_829590",
+    "timestamp": "2026-10-16 02:50:29",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGOUT",
+    "details": "Người dùng đăng xuất khỏi hệ thống",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_829496",
+    "timestamp": "2026-10-16 02:50:29",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (user)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942285",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "admin",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (admin)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942268",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGOUT",
+    "details": "Người dùng đăng xuất khỏi hệ thống",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942209",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "nguyen_van_a",
+    "action": "TOGGLE_CONSENT_SCOPE",
+    "details": "Tắt quyền 'Xem số dư' của Vietcombank (Nghị định 13)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942157",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "nguyen_van_a",
+    "action": "UPDATE_CATEGORY_LIMIT",
+    "details": "Cập nhật hạn mức chi tiêu cho 1 danh mục",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942103",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "nguyen_van_a",
+    "action": "UPDATE_ROUND_UP_CONFIG",
+    "details": "Bật tính năng tích lũy tiền lẻ Heo đất, bước làm tròn: 50,000 VNĐ",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_942028",
+    "timestamp": "2026-10-16 02:35:42",
+    "username": "nguyen_van_a",
+    "action": "DEPOSIT_GOAL",
+    "details": "Nạp 2,000,000 VNĐ vào mục tiêu 'Quỹ mua xe điện'",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_941968",
+    "timestamp": "2026-10-16 02:35:41",
+    "username": "nguyen_van_a",
+    "action": "ADD_SAVINGS_GOAL",
+    "details": "Tạo mục tiêu mới: 'Quỹ mua xe điện' với mục tiêu 40,000,000 VNĐ",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_941901",
+    "timestamp": "2026-10-16 02:35:41",
+    "username": "nguyen_van_a",
+    "action": "CHANGE_BUDGET_RATIO",
+    "details": "Thiết lập tỷ lệ ngân sách mới: 60% Thiết yếu - 20% Mong muốn - 20% Tiết kiệm",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_941821",
+    "timestamp": "2026-10-16 02:35:41",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGIN",
+    "details": "Người dùng đăng nhập thành công (user)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_101",
+    "timestamp": "2026-10-16 08:30:15",
+    "username": "admin",
+    "action": "SYSTEM_STARTUP",
+    "details": "Khởi động lõi hệ thống FinLab Open Banking Engine v2.5",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_102",
+    "timestamp": "2026-10-16 08:35:40",
+    "username": "nguyen_van_a",
+    "action": "USER_LOGIN",
+    "details": "Đăng nhập thành công vào bảng điều khiển PFM",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_103",
+    "timestamp": "2026-10-16 08:36:12",
+    "username": "nguyen_van_a",
+    "action": "SYNC_BANK",
+    "details": "Đồng bộ giao dịch tự động qua Open API v2.1 với Vietcombank",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_104",
+    "timestamp": "2026-10-16 08:40:22",
+    "username": "nguyen_van_a",
+    "action": "CHANGE_BUDGET_RATIO",
+    "details": "Thiết lập tỷ lệ phân bổ ngân sách: 50% Thiết yếu - 30% Mong muốn - 20% Tiết kiệm",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_105",
+    "timestamp": "2026-10-16 08:45:00",
+    "username": "nguyen_van_a",
+    "action": "UPDATE_CATEGORY_LIMIT",
+    "details": "Cập nhật hạn mức chi tiêu Ăn uống & Cà phê: 3,500,000 VNĐ",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_106",
+    "timestamp": "2026-10-16 09:10:15",
+    "username": "nguyen_van_a",
+    "action": "ADD_SAVINGS_GOAL",
+    "details": "Tạo mục tiêu mới: Quỹ khẩn cấp 3 tháng (Mục tiêu 20,000,000 VNĐ)",
+    "status": "SUCCESS",
+    "ip": "127.0.0.1"
+  }
+]

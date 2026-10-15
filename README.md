@@ -1,17 +1,21 @@
-# 🏦 FinLab - Trợ lý Quản lý Tài chính Cá nhân & Cảnh báo Rò rỉ Chi tiêu Thông minh
-> **Dự án Bài tập lớn cuối kỳ môn học: Công nghệ dịch vụ tài chính (FinTech)**  
+# 🏦 FinLab - Nền Tảng Quản Lý Tài Chính Cá Nhân (PFM) & Open Banking Toàn Diện
+> **Đồ án môn học: Công nghệ dịch vụ tài chính (FinTech)**  
 > **Khoa Công nghệ Thông tin & Kinh tế số - Học viện Ngân hàng (HVNH)**
 
 ---
 
-## 🌟 Giới thiệu Dự án
-**FinLab** là nền tảng quản lý tài chính cá nhân thế hệ mới, giải quyết triệt để 2 "bẫy tài chính" phổ biến của người trẻ:
-1. **Rò rỉ dịch vụ số (Subscription Leaks):** Các khoản đăng ký định kỳ trừ ngầm tự động (Netflix, Spotify, iCloud...).
-2. **Chi tiêu bốc đồng ban đêm (Night Impulse Spending):** Các đơn hàng mua sắm Shopee, TikTok Shop, GrabFood phát sinh sau 22h00 đêm khi tâm lý cảm xúc lấn át lý trí.
+## 🌟 Giới thiệu Hệ thống FinLab
 
-Ứng dụng kết hợp 2 công nghệ tài chính cốt lõi:
-- **Open Banking API (AIS):** Giả lập kết nối chuẩn *Thông tư 64/2024/TT-NHNN* tổng hợp dữ liệu giao dịch từ 3 ngân hàng lớn (Vietcombank, Techcombank, MB Bank) qua cơ chế OAuth 2.0 Consent.
-- **Trí tuệ nhân tạo (AI & NLP):** Tự động phân loại giao dịch theo quy tắc chuẩn **50/30/20** (Thiết yếu 50% - Mong muốn 30% - Tiết kiệm 20%), chấm Điểm sức khỏe tài chính (0-100) và tích hợp **Trợ lý ảo AI Chatbot** trò chuyện, tư vấn tài chính theo thời gian thực.
+**FinLab** là nền tảng Quản lý tài chính cá nhân (Personal Financial Management - PFM) và Ngân hàng mở (Open Banking Aggregator) thông minh, giúp người dùng kiểm soát dòng tiền, ngăn chặn rò rỉ chi tiêu, thiết lập mục tiêu tài chính, tích lũy tiền lẻ tự động và tuân thủ chuẩn mực an ninh dữ liệu.
+
+### 7 Tính Năng Nâng Cấp Toàn Diện:
+1. **Tỷ Lệ Phân Bổ Ngân Sách Tùy Chọn (Custom Budget Ratio):** Chuyển đổi từ quy tắc 50/30/20 cứng nhắc thành hệ thống tùy biến linh hoạt theo từng giai đoạn cuộc sống (50/30/20, 60/20/20, 70/20/10 hoặc tự do kéo thanh trượt).
+2. **Mục Tiêu Tài Chính Thông Minh (Savings Goals / Hũ Tích Lũy Số):** Theo dõi tiến độ tích lũy thực tế, AI dự báo số tháng hoàn thành dựa trên tốc độ dòng tiền (`months_needed`), cho phép nạp tiền nhanh vào từng hũ.
+3. **Quy Tắc Làm Tròn Tiền Lẻ (Round-Up Savings / Micro-investing):** Giả lập cơ chế Heo Đất MoMo / Acorns, tự động gom tiền lẻ từ mọi giao dịch quẹt thẻ lên hàng 10.000đ hoặc 50.000đ để chuyển vào hũ tiết kiệm.
+4. **Dự Báo Dòng Tiền Cuối Tháng (Cashflow Forecasting):** Thuật toán tính tốc độ đốt tiền trung bình mỗi ngày (`daily_burn_rate`), dự phóng tổng chi tiêu đến ngày 30, cảnh báo nguy cơ cạn ví hoặc thông báo thặng dư an toàn.
+5. **Hạn Mức Chi Tiêu & Cảnh Báo Theo Danh Mục (Category Budget Alerts):** Đặt trần chi tiêu cho từng danh mục, hiển thị traffic light (Xanh < 80%, Vàng 80-99%, Đỏ >= 100% Vượt mức).
+6. **Trung Tâm Quản Trị Quyền Dữ Liệu (Open Banking Consent Manager):** Tuân thủ **Nghị định 13/2023/NĐ-CP** (Bảo vệ dữ liệu cá nhân) & **Thông tư 64/2024/TT-NHNN** (Tiêu chuẩn Kỹ thuật Open API), cho phép bật/tắt quyền xem số dư, giao dịch, phân tích AI và Thu hồi ủy quyền (Revoke Consent).
+7. **Phân Quyền RBAC & Trang Quản Trị Hệ Thống (Admin Dashboard):** Bảng điều khiển quản trị viên (`/admin`) với số liệu KPIs toàn hệ thống, biểu đồ phân bố ngân hàng & sức khỏe tài chính, bảng quản lý người dùng (đổi vai trò, đặt lại mật khẩu, khóa tài khoản) và bảng Nhật ký An ninh Hệ thống (Audit Logs).
 
 ---
 
@@ -19,91 +23,96 @@
 
 ```text
 fintech/
-├── app.py                      # File khởi chạy chính của ứng dụng Flask
-├── requirements.txt            # Danh sách thư viện Python cần thiết
+├── app.py                      # Flask Backend: Routes, REST APIs, Session & RBAC
+├── requirements.txt            # Danh sách thư viện Python (Flask)
 ├── README.md                   # Hướng dẫn chi tiết sử dụng & thuyết trình
 │
-├── data/                       # Dữ liệu mẫu (Database giả lập)
-│   ├── users.json              # Tài khoản đăng nhập demo
-│   └── mock_transactions.json  # 35 giao dịch thực tế từ VCB, TCB, MB
+├── data/                       # Dữ liệu JSON (Zero Database Dependency)
+│   ├── users.json              # Danh sách tài khoản người dùng, cấu hình & consents
+│   ├── mock_transactions.json  # Lịch sử giao dịch giả lập từ VCB, TCB, MB
+│   └── audit_logs.json         # Nhật ký hệ thống & an ninh tuân thủ Nghị định 13
 │
-├── modules/                    # Các module xử lý nghiệp vụ backend
-│   ├── auth.py                 # Xác thực tài khoản & phiên đăng nhập
-│   ├── open_banking.py         # Giả lập kết nối Open Banking API & Consent
-│   ├── ai_categorizer.py       # AI NLP phân loại giao dịch & gắn nhãn 50/30/20
-│   ├── health_scoring.py       # Thuật toán tính Điểm sức khỏe & kiểm toán rò rỉ
-│   └── chatbot_ai.py           # Logic Trợ lý ảo AI Chatbot tư vấn tài chính
+├── modules/                    # Các module nghiệp vụ fintech
+│   ├── auth.py                 # Xác thực, phân quyền RBAC, user management & audit
+│   ├── open_banking.py         # Giả lập Open Banking API, OAuth 2.0 & Consent check
+│   ├── ai_categorizer.py       # AI NLP phân loại giao dịch & gắn nhãn rổ chi tiêu
+│   ├── health_scoring.py       # Tính điểm sức khỏe, dự báo dòng tiền, hạn mức & heo đất
+│   └── chatbot_ai.py           # Trợ lý ảo AI Chatbot tư vấn tài chính thông minh
 │
 ├── static/                     # Tài nguyên giao diện tĩnh
 │   ├── css/
-│   │   └── style.css           # Giao diện FinTech chuẩn hiện đại, responsive
+│   │   └── style.css           # Design System Fintech cao cấp, Dark/Light hài hòa
 │   └── js/
-│       ├── main.js             # Điều khiển biểu đồ Chart.js, bộ lọc & Open API modal
-│       └── chatbot.js          # Widget Trợ lý AI Chatbot góc dưới bên phải
+│       ├── main.js             # Xử lý tương tác giao diện, Chart.js & gọi REST APIs
+│       └── chatbot.js          # Widget Trợ lý AI Chatbot
 │
-└── templates/                  # Giao diện HTML (Jinja2 Template)
-    ├── login.html              # Màn hình đăng nhập (có nút 1-chạm Demo)
-    └── dashboard.html          # Bảng điều khiển tài chính trung tâm
+└── templates/                  # Giao diện HTML (Jinja2)
+    ├── login.html              # Màn hình đăng nhập (có nút 1-chạm User & Admin)
+    ├── dashboard.html          # Bảng điều khiển PFM người dùng toàn diện
+    └── admin.html              # Bảng điều khiển Quản trị viên (Admin Portal)
 ```
 
 ---
 
-## 🚀 Hướng dẫn Cài đặt & Khởi chạy (Chỉ 2 bước)
+## 🚀 Hướng dẫn Cài đặt & Khởi chạy
 
-### Bước 1: Mở Terminal / PowerShell và di chuyển vào thư mục dự án
+### Bước 1: Mở Terminal tại thư mục `fintech`
 ```bash
-cd F:\amazing-noether\fintech
+cd f:\amazing-noether\fintech
 ```
 
-*(Nếu chưa cài thư viện Flask và Pandas)*:
-```bash
-pip install -r requirements.txt
-```
-
-### Bước 2: Chạy ứng dụng Flask
+### Bước 2: Khởi chạy Server Flask
 ```bash
 python app.py
 ```
 
-Sau đó, mở trình duyệt web và truy cập địa chỉ:  
+Mở trình duyệt web và truy cập địa chỉ:  
 👉 **`http://127.0.0.1:5000`**
 
 ---
 
-## 🔑 Tài khoản Đăng nhập Demo Thuyết trình
+## 🔑 Tài khoản Đăng nhập Demo
 
-Trên màn hình đăng nhập, bạn có thể:
-- Bấm trực tiếp nút: **"⚡ Đăng nhập nhanh: Nguyễn Văn A (Demo 1 chạm)"** để vào thẳng Dashboard.
-- Hoặc điền thủ công:
-  - **Tên đăng nhập:** `nguyen_van_a`
-  - **Mật khẩu:** `password123`
+Hệ thống có sẵn các nút **Đăng nhập 1-chạm** trên giao diện đăng nhập:
+
+| Vai trò | Tên đăng nhập | Mật khẩu | Quyền hạn & Chức năng |
+| :--- | :--- | :--- | :--- |
+| **Người dùng (User)** | `nguyen_van_a` | `password123` | Bảng điều khiển PFM, Mục tiêu, Heo đất, Tỷ lệ tùy chọn, Chatbot |
+| **Quản trị viên (Admin)** | `admin` | `admin123` | Truy cập `/admin`, Thống kê toàn hệ thống, Quản trị user & Audit logs |
+| **Người dùng Test** | `demo` | `123` | Tài khoản Freelancer phụ |
 
 ---
 
-## 💡 Kịch bản Demo Ấn tượng khi Thuyết trình (Live Demo Walkthrough)
+## 💡 Kịch bản Demo Thuyết trình Chuẩn Chuyên gia FinTech
 
-1. **Bước 1 (Đăng nhập):** Giới thiệu trang đăng nhập chuyên nghiệp, bấm nút *Đăng nhập nhanh 1-chạm*.
-2. **Bước 2 (Tổng quan Dashboard):**
-   - Chỉ vào 4 thẻ chỉ số: Thu nhập 18.000.000đ, Chi tiêu 17.100.000đ (95% - vượt mức), Quỹ tiết kiệm chỉ còn 900.000đ (5% thay vì 20%).
-   - Giải thích **Điểm sức khỏe tài chính: 62/100 (Mức Cảnh báo)** do quỹ tiết kiệm quá mỏng và nhóm Mong muốn vượt chuẩn.
-3. **Bước 3 (2 Bẫy rò rỉ dòng tiền):**
-   - Rò rỉ Subscriptions: 3 gói dịch vụ trừ thẻ ngầm (Netflix, Spotify, iCloud).
-   - Rò rỉ Mua sắm đêm: 8 đơn hàng Shopee/TikTok/Ăn khuya sau 22h00 đêm tổng cộng hơn 2.7 triệu đồng.
-4. **Bước 4 (Biểu đồ 50/30/20 & Phác đồ hành động AI):**
-   - Biểu đồ tròn trực quan hóa sự chênh lệch so với chuẩn 50/30/20.
-   - Danh sách các khuyến nghị cụ thể bằng con số từ AI để bù đắp 2.7 triệu thiếu hụt.
-5. **Bước 5 (Đồng bộ Open Banking API):**
-   - Bấm nút **"Open Banking API"** trên thanh Navbar để mở Modal cấp quyền OAuth 2.0.
-   - Bấm **"Kết nối & Đồng bộ ngay"** để mô phỏng tiến trình tải dữ liệu thời gian thực.
-6. **Bước 6 (Tương tác Trợ lý ảo AI Chatbot):**
-   - Bấm vào biểu tượng Chatbot hình tròn ở góc phải bên dưới (hoặc icon Trợ lý AI ở thanh điều hướng đáy trên Mobile).
-   - Bấm các câu hỏi gợi ý nhanh:
-     - *"Chi tiêu ăn uống tháng này?"*
-     - *"Có khoản đăng ký ngầm nào đang trừ tiền không?"*
-     - *"Tại sao điểm sức khỏe tài chính của tôi lại thấp?"*
-     - *"Làm sao để tôi tiết kiệm thêm 2.7 triệu mỗi tháng?"*
-   - Chatbot sẽ phản hồi tức thì với dữ liệu phân tích chuẩn xác!
-7. **Bước 7 (Trình diễn Giao diện Mobile App):**
-   - Bấm nút **"📱 Chế độ App"** ngay trên thanh Navbar: Màn hình lập tức chuyển đổi thành **khung hình điện thoại Smartphone** (có Dynamic Island, thanh điều hướng dưới đáy Mobile Bottom Nav, bo góc chuẩn iOS/Android).
-   - Hoặc thu nhỏ cửa sổ trình duyệt / mở trên điện thoại thực tế: Hệ thống tự động kích hoạt giao diện Responsive dạng Native App hoàn hảo!
-
+1. **Đăng nhập & RBAC:**
+   - Đăng nhập tài khoản `nguyen_van_a` bằng nút 1-chạm.
+   - Thử gõ đường dẫn `http://127.0.0.1:5000/admin` ➔ Hệ thống tự động chặn và hiển thị cảnh báo từ chối truy cập do thiếu quyền Admin.
+2. **Dự báo Dòng tiền Cuối tháng (Tính năng 4):**
+   - Chỉ vào Banner dự báo màu đỏ/xanh: Burn rate bình quân/ngày, dự kiến ngày cạn ví và số tiền thâm hụt cuối tháng.
+3. **Mục tiêu Tài chính & Hũ Tích Lũy Số (Tính năng 2):**
+   - Xem các mục tiêu: Quỹ khẩn cấp 3 tháng, Mua Laptop AI, Du lịch Đà Lạt.
+   - Bấm **"+ Nạp thêm tiền tích lũy"** ➔ Nhập 1.000.000đ ➔ Xem thanh tiến độ % cập nhật realtime.
+   - Bấm **"+ Tạo Mục Tiêu Mới"** để tạo hũ tích lũy mới.
+4. **Tích lũy Tiền lẻ Heo Đất Micro-investing (Tính năng 3):**
+   - Bật/tắt toggle "Tự động gom tiền lẻ".
+   - Đổi mức làm tròn: 10.000đ hoặc 50.000đ.
+   - Bấm nút **"Chuyển tiền lẻ vào Mục tiêu"** để kích hoạt dòng tiền tiết kiệm.
+5. **Cơ cấu Ngân sách Tùy chọn (Tính năng 1):**
+   - Bấm nút **"Tỷ lệ Ngân sách"** trên Navbar.
+   - Chọn nhanh preset "Gia đình (60/20/20)" hoặc kéo thanh trượt ➔ Bấm "Lưu thiết lập" ➔ Điểm số và biểu đồ cập nhật ngay tức thì.
+6. **Hạn mức Chi tiêu Danh mục (Tính năng 5):**
+   - Xem bảng traffic light: Xanh (<80%), Vàng (80-99%), Đỏ (>100% Vượt mức).
+   - Bấm **"Cài đặt Hạn mức"** để điều chỉnh trần chi tiêu.
+7. **Trung tâm Quản trị Quyền & Consent (Tính năng 6):**
+   - Bấm nút **"Quyền & Consent"** trên Navbar.
+   - Xem thông tin tuân thủ **Nghị định 13/2023/NĐ-CP**.
+   - Bật/tắt từng quyền (Xem số dư, Lịch sử, AI PFM) hoặc bấm **"Thu hồi quyền truy cập (Revoke Consent)"**.
+8. **Trợ lý AI Chatbot:**
+   - Mở chatbot ở góc dưới bên phải.
+   - Bấm các gợi ý: *"Dự báo dòng tiền cuối tháng thế nào?"*, *"Tiền lẻ tích lũy Heo đất?"*, *"Tiến độ mục tiêu tài chính?"*.
+9. **Trang Quản trị Admin (Tính năng 7):**
+   - Đăng xuất và đăng nhập tài khoản `admin` / `admin123`.
+   - Xem KPIs toàn hệ thống, 2 biểu đồ phân bố ngân hàng và sức khỏe tài chính.
+   - Xem bảng Quản lý Người dùng (đổi role, reset mật khẩu, khóa tài khoản).
+   - Xem bảng Nhật ký Hệ thống (Audit Logs) ghi nhận đầy đủ mọi thao tác vừa thực hiện.

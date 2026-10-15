@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <title>Hệ thống Quản trị FinLab (Admin Enterprise Portal)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0b0f19; color: #f8fafc; }
+        .admin-nav {
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            padding: 0.85rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffffff;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .admin-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.75rem;
+        }
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 0.85rem;
+        }
+        .admin-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .admin-stat-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        .admin-stat-card.primary::before { background: #3b82f6; }
+        .admin-stat-card.success::before { background: #10b981; }
+        .admin-stat-card.purple::before { background: #8b5cf6; }
+        .admin-stat-card.amber::before { background: #f59e0b; }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .admin-table th {
+            background: #1e293b;
+            color: #94a3b8;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #334155;
+        }
+        .admin-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #1f2937;
+            color: #e2e8f0;
+        }
+        .admin-table tr:hover td {
+            background: #172033;
+        }
+        .btn-action-sm {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-role-toggle {
+            background: #312e81;
+            color: #c7d2fe;
+            border: 1px solid #4338ca;
+        }
+        .btn-role-toggle:hover {
+            background: #4338ca;
+            color: #ffffff;
+        }
+        .btn-pwd-reset {
+            background: #374151;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+        }
+        .btn-pwd-reset:hover {
+            background: #4b5563;
+        }
+        .btn-status-toggle {
+            background: #7f1d1d;
+            color: #fecaca;
+            border: 1px solid #991b1b;
+        }
+        .btn-status-toggle.active-btn {
+            background: #064e3b;
+            color: #a7f3d0;
+            border: 1px solid #065f46;
+        }
+        .btn-return-pfm {
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .btn-return-pfm:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Navbar -->
+    <nav class="admin-nav">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/admin" class="admin-brand">
+                <div class="brand-icon" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                    <i class="fa-solid fa-server"></i>
+                </div>
+                <div>
+                    <span class="brand-name" style="-webkit-text-fill-color: #ffffff;">FinLab Admin</span>
+                    <span class="brand-tag" style="color: #94a3b8;">Hệ thống Quản trị &amp; Giám sát Open Banking</span>
+                </div>
+            </a>
+            <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Root Admin</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/" class="btn-return-pfm">
+                <i class="fa-solid fa-arrow-left"></i> Về Giao diện Người dùng (PFM)
+            </a>
+
+            <div style="display: flex; align-items: center; gap: 0.6rem; background: #1e293b; padding: 0.35rem 0.8rem; border-radius: 9999px; border: 1px solid #334155;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.8rem;">
+                    A
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: #f1f5f9;">{{ admin_user.full_name }}</div>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="btn-logout" title="Đăng xuất" style="background: #374151; color: #f87171;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Admin Container -->
+    <div class="container" style="padding-top: 1.5rem; max-width: 1300px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff;">Trung tâm Kiểm soát &amp; Quản trị FinLab Enterprise</h1>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">Giám sát API Open Banking, phân quyền RBAC và kiểm toán nhật ký an ninh theo Nghị định 13/2023/NĐ-CP</p>
+            </div>
+            <div>
+                <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+                    Hệ thống hoạt động bình thường (99.98% Uptime)
+                </span>
+            </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div class="admin-stats-grid">
+            <div class="admin-stat-card primary">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;">Người dùng đăng ký</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0.35rem 0;">{{ total_users }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">tài khoản</span></div>
+                    </div>
+                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #10b981; display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fa-solid fa-shield-check"></i> Phân quyền RBAC chủ động
+                </div>
+            </div>
+
+            <div class="admin-stat-card success">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;">Ngân hàng liên kết</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0.35rem 0;">{{ total_connected_banks }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">kết nối AIS</span></div>
+                    </div>
+                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #60a5fa; display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fa-solid fa-check-double"></i> Open API v2.1 (TT 64/2024)
+                </div>
+            </div>
+
+            <div class="admin-stat-card purple">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;">Khối lượng giao dịch</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0.35rem 0;">{{ "{:,.0f}".format(total_volume) }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">VNĐ</span></div>
+                    </div>
+                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(139, 92, 246, 0.15); color: #c084fc; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #c084fc; display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fa-solid fa-bolt"></i> Xử lý qua NLP Tokenizer AI
+                </div>
+            </div>
+
+            <div class="admin-stat-card amber">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="color: #94a3b8; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;">Số lượng giao dịch</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0.35rem 0;">{{ total_txns }} <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">giao dịch</span></div>
+                    </div>
+                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #fbbf24; display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fa-solid fa-lock"></i> Đã mã hóa bảo mật E2EE
+                </div>
+            </div>
+        </div>
+
+        <!-- 2 Charts Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Chart 1: Ngân hàng liên kết -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-title">
+                        <i class="fa-solid fa-chart-pie" style="color: #3b82f6;"></i>
+                        Tỷ lệ Phân bố Người dùng theo Ngân hàng
+                    </div>
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Open API Gateway</span>
+                </div>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="adminBankChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Phân bố sức khỏe tài chính -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-title">
+                        <i class="fa-solid fa-heart-pulse" style="color: #10b981;"></i>
+                        Phân bố Mức độ Sức khỏe Tài chính Hệ thống
+                    </div>
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Financial Health Index</span>
+                </div>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="adminHealthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Bảng Quản lý Người dùng -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">
+                    <i class="fa-solid fa-user-shield" style="color: #8b5cf6;"></i>
+                    Quản lý Danh sách Người dùng &amp; Phân quyền RBAC
+                </div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">
+                    Tổng: <strong>{{ users|length }}</strong> người dùng
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Họ và Tên</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Vai trò (Role)</th>
+                            <th>Thu nhập</th>
+                            <th>Ngân hàng liên kết</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align: right;">Thao tác quản trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr id="row-user-{{ u.id }}">
+                            <td style="font-family: monospace; color: #94a3b8;">{{ u.id }}</td>
+                            <td style="font-weight: 600; color: #ffffff;">{{ u.full_name }}</td>
+                            <td><span style="background: #1e293b; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: monospace;">{{ u.username }}</span></td>
+                            <td>
+                                {% if u.role == 'admin' %}
+                                <span style="background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid #8b5cf6; padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">
+                                    <i class="fa-solid fa-shield"></i> ADMIN
+                                </span>
+                                {% else %}
+                                <span style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6; padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">
+                                    USER
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ "{:,.0f}".format(u.monthly_income) }}đ</td>
+                            <td>
+                                <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+                                    {% for b in u.connected_banks %}
+                                    <span style="background: #1e293b; color: #cbd5e1; font-size: 0.72rem; padding: 0.15rem 0.4rem; border-radius: 4px;">{{ b }}</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if u.status == 'ACTIVE' %}
+                                <span style="color: #34d399; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Hoạt động
+                                </span>
+                                {% else %}
+                                <span style="color: #f87171; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #ef4444;"></span> Đã khóa
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 0.4rem;">
+                                    {% set next_role = 'user' if u.role == 'admin' else 'admin' %}
+                                    <button class="btn-action-sm btn-role-toggle" onclick="toggleRole('{{ u.id }}', '{{ next_role }}')">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Đổi sang {{ 'User' if u.role == 'admin' else 'Admin' }}
+                                    </button>
+                                    <button class="btn-action-sm btn-pwd-reset" onclick="resetPassword('{{ u.id }}', '{{ u.username }}')">
+                                        <i class="fa-solid fa-key"></i> Đặt lại MK
+                                    </button>
+                                    <button class="btn-action-sm btn-status-toggle {{ 'active-btn' if u.status != 'ACTIVE' else '' }}" onclick="toggleStatus('{{ u.id }}')">
+                                        <i class="fa-solid {{ 'fa-lock-open' if u.status != 'ACTIVE' else 'fa-lock' }}"></i>
+                                        {{ 'Mở khóa' if u.status != 'ACTIVE' else 'Khóa' }}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 4: Bảng Nhật ký Hệ thống (Audit Logs) -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-title">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: #f59e0b;"></i>
+                    Nhật ký An ninh &amp; Tuân thủ Hệ thống (Audit Logs)
+                </div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">
+                    Tuân thủ <strong>Nghị định 13/2023/NĐ-CP</strong> về Bảo vệ Dữ liệu Cá nhân
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Tài khoản</th>
+                            <th>Hành động (Sự kiện)</th>
+                            <th>Chi tiết nhật ký</th>
+                            <th>Địa chỉ IP</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td style="color: #94a3b8; font-family: monospace; white-space: nowrap;">{{ log.timestamp }}</td>
+                            <td>
+                                <span style="font-weight: 600; color: #60a5fa;">{{ log.username }}</span>
+                            </td>
+                            <td>
+                                <span style="background: #1e293b; color: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-family: monospace; font-weight: 700;">
+                                    {{ log.action }}
+                                </span>
+                            </td>
+                            <td style="color: #cbd5e1; max-width: 450px;">{{ log.details }}</td>
+                            <td style="font-family: monospace; color: #94a3b8;">{{ log.ip }}</td>
+                            <td>
+                                {% if log.status == 'SUCCESS' %}
+                                <span style="color: #34d399; font-weight: 700; font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SUCCESS</span>
+                                {% elif log.status == 'WARNING' %}
+                                <span style="color: #fbbf24; font-weight: 700; font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i> WARNING</span>
+                                {% else %}
+                                <span style="color: #f87171; font-weight: 700; font-size: 0.75rem;"><i class="fa-solid fa-xmark"></i> FAILED</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embedded Data for Charts -->
+    <script type="application/json" id="admin-bank-data">
+        {{ bank_counts | tojson }}
+    </script>
+    <script type="application/json" id="admin-health-data">
+        {{ health_distribution | tojson }}
+    </script>
+
+    <script>
+        const bankData = JSON.parse(document.getElementById('admin-bank-data')?.textContent || '{}');
+        const healthData = JSON.parse(document.getElementById('admin-health-data')?.textContent || '{}');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chart 1: Bank Distribution
+            const ctxBank = document.getElementById('adminBankChart');
+            if (ctxBank) {
+                new Chart(ctxBank, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(bankData),
+                        datasets: [{
+                            data: Object.values(bankData),
+                            backgroundColor: ['#006837', '#E31B23', '#002060', '#f59e0b'],
+                            borderWidth: 2,
+                            borderColor: '#111827'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#94a3b8', font: { size: 12 } }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            // Chart 2: Health Distribution
+            const ctxHealth = document.getElementById('adminHealthChart');
+            if (ctxHealth) {
+                new Chart(ctxHealth, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Khỏe mạnh (>80đ)', 'Cảnh báo (50-79đ)', 'Báo động (<50đ)'],
+                        datasets: [{
+                            label: 'Số lượng người dùng',
+                            data: [healthData.healthy || 0, healthData.warning || 0, healthData.danger || 0],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, color: '#94a3b8' },
+                                grid: { color: '#1f2937' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // Admin Action handlers
+        async function toggleRole(userId, newRole) {
+            if (!confirm(`Bạn có chắc muốn đổi vai trò của người dùng này sang '${newRole}'?`)) return;
+            try {
+                const res = await fetch(`/api/admin/user/${userId}/role`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: newRole })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Lỗi đổi role!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối máy chủ!');
+            }
+        }
+
+        async function resetPassword(userId, username) {
+            const newPwd = prompt(`Nhập mật khẩu mới cho tài khoản '${username}':`, 'password123');
+            if (!newPwd) return;
+            try {
+                const res = await fetch(`/api/admin/user/${userId}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: newPwd })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                } else {
+                    alert(result.message || 'Lỗi đặt lại mật khẩu!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối máy chủ!');
+            }
+        }
+
+        async function toggleStatus(userId) {
+            if (!confirm(`Bạn có chắc muốn thay đổi trạng thái hoạt động của tài khoản này?`)) return;
+            try {
+                const res = await fetch(`/api/admin/user/${userId}/toggle-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Lỗi đổi trạng thái!');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối máy chủ!');
+            }
+        }
+    </script>
+</body>
+</html>

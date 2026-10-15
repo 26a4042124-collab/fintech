@@ -1,0 +1,237 @@
+[
+  {
+    "id": "cat_income_salary",
+    "name": "Thu nhập tiền lương",
+    "type": "INCOME",
+    "bucket": "INCOME",
+    "icon": "fa-wallet",
+    "color": "#10b981",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "LUONG",
+      "THUONG",
+      "CHUYEN LUONG",
+      "SALARY",
+      "BONUS",
+      "THU NHAP"
+    ]
+  },
+  {
+    "id": "cat_income_bonus",
+    "name": "Thưởng & Thu nhập ngoài",
+    "type": "INCOME",
+    "bucket": "INCOME",
+    "icon": "fa-gift",
+    "color": "#14b8a6",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "THUONG DU AN",
+      "HOAN TIEN",
+      "CASHBACK",
+      "LAI TIET KIEM"
+    ]
+  },
+  {
+    "id": "cat_needs_housing",
+    "name": "Nhà ở & Hóa đơn tiện ích",
+    "type": "EXPENSE",
+    "bucket": "NEEDS",
+    "icon": "fa-house",
+    "color": "#3b82f6",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "THUE NHA",
+      "TIEN DIEN",
+      "EVN",
+      "NUOC SACH",
+      "INTERNET",
+      "VNPT",
+      "VIETTEL",
+      "FPT",
+      "DIEN THOAI TRA SAU"
+    ]
+  },
+  {
+    "id": "cat_needs_food",
+    "name": "Thực phẩm & Đi chợ",
+    "type": "EXPENSE",
+    "bucket": "NEEDS",
+    "icon": "fa-basket-shopping",
+    "color": "#06b6d4",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "WINMART",
+      "COOPMART",
+      "BACH HOA XANH",
+      "THUC PHAM",
+      "SIEU THI",
+      "CHO "
+    ]
+  },
+  {
+    "id": "cat_needs_transport",
+    "name": "Đi lại & Xăng xe",
+    "type": "EXPENSE",
+    "bucket": "NEEDS",
+    "icon": "fa-motorcycle",
+    "color": "#64748b",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "GRAB",
+      "BE CAR",
+      "BE BIKE",
+      "XANH SM",
+      "PETROLIMEX",
+      "XANG",
+      "GUI XE"
+    ]
+  },
+  {
+    "id": "cat_needs_healthcare",
+    "name": "Y tế & Giáo dục",
+    "type": "EXPENSE",
+    "bucket": "NEEDS",
+    "icon": "fa-heart-pulse",
+    "color": "#ef4444",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "PHARMACITY",
+      "LONG CHAU",
+      "BENH VIEN",
+      "KHAM BENH",
+      "THUOC",
+      "KHOA HOC",
+      "TIENG ANH",
+      "HOC PHI"
+    ]
+  },
+  {
+    "id": "cat_wants_dining",
+    "name": "Ăn uống & Cà phê ngoài",
+    "type": "EXPENSE",
+    "bucket": "WANTS",
+    "icon": "fa-utensils",
+    "color": "#f59e0b",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "HIGHLANDS",
+      "PHUC LONG",
+      "THE COFFEE HOUSE",
+      "COM TRUA",
+      "BUN CHA",
+      "COM TAM",
+      "PHO BO",
+      "BUN DAU",
+      "LAU MANWAH",
+      "GRABFOOD",
+      "SHOPEEFOOD"
+    ]
+  },
+  {
+    "id": "cat_wants_shopping",
+    "name": "Mua sắm cá nhân",
+    "type": "EXPENSE",
+    "bucket": "WANTS",
+    "icon": "fa-bag-shopping",
+    "color": "#ec4899",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "SHOPEE",
+      "TIKTOK SHOP",
+      "LAZADA",
+      "THOI TRANG",
+      "MY PHAM",
+      "TAI NGHE",
+      "GIAY"
+    ]
+  },
+  {
+    "id": "cat_wants_subscription",
+    "name": "Dịch vụ số định kỳ (Subscription)",
+    "type": "EXPENSE",
+    "bucket": "WANTS",
+    "icon": "fa-repeat",
+    "color": "#8b5cf6",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "NETFLIX",
+      "SPOTIFY",
+      "APPLE.COM/BILL",
+      "ICLOUD",
+      "YOUTUBE",
+      "CHATGPT",
+      "GYM"
+    ]
+  },
+  {
+    "id": "cat_wants_entertainment",
+    "name": "Giải trí & Phim ảnh",
+    "type": "EXPENSE",
+    "bucket": "WANTS",
+    "icon": "fa-film",
+    "color": "#f97316",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "CGV",
+      "LOTTE CINEMA",
+      "KARAOKE",
+      "VE XEM PHIM",
+      "DU LICH"
+    ]
+  },
+  {
+    "id": "cat_savings_investment",
+    "name": "Tiết kiệm & Tích sản",
+    "type": "EXPENSE",
+    "bucket": "SAVINGS",
+    "icon": "fa-piggy-bank",
+    "color": "#10b981",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "TIET KIEM",
+      "TICH LUY",
+      "CHUNG CHI QUY",
+      "DAU TU",
+      "SAVINGS"
+    ]
+  },
+  {
+    "id": "cat_wants_other",
+    "name": "Chi tiêu khác",
+    "type": "EXPENSE",
+    "bucket": "WANTS",
+    "icon": "fa-receipt",
+    "color": "#94a3b8",
+    "is_default": true,
+    "is_hidden": false,
+    "keywords": [
+      "RUT TIEN",
+      "CHUYEN KHOAN",
+      "PHI DICH VU"
+    ]
+  },
+  {
+    "id": "cat_custom_249792",
+    "name": "Bảo hiểm nhân thọ",
+    "type": "EXPENSE",
+    "bucket": "NEEDS",
+    "icon": "fa-shield",
+    "color": "#3b82f6",
+    "is_default": false,
+    "is_hidden": true,
+    "keywords": [
+      "BAO HIEM"
+    ]
+  }
+]
