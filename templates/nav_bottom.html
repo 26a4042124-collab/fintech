@@ -1,0 +1,30 @@
+<!-- Component Bottom Navigation chuẩn Mobile App -->
+<nav class="bottom-nav">
+  <a href="{{ url_for('dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+    <i class="fa-solid fa-house"></i>
+    <span>Trang chủ</span>
+  </a>
+  
+  <a href="{{ url_for('transactions') }}" class="nav-item {% if active_page == 'transactions' %}active{% endif %}">
+    <i class="fa-solid fa-receipt"></i>
+    <span>Giao dịch</span>
+  </a>
+
+  <!-- Nút tròn nổi ở giữa: Thêm giao dịch -->
+  <a href="{{ url_for('add_transaction') }}" class="nav-item-center {% if active_page == 'add_transaction' %}active{% endif %}" title="Ghi chép chi tiêu">
+    <div class="nav-center-btn">
+      <i class="fa-solid fa-plus"></i>
+    </div>
+    <span>Ghi chép</span>
+  </a>
+
+  <a href="{{ url_for('budgets') }}" class="nav-item {% if active_page == 'budgets' %}active{% endif %}">
+    <i class="fa-solid fa-chart-pie"></i>
+    <span>Ngân sách</span>
+  </a>
+
+  <a href="{{ url_for('wallets') }}" class="nav-item {% if active_page == 'wallets' %}active{% endif %}">
+    <i class="fa-solid fa-wallet"></i>
+    <span>Ví &amp; Thẻ</span>
+  </a>
+</nav>

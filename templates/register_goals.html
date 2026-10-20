@@ -2,10 +2,12 @@
 {% block title %}Mục tiêu tài chính{% endblock %}
 {% block body %}
 <div class="auth-wrapper">
+  <!-- Blobs -->
   <div class="blob blob-orange"></div>
-  <div class="blob blob-gold"></div>
+  <div class="blob blob-orange-2"></div>
 
-  <div class="status-bar">
+  <!-- Status Bar -->
+  <div class="auth-status-bar">
     <span>12:00</span>
     <div class="status-bar-right">
       <i class="fa-solid fa-signal"></i>
@@ -14,55 +16,77 @@
     </div>
   </div>
 
-  <div class="auth-header">
-    <a href="{{ url_for('register_create') }}" class="auth-back"><i class="fa-solid fa-arrow-left"></i></a>
-    <h1 class="auth-title">Mục tiêu tài chính 🎯</h1>
-    <p class="auth-subtitle">Chọn những gì bạn muốn đạt được.<br>AI sẽ cá nhân hóa lời khuyên cho bạn.</p>
+  <!-- Heading -->
+  <div class="auth-heading" style="padding-top:24px;">
+    <h1 class="auth-title">Mục tiêu tài chính<br><span class="highlight">hiện tại của bạn?</span></h1>
+    <p class="auth-subtitle">Chọn mục tiêu tài chính hiện tại của bạn. Bạn vẫn có thể khám phá các chức năng khác bất cứ lúc nào!</p>
   </div>
 
+  <!-- Form Body -->
   <div class="auth-body">
     {% if error %}
     <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
     {% endif %}
 
     <form method="POST" action="{{ url_for('register_goals') }}" id="goals-form">
-      <div class="goals-grid">
-        {% set goal_list = [
-          ("saving",    "💰", "Tiết kiệm",      "rgba(255,107,53,0.15)",  "#FF6B35"),
-          ("invest",    "📈", "Đầu tư",         "rgba(34,197,94,0.15)",   "#22c55e"),
-          ("control",   "🛡️", "Kiểm soát\nchi tiêu", "rgba(59,130,246,0.15)", "#3b82f6"),
-          ("debt",      "💳", "Trả nợ",         "rgba(239,68,68,0.15)",   "#ef4444"),
-          ("house",     "🏠", "Mua nhà / xe",   "rgba(168,85,247,0.15)",  "#a855f7"),
-          ("travel",    "✈️", "Du lịch",        "rgba(255,215,0,0.15)",   "#FFD700"),
-        ] %}
-        {% for val, icon, label, bg, color in goal_list %}
-        <label class="goal-card" id="gc-{{ val }}">
-          <input type="checkbox" name="goals" value="{{ val }}"
-                 onchange="toggleGoalCard('gc-{{ val }}', this)">
-          <div class="goal-card-icon" style="background:{{ bg }}; color:{{ color }}; font-size:24px;">
-            {{ icon }}
-          </div>
-          <div class="goal-card-label">{{ label }}</div>
+      <div class="goals-list">
+        <!-- Ghi chép thu chi -->
+        <label class="goal-item" id="gi-record" onclick="toggleGoalItem('gi-record', this.querySelector('input'))">
+          <input type="checkbox" name="goals" value="record">
+          <div class="goal-item-icon">💼</div>
+          <div class="goal-item-label">Ghi chép các khoản thu, chi</div>
         </label>
-        {% endfor %}
+
+        <!-- Theo dõi vay nợ -->
+        <label class="goal-item" id="gi-debt" onclick="toggleGoalItem('gi-debt', this.querySelector('input'))">
+          <input type="checkbox" name="goals" value="debt">
+          <div class="goal-item-icon">💸</div>
+          <div class="goal-item-label">Theo dõi các khoản vay nợ cá nhân</div>
+        </label>
+
+        <!-- Cắt giảm chi tiêu -->
+        <label class="goal-item" id="gi-control" onclick="toggleGoalItem('gi-control', this.querySelector('input'))">
+          <input type="checkbox" name="goals" value="control">
+          <div class="goal-item-icon">📅</div>
+          <div class="goal-item-label">Cắt giảm chi tiêu</div>
+        </label>
+
+        <!-- Tiết kiệm -->
+        <label class="goal-item" id="gi-saving" onclick="toggleGoalItem('gi-saving', this.querySelector('input'))">
+          <input type="checkbox" name="goals" value="saving">
+          <div class="goal-item-icon">🎯</div>
+          <div class="goal-item-label">Tiết kiệm</div>
+        </label>
+
+        <!-- Quản lý tiền mọi nơi -->
+        <label class="goal-item" id="gi-manage" onclick="toggleGoalItem('gi-manage', this.querySelector('input'))">
+          <input type="checkbox" name="goals" value="manage">
+          <div class="goal-item-icon">💰</div>
+          <div class="goal-item-label">Quản lý tiền ở mọi nơi</div>
+        </label>
       </div>
 
-      <button type="submit" class="btn-primary">
-        Bắt đầu hành trình <i class="fa-solid fa-rocket"></i>
-      </button>
+      <button type="submit" class="btn-primary">Tiếp tục</button>
     </form>
   </div>
+
+  <!-- Bottom indicator -->
+  <div style="height:28px;"></div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
-function toggleGoalCard(cardId, checkbox) {
+function toggleGoalItem(cardId, checkbox) {
   const card = document.getElementById(cardId);
-  if (checkbox.checked) {
-    card.classList.add('selected');
-  } else {
-    card.classList.remove('selected');
-  }
+  // Prevent double-toggle since label click already toggles checkbox
+  // We read the state after toggle
+  setTimeout(() => {
+    if (checkbox.checked) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  }, 10);
 }
 </script>
 {% endblock %}

@@ -3,20 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0f">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FFF8F5">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <title>{% block title %}FinLab{% endblock %} — Quản lý Tài chính AI</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>{% block title %}FinLab{% endblock %} — Quản lý Tài chính</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   {% block extra_head %}{% endblock %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-  {% block body %}{% endblock %}
+<body class="phone-mockup-body">
+  
+  <!-- Desktop Ambient Control Bar -->
+  <aside class="desktop-app-toolbar">
+    <div class="toolbar-brand">
+      <span class="toolbar-logo-icon">🧪</span>
+      <span class="toolbar-app-name">FIN<span>LAB</span> <small>MOBILE APP</small></span>
+    </div>
+    <div class="toolbar-actions">
+      <button class="toolbar-btn active" id="btn-mode-phone" title="Chế độ App Chuẩn (iPhone 16 Pro)"><i class="fa-solid fa-mobile-screen"></i> <span>Chế độ App</span></button>
+      <button class="toolbar-btn" id="btn-mode-max" title="Kích thước Lớn"><i class="fa-solid fa-mobile"></i> <span>Màn hình lớn</span></button>
+      <button class="toolbar-btn" id="btn-mode-fullscreen" title="Toàn màn hình"><i class="fa-solid fa-expand"></i> <span>Toàn màn hình</span></button>
+    </div>
+    <div class="toolbar-hint">
+      <span class="live-clock-badge"><i class="fa-regular fa-clock"></i> <span id="desktop-clock">--:--</span></span>
+    </div>
+  </aside>
+
+  <!-- Device Studio Stage -->
+  <div class="device-studio-stage">
+    
+    <!-- Phone Mockup Frame -->
+    <div class="phone-mockup-container" id="phone-container">
+      
+      <!-- Hardware Buttons (External Bezel) -->
+      <div class="hardware-btn hw-action" title="Nút Tác vụ"></div>
+      <div class="hardware-btn hw-vol-up" title="Tăng âm lượng"></div>
+      <div class="hardware-btn hw-vol-down" title="Giảm âm lượng"></div>
+      <div class="hardware-btn hw-power" title="Nút Nguồn"></div>
+
+      <!-- Phone Outer Bezel -->
+      <div class="phone-device-bezel">
+        
+        <!-- Dynamic Island Cutout -->
+        <div class="dynamic-island-cutout">
+          <div class="di-camera"></div>
+          <div class="di-sensor"></div>
+        </div>
+
+        <!-- Phone Inner Viewport (Contains all app pages) -->
+        <main class="phone-app-viewport" id="app-viewport">
+          {% block body %}{% endblock %}
+        </main>
+
+        <!-- iOS Home Indicator bar at the bottom -->
+        <div class="phone-home-indicator"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Realtime Clock Synchronizer
+    function syncRealtimeClocks() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hh}:${mm}`;
+      
+      const deskEl = document.getElementById('desktop-clock');
+      if (deskEl) deskEl.textContent = timeStr;
+      
+      document.querySelectorAll('.status-bar span:first-child, .auth-status-bar span:first-child').forEach(el => {
+        el.textContent = timeStr;
+      });
+    }
+    setInterval(syncRealtimeClocks, 1000);
+    syncRealtimeClocks();
+
+    // Viewport Mode Toggles
+    const phoneContainer = document.getElementById('phone-container');
+    const btnPhone = document.getElementById('btn-mode-phone');
+    const btnMax = document.getElementById('btn-mode-max');
+    const btnFull = document.getElementById('btn-mode-fullscreen');
+
+    if (btnPhone && phoneContainer) {
+      btnPhone.addEventListener('click', () => {
+        phoneContainer.className = 'phone-mockup-container';
+        btnPhone.classList.add('active');
+        if (btnMax) btnMax.classList.remove('active');
+        if (btnFull) btnFull.classList.remove('active');
+      });
+      if (btnMax) {
+        btnMax.addEventListener('click', () => {
+          phoneContainer.className = 'phone-mockup-container phone-size-max';
+          btnMax.classList.add('active');
+          btnPhone.classList.remove('active');
+          if (btnFull) btnFull.classList.remove('active');
+        });
+      }
+      if (btnFull) {
+        btnFull.addEventListener('click', () => {
+          phoneContainer.className = 'phone-mockup-container phone-size-fullscreen';
+          btnFull.classList.add('active');
+          btnPhone.classList.remove('active');
+          if (btnMax) btnMax.classList.remove('active');
+        });
+      }
+    }
+  </script>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>

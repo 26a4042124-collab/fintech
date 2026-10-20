@@ -124,14 +124,12 @@ def compute_financial_health(enriched_transactions, total_income=18000000):
         "subscription_leaks": {
             "count": len(subscription_items),
             "total_amount": total_sub_leak,
-            "items": subscription_items,
-            "items_list": subscription_items
+            "list": subscription_items
         },
         "impulse_night_spending": {
             "count": len(night_impulse_items),
             "total_amount": total_night_impulse,
-            "items": night_impulse_items,
-            "items_list": night_impulse_items
+            "list": night_impulse_items
         },
         "category_breakdown": category_breakdown,
         "recommendations": recommendations,

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Giao dịch{% endblock %}
 {% block body %}
+{% set active_page = 'transactions' %}
 <div class="app-wrapper">
   <div class="blob blob-orange" style="opacity:0.10;"></div>
 
@@ -14,7 +15,7 @@
   <div class="top-bar">
     <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
     <div class="top-bar-title">Lịch sử giao dịch</div>
-    <div class="top-bar-action"><i class="fa-solid fa-sliders"></i></div>
+    <a href="{{ url_for('add_transaction') }}" class="top-bar-action" title="Ghi chép mới" style="text-decoration:none;"><i class="fa-solid fa-plus text-accent"></i></a>
   </div>
 
   <div class="page-content">
@@ -93,13 +94,7 @@
     </div>
   </div>
 
-  <nav class="bottom-nav">
-    <a href="{{ url_for('dashboard') }}" class="nav-item"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
-    <a href="{{ url_for('transactions') }}" class="nav-item active"><i class="fa-solid fa-receipt"></i><span>Giao dịch</span></a>
-    <a href="{{ url_for('analytics') }}" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Phân tích</span></a>
-    <a href="{{ url_for('goals') }}" class="nav-item"><i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span></a>
-    <a href="{{ url_for('profile') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Cá nhân</span></a>
-  </nav>
+  {% include "nav_bottom.html" %}
 </div>
 {% endblock %}
 
@@ -134,5 +129,16 @@ filterBtns.forEach(btn => {
   });
 });
 searchInput.addEventListener('input', filterTxns);
+
+// Toast notification if transaction added
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('added') === '1') {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-success show';
+  toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Ghi nhận giao dịch thành công!</span>';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
 </script>
 {% endblock %}

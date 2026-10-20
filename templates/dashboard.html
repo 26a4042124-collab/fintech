@@ -3,6 +3,7 @@
 {% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
 
 {% block body %}
+{% set active_page = 'dashboard' %}
 <div class="app-wrapper">
   <div class="blob blob-orange" style="opacity:0.15;"></div>
   <div class="blob blob-orange-2" style="opacity:0.10;"></div>
@@ -19,18 +20,24 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div style="width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:white;box-shadow:0 4px 14px rgba(255,107,53,0.35);">
+    <a href="{{ url_for('profile') }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+      <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;box-shadow:0 4px 12px rgba(255,107,53,0.35);">
         {{ user.full_name[0] }}
       </div>
       <div>
-        <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Xin chào 👋</div>
-        <div style="font-size:15px;font-weight:800;">{{ user.full_name }}</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;">Xin chào 👋</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text-primary);">{{ user.full_name }}</div>
       </div>
+    </a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="{{ url_for('notifications') }}" class="top-bar-action" style="position:relative;text-decoration:none;" title="Thông báo">
+        <i class="fa-solid fa-bell" style="color:var(--text-secondary);font-size:15px;"></i>
+        <span style="position:absolute;top:6px;right:7px;width:7px;height:7px;background:var(--accent);border-radius:50%;"></span>
+      </a>
+      <button class="top-bar-action" id="chatbot-fab-top" title="Trợ lý AI">
+        <i class="fa-solid fa-robot" style="color:var(--accent);"></i>
+      </button>
     </div>
-    <button class="top-bar-action" id="chatbot-fab-top" title="Trợ lý AI">
-      <i class="fa-solid fa-robot" style="color:var(--accent);"></i>
-    </button>
   </div>
 
   <!-- Page Content -->
@@ -62,23 +69,23 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="quick-actions">
+    <div class="quick-actions" style="grid-template-columns: repeat(4, 1fr);">
+      <a href="{{ url_for('add_transaction') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon accent"><i class="fa-solid fa-plus"></i></div>
+        <div class="qa-label">Ghi chép</div>
+      </a>
+      <a href="{{ url_for('wallets') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon"><i class="fa-solid fa-wallet"></i></div>
+        <div class="qa-label">Ví &amp; Thẻ</div>
+      </a>
+      <a href="{{ url_for('budgets') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon"><i class="fa-solid fa-sliders"></i></div>
+        <div class="qa-label">Ngân sách</div>
+      </a>
       <div class="quick-action" onclick="document.getElementById('modal-bank').classList.add('open')">
-        <div class="qa-icon accent"><i class="fa-solid fa-building-columns"></i></div>
+        <div class="qa-icon"><i class="fa-solid fa-building-columns"></i></div>
         <div class="qa-label">Ngân hàng</div>
       </div>
-      <a href="{{ url_for('transactions') }}" class="quick-action" style="text-decoration:none;">
-        <div class="qa-icon"><i class="fa-solid fa-receipt"></i></div>
-        <div class="qa-label">Giao dịch</div>
-      </a>
-      <a href="{{ url_for('analytics') }}" class="quick-action" style="text-decoration:none;">
-        <div class="qa-icon"><i class="fa-solid fa-chart-pie"></i></div>
-        <div class="qa-label">Phân tích</div>
-      </a>
-      <a href="{{ url_for('goals') }}" class="quick-action" style="text-decoration:none;">
-        <div class="qa-icon"><i class="fa-solid fa-bullseye"></i></div>
-        <div class="qa-label">Mục tiêu</div>
-      </a>
     </div>
 
     <!-- Health Score -->
@@ -117,10 +124,10 @@
       <div class="leak-icon leak-icon-danger"><i class="fa-solid fa-repeat"></i></div>
       <div class="leak-body">
         <div class="leak-title">Dịch vụ số tự động (Subscriptions)</div>
-        <div class="leak-desc">AI phát hiện {{ health.subscription_leaks.items | length }} dịch vụ định kỳ trừ thẻ ngầm</div>
+        <div class="leak-desc">AI phát hiện {{ health.subscription_leaks.count }} dịch vụ định kỳ trừ thẻ ngầm</div>
         <div class="leak-amount">-{{ "{:,.0f}".format(health.subscription_leaks.total_amount) }}đ/tháng</div>
         <div class="leak-tags">
-          {% for sub in health.subscription_leaks.items %}
+          {% for sub in health.subscription_leaks.list %}
           <span class="leak-tag">{{ sub.merchant[:16] }}</span>
           {% endfor %}
         </div>
@@ -179,23 +186,7 @@
   </div><!-- /page-content -->
 
   <!-- Bottom Nav -->
-  <nav class="bottom-nav">
-    <a href="{{ url_for('dashboard') }}" class="nav-item active">
-      <i class="fa-solid fa-house"></i><span>Trang chủ</span>
-    </a>
-    <a href="{{ url_for('transactions') }}" class="nav-item">
-      <i class="fa-solid fa-receipt"></i><span>Giao dịch</span>
-    </a>
-    <a href="{{ url_for('analytics') }}" class="nav-item">
-      <i class="fa-solid fa-chart-pie"></i><span>Phân tích</span>
-    </a>
-    <a href="{{ url_for('goals') }}" class="nav-item">
-      <i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span>
-    </a>
-    <a href="{{ url_for('profile') }}" class="nav-item">
-      <i class="fa-solid fa-user"></i><span>Cá nhân</span>
-    </a>
-  </nav>
+  {% include "nav_bottom.html" %}
 
   <!-- Chatbot FAB -->
   <button class="chatbot-fab" id="chatbot-trigger">

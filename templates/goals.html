@@ -89,13 +89,7 @@
     </div>
   </div>
 
-  <nav class="bottom-nav">
-    <a href="{{ url_for('dashboard') }}" class="nav-item"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
-    <a href="{{ url_for('transactions') }}" class="nav-item"><i class="fa-solid fa-receipt"></i><span>Giao dịch</span></a>
-    <a href="{{ url_for('analytics') }}" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Phân tích</span></a>
-    <a href="{{ url_for('goals') }}" class="nav-item active"><i class="fa-solid fa-bullseye"></i><span>Mục tiêu</span></a>
-    <a href="{{ url_for('profile') }}" class="nav-item"><i class="fa-solid fa-user"></i><span>Cá nhân</span></a>
-  </nav>
+  {% include "nav_bottom.html" %}
 
   <!-- Add Goal Modal -->
   <div class="modal-overlay" id="modal-add-goal">

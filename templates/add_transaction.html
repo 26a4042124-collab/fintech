@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}Ghi chép giao dịch{% endblock %}
+
+{% block body %}
+{% set active_page = 'add_transaction' %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.12;"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Ghi chép giao dịch</div>
+    <a href="{{ url_for('transactions') }}" class="top-bar-action" title="Xem lịch sử"><i class="fa-solid fa-clock-rotate-left"></i></a>
+  </div>
+
+  <!-- Form Body -->
+  <div class="page-content" style="padding-bottom: 90px;">
+    
+    <form method="POST" action="{{ url_for('add_transaction') }}" id="form-add-txn">
+      <input type="hidden" name="type" id="input-txn-type" value="OUTFLOW">
+      <input type="hidden" name="category" id="input-txn-category" value="Ăn uống">
+
+      <!-- Transaction Type Segment Tabs -->
+      <div class="type-segment-tabs">
+        <button type="button" class="type-tab-btn active" data-type="OUTFLOW" onclick="switchType('OUTFLOW', this)">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Chi tiền
+        </button>
+        <button type="button" class="type-tab-btn" data-type="INFLOW" onclick="switchType('INFLOW', this)">
+          <i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> Thu tiền
+        </button>
+        <button type="button" class="type-tab-btn" data-type="TRANSFER" onclick="switchType('TRANSFER', this)">
+          <i class="fa-solid fa-right-left"></i> Chuyển khoản
+        </button>
+      </div>
+
+      <!-- Money Display Card -->
+      <div class="amount-input-card">
+        <label class="amount-label" id="amount-type-label">Số tiền chi ra</label>
+        <div class="amount-field-wrap">
+          <input type="text" name="amount" id="amount-input" class="amount-huge-input" placeholder="0" autofocus required>
+          <span class="currency-symbol">VNĐ</span>
+        </div>
+        
+        <!-- Quick Amount Shortcuts -->
+        <div class="quick-amount-chips">
+          <button type="button" class="chip-amt" onclick="addAmount(20000)">+20K</button>
+          <button type="button" class="chip-amt" onclick="addAmount(50000)">+50K</button>
+          <button type="button" class="chip-amt" onclick="addAmount(100000)">+100K</button>
+          <button type="button" class="chip-amt" onclick="addAmount(500000)">+500K</button>
+          <button type="button" class="chip-amt clear" onclick="clearAmount()"><i class="fa-solid fa-eraser"></i> Xóa</button>
+        </div>
+      </div>
+
+      <!-- Category Picker -->
+      <div class="section-title mt-16 mb-8">
+        <span>Chọn danh mục</span>
+        <span id="selected-category-badge" class="badge-cat-preview">Ăn uống</span>
+      </div>
+
+      <!-- Expense Categories Grid -->
+      <div class="category-grid" id="expense-categories">
+        <div class="cat-card selected" onclick="selectCategory('Ăn uống', this, '🍜')">
+          <div class="cat-icon" style="background:#FFF0EA;color:#E8632A;"><i class="fa-solid fa-utensils"></i></div>
+          <span class="cat-name">Ăn uống</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Cà phê', this, '☕')">
+          <div class="cat-icon" style="background:#FEF3C7;color:#D97706;"><i class="fa-solid fa-mug-saucer"></i></div>
+          <span class="cat-name">Cà phê</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Đi lại', this, '🛵')">
+          <div class="cat-icon" style="background:#EFF6FF;color:#2563EB;"><i class="fa-solid fa-motorcycle"></i></div>
+          <span class="cat-name">Đi lại</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Mua sắm', this, '🛍️')">
+          <div class="cat-icon" style="background:#FDF2F8;color:#DB2777;"><i class="fa-solid fa-bag-shopping"></i></div>
+          <span class="cat-name">Mua sắm</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Hóa đơn sinh hoạt', this, '💡')">
+          <div class="cat-icon" style="background:#F0FDF4;color:#16A34A;"><i class="fa-solid fa-bolt"></i></div>
+          <span class="cat-name">Hóa đơn</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Giải trí', this, '🎬')">
+          <div class="cat-icon" style="background:#FAF5FF;color:#9333EA;"><i class="fa-solid fa-film"></i></div>
+          <span class="cat-name">Giải trí</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Sức khỏe', this, '💊')">
+          <div class="cat-icon" style="background:#ECFEFF;color:#0891B2;"><i class="fa-solid fa-heart-pulse"></i></div>
+          <span class="cat-name">Sức khỏe</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Khác', this, '📦')">
+          <div class="cat-icon" style="background:#F1F5F9;color:#64748B;"><i class="fa-solid fa-ellipsis"></i></div>
+          <span class="cat-name">Khác</span>
+        </div>
+      </div>
+
+      <!-- Income Categories Grid (Hidden by default) -->
+      <div class="category-grid" id="income-categories" style="display:none;">
+        <div class="cat-card selected" onclick="selectCategory('Tiền lương', this, '💼')">
+          <div class="cat-icon" style="background:#F0FDF4;color:#16A34A;"><i class="fa-solid fa-briefcase"></i></div>
+          <span class="cat-name">Tiền lương</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Tiền thưởng', this, '🎁')">
+          <div class="cat-icon" style="background:#FEF3C7;color:#D97706;"><i class="fa-solid fa-gift"></i></div>
+          <span class="cat-name">Thưởng</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Đầu tư sinh lời', this, '📈')">
+          <div class="cat-icon" style="background:#EFF6FF;color:#2563EB;"><i class="fa-solid fa-chart-line"></i></div>
+          <span class="cat-name">Đầu tư</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Bán đồ cũ', this, '🏷️')">
+          <div class="cat-icon" style="background:#FDF2F8;color:#DB2777;"><i class="fa-solid fa-tags"></i></div>
+          <span class="cat-name">Thanh lý</span>
+        </div>
+        <div class="cat-card" onclick="selectCategory('Thu nhập phụ', this, '💵')">
+          <div class="cat-icon" style="background:#FFF0EA;color:#E8632A;"><i class="fa-solid fa-coins"></i></div>
+          <span class="cat-name">Nguồn khác</span>
+        </div>
+      </div>
+
+      <!-- Details Card (Account / Date / Note) -->
+      <div class="glass-card-solid mt-16" style="padding:16px;">
+        <!-- Account / Wallet select -->
+        <div class="form-group mb-12">
+          <label class="form-label" style="font-size:13px;"><i class="fa-solid fa-wallet text-accent"></i> Ví / Tài khoản thanh toán</label>
+          <select name="bank" class="form-input" style="padding:12px 14px;font-size:14px;background:#FFF;">
+            <option value="Tiền mặt" selected>💵 Ví Tiền mặt (Cá nhân)</option>
+            <option value="Techcombank">💳 Techcombank Visa (•• 5920)</option>
+            <option value="Vietcombank">🏦 Vietcombank Connect24 (•• 5938)</option>
+            <option value="MB Bank">🛡️ MB Bank (•• 4321)</option>
+            <option value="Ví MoMo">📱 Ví điện tử MoMo</option>
+          </select>
+        </div>
+
+        <!-- Date select -->
+        <div class="form-group mb-12">
+          <label class="form-label" style="font-size:13px;"><i class="fa-solid fa-calendar-day text-accent"></i> Ngày giao dịch</label>
+          <input type="date" name="date" class="form-input" value="{{ today }}" style="padding:12px 14px;font-size:14px;background:#FFF;">
+        </div>
+
+        <!-- Note / Memo -->
+        <div class="form-group mb-4">
+          <label class="form-label" style="font-size:13px;"><i class="fa-solid fa-pen-to-square text-accent"></i> Ghi chú / Diễn giải</label>
+          <input type="text" name="note" class="form-input" placeholder="Ví dụ: Ăn trưa với team dự án..." style="padding:12px 14px;font-size:14px;background:#FFF;">
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="mt-20">
+        <button type="submit" class="btn-primary" id="btn-save-txn" style="box-shadow: 0 8px 24px rgba(232, 99, 42, 0.4);">
+          <i class="fa-solid fa-check"></i> Lưu giao dịch ngay
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Bottom Nav -->
+  {% include "nav_bottom.html" %}
+</div>
+
+<style>
+/* Segment Tabs */
+.type-segment-tabs {
+  display: flex;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+.type-tab-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.type-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Amount Input Card */
+.amount-input-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.amount-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 6px;
+}
+.amount-field-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.amount-huge-input {
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  width: 240px;
+  max-width: 100%;
+}
+.currency-symbol {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.quick-amount-chips {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chip-amt {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+.chip-amt:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chip-amt.clear {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.cat-card {
+  background: #FFFFFF;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.cat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.cat-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  box-shadow: 0 4px 12px rgba(232, 99, 42, 0.18);
+}
+.cat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.cat-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+}
+.badge-cat-preview {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Format currency input with commas/dots
+const amountInput = document.getElementById('amount-input');
+
+function formatNumberVND(numStr) {
+  const clean = numStr.replace(/\D/g, '');
+  if (!clean) return '';
+  return new Intl.NumberFormat('vi-VN').format(clean);
+}
+
+amountInput.addEventListener('input', (e) => {
+  const cursor = e.target.selectionStart;
+  const raw = e.target.value.replace(/\D/g, '');
+  e.target.value = formatNumberVND(raw);
+});
+
+function addAmount(val) {
+  let curr = parseInt(amountInput.value.replace(/\D/g, '') || '0', 10);
+  curr += val;
+  amountInput.value = formatNumberVND(String(curr));
+}
+
+function clearAmount() {
+  amountInput.value = '';
+  amountInput.focus();
+}
+
+function switchType(type, btn) {
+  document.querySelectorAll('.type-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('input-txn-type').value = type;
+
+  const expCats = document.getElementById('expense-categories');
+  const incCats = document.getElementById('income-categories');
+  const label = document.getElementById('amount-type-label');
+
+  if (type === 'INFLOW') {
+    expCats.style.display = 'none';
+    incCats.style.display = 'grid';
+    label.textContent = 'Số tiền thu vào';
+    selectCategory('Tiền lương', incCats.querySelector('.cat-card'), '💼');
+  } else if (type === 'TRANSFER') {
+    expCats.style.display = 'grid';
+    incCats.style.display = 'none';
+    label.textContent = 'Số tiền chuyển khoản';
+    selectCategory('Chuyển khoản', expCats.querySelector('.cat-card'), '🔄');
+  } else {
+    expCats.style.display = 'grid';
+    incCats.style.display = 'none';
+    label.textContent = 'Số tiền chi ra';
+    selectCategory('Ăn uống', expCats.querySelector('.cat-card'), '🍜');
+  }
+}
+
+function selectCategory(catName, cardEl, icon) {
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  if (cardEl) cardEl.classList.add('selected');
+  document.getElementById('input-txn-category').value = catName;
+  document.getElementById('selected-category-badge').textContent = `${icon || ''} ${catName}`;
+}
+</script>
+{% endblock %}

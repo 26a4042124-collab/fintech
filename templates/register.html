@@ -2,10 +2,12 @@
 {% block title %}Đăng ký{% endblock %}
 {% block body %}
 <div class="auth-wrapper">
+  <!-- Blobs -->
   <div class="blob blob-orange"></div>
   <div class="blob blob-orange-2"></div>
 
-  <div class="status-bar">
+  <!-- Status Bar -->
+  <div class="auth-status-bar">
     <span>12:00</span>
     <div class="status-bar-right">
       <i class="fa-solid fa-signal"></i>
@@ -14,42 +16,53 @@
     </div>
   </div>
 
-  <div class="auth-header">
-    <a href="{{ url_for('landing') }}" class="auth-back"><i class="fa-solid fa-arrow-left"></i></a>
-    <div class="auth-brand">
-      <div class="auth-brand-icon">🪙</div>
-      <div class="auth-brand-name">finlab</div>
-    </div>
-    <h1 class="auth-title">Tạo tài khoản</h1>
-    <p class="auth-subtitle">Nhập số điện thoại để bắt đầu.<br>Chúng tôi sẽ gửi mã xác thực.</p>
+  <!-- Logo -->
+  <div class="profile-form-logo" style="padding-top:20px;">
+    <img src="{{ url_for('static', filename='images/logo.png') }}"
+         alt="FinLab"
+         style="height:56px; width:auto; object-fit:contain;"
+         onerror="this.outerHTML='<div style=\'display:flex;align-items:center;gap:8px;\'><span style=\'font-size:32px;\'>🧪</span><span style=\'font-size:26px;font-weight:900;color:#E8632A;\'>FINLAB</span></div>'">
   </div>
 
-  <div class="auth-body">
+  <!-- Heading -->
+  <div class="auth-heading" style="margin-top:24px;">
+    <h1 class="auth-title">Tạo <span class="highlight">tài khoản</span></h1>
+    <p class="auth-subtitle">Nhập email để nhận mã xác thực OTP.<br>Mã có hiệu lực trong <strong style="color:var(--accent);">5 phút</strong>.</p>
+  </div>
+
+  <!-- Form Body -->
+  <div class="auth-body" style="flex:1; overflow-y:auto;">
     {% if error %}
     <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST" action="{{ url_for('register') }}" id="register-form">
       <div class="form-group">
-        <label class="form-label">Số điện thoại</label>
-        <div class="input-wrapper">
-          <span class="input-prefix">🇻🇳 +84</span>
-          <input type="tel" name="phone" class="form-input"
-            placeholder="0xxx xxx xxx"
-            value="{{ phone or '' }}"
-            maxlength="11" required
-            style="padding-left: 72px;">
-        </div>
+        <label class="form-label">Địa chỉ Email <span class="required">*</span></label>
+        <input type="email" name="email" class="form-input"
+          placeholder="example@gmail.com"
+          value="{{ email or '' }}"
+          required autocomplete="email">
       </div>
-      <div class="mt-8"></div>
-      <button type="submit" class="btn-primary">
-        Gửi mã OTP <i class="fa-solid fa-arrow-right"></i>
-      </button>
+
+      <div style="height:32px;"></div>
+      <button type="submit" class="btn-primary" id="submit-btn">Tiếp tục</button>
     </form>
   </div>
 
-  <div class="auth-footer">
-    Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập ngay</a>
+  <!-- Footer link -->
+  <div style="text-align:center; padding:20px 28px 40px; font-size:14px; color:var(--text-secondary); font-weight:500;">
+    Đã có tài khoản? <a href="{{ url_for('login') }}" style="color:var(--accent);font-weight:700;">Đăng nhập ngay</a>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('register-form').addEventListener('submit', function() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Đang gửi OTP...';
+});
+</script>
 {% endblock %}

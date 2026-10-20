@@ -63,19 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (countdownEl) countdownEl.textContent = seconds;
     if (seconds <= 0) {
       clearInterval(timer);
-      resendBtn.classList.add('active');
-      resendBtn.innerHTML = 'Gửi lại mã';
+      resendBtn.classList.remove('disabled');
+      resendBtn.innerHTML = 'Yêu cầu gửi lại mã OTP';
       resendBtn.style.cursor = 'pointer';
     }
   }, 1000);
 
   if (resendBtn) {
     resendBtn.addEventListener('click', () => {
-      if (!resendBtn.classList.contains('active')) return;
+      if (resendBtn.classList.contains('disabled')) return;
       // Reset
       seconds = 60;
-      resendBtn.classList.remove('active');
-      resendBtn.innerHTML = 'Gửi lại (<span id="countdown">60</span>s)';
+      resendBtn.classList.add('disabled');
+      resendBtn.innerHTML = 'Yêu cầu gửi lại mã OTP (<span id="countdown">60</span>s)';
       // Restart timer
       const newCountdown = document.getElementById('countdown');
       let s2 = 60;
@@ -84,11 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newCountdown) newCountdown.textContent = s2;
         if (s2 <= 0) {
           clearInterval(t2);
-          resendBtn.classList.add('active');
-          resendBtn.innerHTML = 'Gửi lại mã';
+          resendBtn.classList.remove('disabled');
+          resendBtn.innerHTML = 'Yêu cầu gửi lại mã OTP';
         }
       }, 1000);
-      showToast('Mã OTP mới đã được gửi! (Demo: nhập bất kỳ 6 số)', 'success');
+      if (typeof showToast === 'function') showToast('Mã OTP mới đã được gửi! (Demo: nhập bất kỳ 6 số)', 'success');
     });
   }
 });

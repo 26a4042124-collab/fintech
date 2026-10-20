@@ -7,7 +7,11 @@
     "email": "nguyenvana@gmail.com",
     "occupation": "Nhân viên văn phòng",
     "monthly_income": 18000000,
-    "connected_banks": ["Vietcombank", "Techcombank", "MB Bank"]
+    "connected_banks": [
+      "Vietcombank",
+      "Techcombank",
+      "MB Bank"
+    ]
   },
   {
     "id": "usr_002",
@@ -17,6 +21,22 @@
     "email": "demo@finlab.vn",
     "occupation": "Freelancer",
     "monthly_income": 20000000,
-    "connected_banks": ["Vietcombank"]
+    "connected_banks": [
+      "Vietcombank"
+    ]
+  },
+  {
+    "id": "usr_003",
+    "username": "nguyen_tran_phuong_diep",
+    "password": "123456",
+    "full_name": "NGUYỄN TRẦN PHƯƠNG DIỆP",
+    "email": "nguyentranphuongdiep09@gmail.com",
+    "phone": "0334025905",
+    "occupation": "Cá nhân",
+    "monthly_income": 18000000,
+    "connected_banks": [],
+    "goals": [
+      "saving"
+    ]
   }
 ]

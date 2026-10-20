@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Thông báo{% endblock %}
+
+{% block body %}
+{% set active_page = 'notifications' %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.12;"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Thông báo</div>
+    <button class="top-bar-action" onclick="markAllAsRead()" title="Đánh dấu đã đọc"><i class="fa-solid fa-check-double text-accent"></i></button>
+  </div>
+
+  <div class="page-content" style="padding-bottom: 90px;">
+    
+    <!-- Filter Pills -->
+    <div class="filter-row" style="margin-bottom:14px;">
+      <button class="filter-pill active" onclick="filterNotif('ALL', this)">Tất cả ({{ notifications|length }})</button>
+      <button class="filter-pill" onclick="filterNotif('alert', this)">Cảnh báo</button>
+      <button class="filter-pill" onclick="filterNotif('reminder', this)">Nhắc nhở</button>
+      <button class="filter-pill" onclick="filterNotif('inflow', this)">Biến động số dư</button>
+    </div>
+
+    <!-- Notification List -->
+    <div style="display:flex;flex-direction:column;gap:10px;" id="notif-container">
+      {% for n in notifications %}
+      <div class="notif-card-item {% if n.unread %}unread{% endif %}" data-type="{{ n.type }}" onclick="readNotif(this)">
+        <div class="notif-icon-wrap" style="background: {{ n.bg }}; color: {{ n.color }};">
+          <i class="fa-solid {{ n.icon }}"></i>
+        </div>
+        <div class="notif-content-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">
+            <div class="notif-title">{{ n.title }}</div>
+            {% if n.unread %}
+            <span class="notif-dot"></span>
+            {% endif %}
+          </div>
+          <div class="notif-body-text">{{ n.body }}</div>
+          <div class="notif-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> {{ n.time }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  {% include "nav_bottom.html" %}
+</div>
+
+<style>
+.notif-card-item {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.notif-card-item.unread {
+  background: #FFFDFB;
+  border-color: rgba(232, 99, 42, 0.25);
+  box-shadow: 0 4px 14px rgba(232, 99, 42, 0.08);
+}
+.notif-card-item:hover {
+  transform: translateY(-2px);
+}
+.notif-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.notif-content-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.notif-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.notif-body-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.notif-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterNotif(type, btn) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const items = document.querySelectorAll('.notif-card-item');
+  items.forEach(it => {
+    if (type === 'ALL' || it.dataset.type === type) {
+      it.style.display = 'flex';
+    } else {
+      it.style.display = 'none';
+    }
+  });
+}
+
+function readNotif(el) {
+  el.classList.remove('unread');
+  const dot = el.querySelector('.notif-dot');
+  if (dot) dot.remove();
+}
+
+function markAllAsRead() {
+  document.querySelectorAll('.notif-card-item').forEach(el => {
+    el.classList.remove('unread');
+    const dot = el.querySelector('.notif-dot');
+    if (dot) dot.remove();
+  });
+  alert('Đã đánh dấu tất cả thông báo là đã đọc!');
+}
+</script>
+{% endblock %}
