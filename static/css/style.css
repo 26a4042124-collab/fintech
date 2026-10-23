@@ -1097,6 +1097,26 @@ img { max-width: 100%; height: auto; }
   font-size: 18px;
   flex-shrink: 0;
 }
+.txn-icon.icon-bucket-income  { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.txn-icon.icon-bucket-needs   { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.txn-icon.icon-bucket-wants   { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.txn-icon.icon-bucket-savings { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.txn-icon.icon-bucket-other   { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+
+.bank-avatar-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
+}
+.bank-bg-vcb { background: #006837; }
+.bank-bg-tcb { background: #E31B23; }
+.bank-bg-mbb { background: #002060; }
 .txn-info { flex: 1; min-width: 0; }
 .txn-name {
   font-size: 14px;

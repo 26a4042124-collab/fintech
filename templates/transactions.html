@@ -49,16 +49,16 @@
     <div id="txn-list">
       {% for t in transactions %}
       {% set icons = {
-        'INCOME': ('fa-arrow-down', '#22c55e', 'rgba(34,197,94,0.15)'),
-        'NEEDS': ('fa-shield', '#3b82f6', 'rgba(59,130,246,0.15)'),
-        'WANTS': ('fa-bag-shopping', '#f59e0b', 'rgba(245,158,11,0.15)'),
-        'SAVINGS': ('fa-piggy-bank', '#a855f7', 'rgba(168,85,247,0.15)')
+        'INCOME': 'fa-arrow-down',
+        'NEEDS': 'fa-shield',
+        'WANTS': 'fa-bag-shopping',
+        'SAVINGS': 'fa-piggy-bank'
       } %}
-      {% set ico = icons.get(t.ai_bucket, ('fa-circle-dot', '#64748b', 'rgba(100,116,139,0.15)')) %}
+      {% set ico = icons.get(t.ai_bucket, 'fa-circle-dot') %}
       <div class="txn-item" data-bank="{{ t.bank }}"
         style="background:var(--bg-card-solid);border-radius:14px;padding:12px 14px;margin-bottom:8px;">
-        <div class="txn-icon" style="background:{{ ico[2] }};color:{{ ico[1] }};">
-          <i class="fa-solid {{ ico[0] }}"></i>
+        <div class="txn-icon icon-bucket-{{ (t.ai_bucket or 'other')|lower }}">
+          <i class="fa-solid {{ ico }}"></i>
         </div>
         <div class="txn-info">
           <div class="txn-name">{{ t.description[:36] }}{% if t.description|length > 36 %}...{% endif %}</div>
