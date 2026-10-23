@@ -1214,6 +1214,12 @@ img { max-width: 100%; height: auto; }
   border-radius: 99px;
   transition: width 0.8s ease;
 }
+.progress-fill-needs { background: #3b82f6; }
+.progress-fill-wants { background: #f59e0b; }
+.progress-fill-savings { background: #22c55e; }
+.text-danger { color: var(--danger) !important; }
+.text-success { color: var(--success) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
 .rec-item {
   display: flex;
   gap: 12px;

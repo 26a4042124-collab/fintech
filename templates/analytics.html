@@ -56,7 +56,7 @@
             <span class="budget-row-val">{{ health.needs.percentage }}% / chuẩn 50%</span>
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width:{{ [health.needs.percentage, 100]|min }}%;background:#3b82f6;"></div>
+            <div class="progress-fill progress-fill-needs" data-pct="{{ [health.needs.percentage, 100]|min }}"></div>
           </div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.needs.amount) }}đ</div>
         </div>
@@ -67,12 +67,12 @@
               <span class="dot-color" style="background:#f59e0b;"></span>
               Mong muốn (Wants)
             </span>
-            <span class="budget-row-val" style="color:{% if health.wants.percentage > 30 %}var(--danger){% else %}var(--text-secondary){% endif %};">
+            <span class="budget-row-val {% if health.wants.percentage > 30 %}text-danger{% else %}text-secondary{% endif %}">
               {{ health.wants.percentage }}% / chuẩn 30%{% if health.wants.percentage > 30 %} ⚠️{% endif %}
             </span>
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width:{{ [health.wants.percentage, 100]|min }}%;background:#f59e0b;"></div>
+            <div class="progress-fill progress-fill-wants" data-pct="{{ [health.wants.percentage, 100]|min }}"></div>
           </div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.wants.amount) }}đ</div>
         </div>
@@ -83,12 +83,12 @@
               <span class="dot-color" style="background:#22c55e;"></span>
               Tiết kiệm (Savings)
             </span>
-            <span class="budget-row-val" style="color:{% if health.savings.percentage < 20 %}var(--danger){% else %}var(--success){% endif %};">
+            <span class="budget-row-val {% if health.savings.percentage < 20 %}text-danger{% else %}text-success{% endif %}">
               {{ health.savings.percentage }}% / chuẩn 20%{% if health.savings.percentage < 20 %} ❌{% else %} ✅{% endif %}
             </span>
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width:{{ [health.savings.percentage, 100]|min }}%;background:#22c55e;"></div>
+            <div class="progress-fill progress-fill-savings" data-pct="{{ [health.savings.percentage, 100]|min }}"></div>
           </div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.savings.amount) }}đ</div>
         </div>
@@ -154,6 +154,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const d = JSON.parse(document.getElementById('analytics-data').textContent);
+
+  // Set progress fill widths smoothly
+  document.querySelectorAll('.progress-fill[data-pct]').forEach(el => {
+    el.style.width = el.getAttribute('data-pct') + '%';
+  });
 
   // Doughnut chart 50/30/20
   const ctx1 = document.getElementById('ruleChart');
