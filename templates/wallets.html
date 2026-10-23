@@ -18,23 +18,27 @@
   <div class="top-bar">
     <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
     <div class="top-bar-title">Ví &amp; Tài khoản</div>
-    <button class="top-bar-action" onclick="openAddWalletModal()" title="Thêm ví mới"><i class="fa-solid fa-plus text-accent"></i></button>
+    <button class="top-bar-action" onclick="openAddWalletModal()" title="Thêm ví mới">
+      <i class="fa-solid fa-plus text-accent"></i>
+    </button>
   </div>
 
   <div class="page-content">
-    
-    <!-- Net Worth Card -->
+
+    <!-- Net Worth Summary Card -->
     <div class="balance-card" style="background: linear-gradient(135deg, #1E2024 0%, #2A2D35 60%, #E8632A 100%);">
       <div class="balance-label" style="color: rgba(255,255,255,0.7);">Tổng tài sản khả dụng</div>
-      <div class="balance-amount" style="font-size: 30px;">
-        {{ "{:,.0f}".format(total_assets) }}
+      <div class="balance-amount" style="font-size: 30px;" id="total-assets-display">
+        <span id="total-assets-value">0</span>
         <span style="font-size:16px;">VNĐ</span>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1;">
         <div style="font-size:12px; color:rgba(255,255,255,0.75);">
-          <i class="fa-solid fa-shield-check" style="color:#4ADE80;"></i> {{ wallets|length }} nguồn tiền kết nối
+          <i class="fa-solid fa-wallet" style="color:#4ADE80;"></i>
+          <span id="wallet-count-badge">0</span> nguồn tiền
         </div>
-        <button class="btn-ghost" onclick="openTransferModal()" style="color:#FFF; background:rgba(255,255,255,0.18); border-radius:20px; padding:6px 14px; font-size:12px;">
+        <button class="btn-ghost" onclick="openTransferModal()"
+          style="color:#FFF; background:rgba(255,255,255,0.18); border-radius:20px; padding:6px 14px; font-size:12px;">
           <i class="fa-solid fa-right-left"></i> Chuyển ví
         </button>
       </div>
@@ -56,29 +60,26 @@
       </a>
     </div>
 
-    <!-- Wallets Cards Carousel / List -->
-    <div class="section-title">
+    <!-- Wallets Section -->
+    <div class="section-title" id="wallets-section-title">
       <span>Danh sách ví &amp; thẻ</span>
-      <span style="font-size:12px;color:var(--text-muted);font-weight:600;">{{ wallets|length }} tài khoản</span>
+      <span style="font-size:12px;color:var(--text-muted);font-weight:600;" id="wallet-count-label">0 tài khoản</span>
     </div>
 
-    <div class="wallets-card-list">
-      {% for w in wallets %}
-      <div class="bank-card-item" style="background: {{ w.color }}; color: {{ w.text_color }};">
-        <div class="bci-header">
-          <div class="bci-brand">{{ w.brand }}</div>
-          <div class="bci-type"><i class="fa-solid {{ w.icon }}"></i></div>
-        </div>
-        <div class="bci-balance">
-          <small>Số dư hiện có</small>
-          <strong>{{ "{:,.0f}".format(w.balance) }} <span style="font-size:13px;font-weight:600;">đ</span></strong>
-        </div>
-        <div class="bci-footer">
-          <span class="bci-accno">{{ w.account_no }}</span>
-          <span class="bci-status"><i class="fa-solid fa-circle" style="font-size:7px;color:#4ADE80;"></i> {{ w.status }}</span>
-        </div>
-      </div>
-      {% endfor %}
+    <!-- Empty State (shown when no wallets) -->
+    <div class="empty-state" id="wallet-empty-state" style="display:none;">
+      <i class="fa-solid fa-wallet"></i>
+      <p style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:6px;">Chưa có ví nào</p>
+      <p>Thêm ví đầu tiên để bắt đầu theo dõi tài chính của bạn</p>
+      <button class="btn-primary" onclick="openAddWalletModal()"
+        style="margin-top:16px; width:auto; padding:12px 28px; font-size:14px;">
+        <i class="fa-solid fa-plus"></i> Thêm ví mới
+      </button>
+    </div>
+
+    <!-- Wallet Cards List -->
+    <div class="wallets-card-list" id="wallets-card-list">
+      <!-- JS render here -->
     </div>
 
     <!-- Recent Transactions from Wallets -->
@@ -90,7 +91,10 @@
     <div class="glass-card-solid" style="padding: 12px 16px;">
       {% for t in recent_txns %}
       <div class="txn-item" style="padding: 10px 0;">
-        <div class="txn-icon" style="background: {% if t.type == 'INFLOW' %}rgba(34,197,94,0.12){% else %}rgba(232,99,42,0.12){% endif %}; color: {% if t.type == 'INFLOW' %}#16A34A{% else %}#E8632A{% endif %}; width:38px; height:38px; font-size:15px;">
+        <div class="txn-icon"
+          style="background: {% if t.type == 'INFLOW' %}rgba(34,197,94,0.12){% else %}rgba(232,99,42,0.12){% endif %};
+                 color: {% if t.type == 'INFLOW' %}#16A34A{% else %}#E8632A{% endif %};
+                 width:38px; height:38px; font-size:15px;">
           <i class="fa-solid {% if t.type == 'INFLOW' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
         </div>
         <div class="txn-info">
@@ -99,97 +103,330 @@
             <span>{{ t.timestamp[:10] }}</span> &bull; <span>{{ t.bank }}</span>
           </div>
         </div>
-        <div class="txn-amount" style="font-size:14px; color: {% if t.type == 'INFLOW' %}var(--success){% else %}var(--text-primary){% endif %};">
+        <div class="txn-amount"
+          style="font-size:14px; color: {% if t.type == 'INFLOW' %}var(--success){% else %}var(--text-primary){% endif %};">
           {% if t.type == 'INFLOW' %}+{% else %}-{% endif %}{{ "{:,.0f}".format(t.amount) }}đ
         </div>
       </div>
       {% endfor %}
     </div>
 
-  </div>
+  </div><!-- /page-content -->
 
-  <!-- Modal Add Wallet (Static) -->
+  <!-- ===================================================================
+       MODAL: THÊM VÍ MỚI
+       =================================================================== -->
   <div class="modal-overlay" id="modal-add-wallet">
     <div class="modal-box">
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-plus-circle text-accent"></i> Thêm ví / Thẻ mới</div>
-        <button class="modal-close" onclick="closeAddWalletModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-title">
+          <i class="fa-solid fa-plus-circle text-accent"></i> Thêm ví / Thẻ mới
+        </div>
+        <button class="modal-close" onclick="closeAddWalletModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="modal-body">
+
+        <!-- Lỗi validation -->
+        <div id="add-wallet-error" class="form-error" style="display:none;">
+          <i class="fa-solid fa-circle-xmark"></i><span id="add-wallet-error-msg"></span>
+        </div>
+
+        <!-- Bước 1: Loại ví -->
         <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Loại tài sản</label>
-          <select class="form-input" id="new-wallet-type" style="padding:12px;background:#FFF;">
-            <option>Tài khoản ngân hàng (ATM/Debit/Visa)</option>
-            <option>Ví điện tử (MoMo / ZaloPay / ShopeePay)</option>
-            <option>Ví tiền mặt cá nhân</option>
-            <option>Sổ tiết kiệm / Tích lũy</option>
+          <label class="form-label">Loại ví <span class="required">*</span></label>
+          <div class="wallet-type-grid" id="wallet-type-grid">
+            <div class="wallet-type-option selected" data-type="bank" onclick="selectWalletType(this, 'bank')">
+              <i class="fa-solid fa-building-columns" style="color:#1D4ED8;"></i>
+              Ngân hàng
+            </div>
+            <div class="wallet-type-option" data-type="ewallet" onclick="selectWalletType(this, 'ewallet')">
+              <i class="fa-solid fa-mobile-screen-button" style="color:#A50064;"></i>
+              Ví điện tử
+            </div>
+            <div class="wallet-type-option" data-type="cash" onclick="selectWalletType(this, 'cash')">
+              <i class="fa-solid fa-money-bill-wave" style="color:#16A34A;"></i>
+              Tiền mặt
+            </div>
+            <div class="wallet-type-option" data-type="savings" onclick="selectWalletType(this, 'savings')">
+              <i class="fa-solid fa-piggy-bank" style="color:#E8632A;"></i>
+              Tiết kiệm
+            </div>
+            <div class="wallet-type-option" data-type="investment" onclick="selectWalletType(this, 'investment')">
+              <i class="fa-solid fa-chart-line" style="color:#8B5CF6;"></i>
+              Đầu tư
+            </div>
+            <div class="wallet-type-option" data-type="other" onclick="selectWalletType(this, 'other')">
+              <i class="fa-solid fa-ellipsis" style="color:#6B7280;"></i>
+              Khác
+            </div>
+          </div>
+        </div>
+
+        <!-- Bước 2: Tên ví -->
+        <div class="form-group mb-12">
+          <label class="form-label" for="new-wallet-name">
+            Tên ví <span class="required">*</span>
+          </label>
+          <input type="text" class="form-input" id="new-wallet-name"
+            placeholder="Ví dụ: MB Bank – Chi tiêu, Ví tiền mặt…"
+            maxlength="60" autocomplete="off">
+        </div>
+
+        <!-- Bước 3: Ngân hàng / Nhà cung cấp (ẩn/hiện theo loại ví) -->
+        <div class="form-group mb-12" id="provider-group">
+          <label class="form-label" for="new-wallet-provider">Ngân hàng / Nhà cung cấp</label>
+          <select class="form-input" id="new-wallet-provider" style="background:var(--bg-input);">
+            <option value="">— Chọn nhà cung cấp —</option>
+            <!-- Ngân hàng -->
+            <optgroup label="🏦 Ngân hàng" id="optgroup-bank">
+              <option value="Vietcombank">Vietcombank (VCB)</option>
+              <option value="Techcombank">Techcombank (TCB)</option>
+              <option value="MB Bank">MB Bank</option>
+              <option value="VietinBank">VietinBank (CTG)</option>
+              <option value="BIDV">BIDV</option>
+              <option value="Agribank">Agribank</option>
+              <option value="ACB">ACB</option>
+              <option value="VPBank">VPBank</option>
+              <option value="TPBank">TPBank</option>
+              <option value="Sacombank">Sacombank</option>
+              <option value="HDBank">HDBank</option>
+              <option value="OCB">OCB</option>
+              <option value="MSB">MSB</option>
+              <option value="SHB">SHB</option>
+              <option value="LienVietPostBank">LienVietPostBank</option>
+            </optgroup>
+            <!-- Ví điện tử -->
+            <optgroup label="📱 Ví điện tử" id="optgroup-ewallet">
+              <option value="MoMo">MoMo</option>
+              <option value="ZaloPay">ZaloPay</option>
+              <option value="ShopeePay">ShopeePay</option>
+              <option value="VNPay">VNPay</option>
+              <option value="Moca">Moca (Grab)</option>
+              <option value="VNPT Pay">VNPT Pay</option>
+              <option value="Viettel Money">Viettel Money</option>
+            </optgroup>
           </select>
         </div>
+
+        <!-- Bước 4: Số dư ban đầu -->
         <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Tên ngân hàng / Tên ví</label>
-          <input type="text" class="form-input" id="new-wallet-name" placeholder="Ví dụ: MB Bank Quân Đội" style="padding:12px;background:#FFF;">
+          <label class="form-label" for="new-wallet-balance">Số dư ban đầu (VNĐ)</label>
+          <div class="balance-input-wrapper">
+            <input type="text" class="form-input" id="new-wallet-balance"
+              placeholder="0" inputmode="numeric" autocomplete="off"
+              style="padding-right: 44px;">
+            <span class="currency-label">đ</span>
+          </div>
         </div>
+
+        <!-- Bước 5: Phương thức quản lý -->
         <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Số tài khoản / Số thẻ (4 số cuối)</label>
-          <input type="text" class="form-input" id="new-wallet-acc" placeholder="Ví dụ: 8899" style="padding:12px;background:#FFF;">
+          <label class="form-label">Phương thức quản lý</label>
+          <div class="mgmt-mode-row" id="mgmt-mode-row">
+            <div class="mgmt-mode-option selected" data-mode="manual"
+              onclick="selectMgmtMode(this, 'manual')">
+              <i class="fa-solid fa-pencil" style="color:#E8632A;"></i>
+              Quản lý thủ công
+            </div>
+            <div class="mgmt-mode-option disabled-opt" data-mode="connect"
+              title="Tính năng kết nối ngân hàng sẽ sớm được hỗ trợ">
+              <i class="fa-solid fa-link" style="color:#6B7280;"></i>
+              Kết nối tài khoản
+              <span class="badge-soon">Sắp ra mắt</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Bước 6: Ghi chú -->
         <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;">Số dư ban đầu (VNĐ)</label>
-          <input type="number" class="form-input" id="new-wallet-bal" placeholder="0" style="padding:12px;background:#FFF;">
+          <label class="form-label" for="new-wallet-note">Ghi chú (không bắt buộc)</label>
+          <input type="text" class="form-input" id="new-wallet-note"
+            placeholder="Mô tả ngắn về ví này…" maxlength="100" autocomplete="off">
         </div>
-      </div>
+
+      </div><!-- /modal-body -->
       <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeAddWalletModal()">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveMockWallet()">
-          <i class="fa-solid fa-check"></i> Hoàn tất
+        <button class="btn-secondary" style="width:auto;padding:11px 18px;"
+          onclick="closeAddWalletModal()">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:11px 22px;"
+          id="btn-save-wallet" onclick="saveWallet()">
+          <i class="fa-solid fa-check"></i> Lưu ví
         </button>
       </div>
     </div>
-  </div>
+  </div><!-- /modal-add-wallet -->
 
-  <!-- Modal Transfer Money (Static) -->
-  <div class="modal-overlay" id="modal-transfer">
+  <!-- ===================================================================
+       MODAL: CHỈNH SỬA VÍ (Fix #4: thêm type selector, Fix #5: provider select)
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-edit-wallet">
     <div class="modal-box">
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-arrow-right-arrow-left text-accent"></i> Chuyển tiền nội bộ</div>
-        <button class="modal-close" onclick="closeTransferModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-title">
+          <i class="fa-solid fa-pen-to-square text-accent"></i> Chỉnh sửa ví
+        </div>
+        <button class="modal-close" onclick="closeEditWalletModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="modal-body">
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Từ ví chuyển đi</label>
-          <select class="form-input" style="padding:12px;background:#FFF;">
-            <option>Techcombank Visa (Số dư: 28.500.000đ)</option>
-            <option>Vietcombank Connect24 (Số dư: 18.200.000đ)</option>
-            <option>Tiền mặt trong ví (Số dư: 2.000.000đ)</option>
-          </select>
+        <div id="edit-wallet-error" class="form-error" style="display:none;">
+          <i class="fa-solid fa-circle-xmark"></i><span></span>
         </div>
+        <input type="hidden" id="edit-wallet-id">
+
+        <!-- Fix #4: Selector loại ví trong edit modal -->
         <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Đến ví nhận tiền</label>
-          <select class="form-input" style="padding:12px;background:#FFF;">
-            <option>Ví điện tử MoMo (Số dư: 3.150.000đ)</option>
-            <option>MB Bank Tiết kiệm (Số dư: 7.500.000đ)</option>
-            <option>Tiền mặt trong ví (Số dư: 2.000.000đ)</option>
+          <label class="form-label">Loại ví</label>
+          <div class="wallet-type-grid" id="edit-type-grid">
+            <div class="wallet-type-option" data-type="bank" onclick="selectEditWalletType(this,'bank')">
+              <i class="fa-solid fa-building-columns" style="color:#1D4ED8;"></i>Ngân hàng
+            </div>
+            <div class="wallet-type-option" data-type="ewallet" onclick="selectEditWalletType(this,'ewallet')">
+              <i class="fa-solid fa-mobile-screen-button" style="color:#A50064;"></i>Ví điện tử
+            </div>
+            <div class="wallet-type-option" data-type="cash" onclick="selectEditWalletType(this,'cash')">
+              <i class="fa-solid fa-money-bill-wave" style="color:#16A34A;"></i>Tiền mặt
+            </div>
+            <div class="wallet-type-option" data-type="savings" onclick="selectEditWalletType(this,'savings')">
+              <i class="fa-solid fa-piggy-bank" style="color:#E8632A;"></i>Tiết kiệm
+            </div>
+            <div class="wallet-type-option" data-type="investment" onclick="selectEditWalletType(this,'investment')">
+              <i class="fa-solid fa-chart-line" style="color:#8B5CF6;"></i>Đầu tư
+            </div>
+            <div class="wallet-type-option" data-type="other" onclick="selectEditWalletType(this,'other')">
+              <i class="fa-solid fa-ellipsis" style="color:#6B7280;"></i>Khác
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group mb-12">
+          <label class="form-label">Tên ví <span class="required">*</span></label>
+          <input type="text" class="form-input" id="edit-wallet-name"
+            placeholder="Tên ví…" maxlength="60" autocomplete="off">
+        </div>
+
+        <!-- Fix #5: Provider dùng select có danh sách + option "Khác" với free-text -->
+        <div class="form-group mb-12" id="edit-provider-group">
+          <label class="form-label">Ngân hàng / Nhà cung cấp</label>
+          <select class="form-input" id="edit-wallet-provider-select"
+            style="background:var(--bg-input);" onchange="updateEditProviderOther(this)">
+            <option value="">— Chọn nhà cung cấp —</option>
+            <optgroup label="🏦 Ngân hàng">
+              <option value="Vietcombank">Vietcombank (VCB)</option>
+              <option value="Techcombank">Techcombank (TCB)</option>
+              <option value="MB Bank">MB Bank</option>
+              <option value="VietinBank">VietinBank (CTG)</option>
+              <option value="BIDV">BIDV</option>
+              <option value="Agribank">Agribank</option>
+              <option value="ACB">ACB</option>
+              <option value="VPBank">VPBank</option>
+              <option value="TPBank">TPBank</option>
+              <option value="Sacombank">Sacombank</option>
+              <option value="HDBank">HDBank</option>
+              <option value="OCB">OCB</option>
+              <option value="MSB">MSB</option>
+              <option value="SHB">SHB</option>
+              <option value="LienVietPostBank">LienVietPostBank</option>
+            </optgroup>
+            <optgroup label="📱 Ví điện tử">
+              <option value="MoMo">MoMo</option>
+              <option value="ZaloPay">ZaloPay</option>
+              <option value="ShopeePay">ShopeePay</option>
+              <option value="VNPay">VNPay</option>
+              <option value="Moca">Moca (Grab)</option>
+              <option value="VNPT Pay">VNPT Pay</option>
+              <option value="Viettel Money">Viettel Money</option>
+            </optgroup>
+            <option value="__other__">✏️ Nhập tên khác…</option>
           </select>
+          <input type="text" class="form-input" id="edit-wallet-provider-text"
+            placeholder="Nhập tên nhà cung cấp…" maxlength="60" autocomplete="off"
+            style="display:none; margin-top:8px;">
+        </div>
+
+        <div class="form-group mb-12">
+          <label class="form-label">Số dư hiện tại (VNĐ)</label>
+          <div class="balance-input-wrapper">
+            <input type="text" class="form-input" id="edit-wallet-balance"
+              placeholder="0" inputmode="numeric" style="padding-right:44px;">
+            <span class="currency-label">đ</span>
+          </div>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;">Số tiền muốn chuyển (VNĐ)</label>
-          <input type="number" class="form-input" placeholder="Nhập số tiền..." style="padding:12px;background:#FFF;">
+          <label class="form-label">Ghi chú</label>
+          <input type="text" class="form-input" id="edit-wallet-note"
+            placeholder="Ghi chú…" maxlength="100" autocomplete="off">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeTransferModal()">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="executeMockTransfer()">
+        <button class="btn-secondary" style="width:auto;padding:11px 18px;"
+          onclick="closeEditWalletModal()">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:11px 22px;"
+          onclick="updateWallet()">
+          <i class="fa-solid fa-check"></i> Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div><!-- /modal-edit-wallet -->
+
+  <!-- ===================================================================
+       MODAL: CHUYỂN TIỀN NỘI BỘ
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-transfer">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-arrow-right-arrow-left text-accent"></i> Chuyển tiền nội bộ
+        </div>
+        <button class="modal-close" onclick="closeTransferModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="transfer-error" class="form-error" style="display:none;">
+          <i class="fa-solid fa-circle-xmark"></i><span></span>
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Từ ví</label>
+          <select class="form-input" id="transfer-from" style="background:var(--bg-input);">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Đến ví</label>
+          <select class="form-input" id="transfer-to" style="background:var(--bg-input);">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Số tiền (VNĐ)</label>
+          <div class="balance-input-wrapper">
+            <input type="text" class="form-input" id="transfer-amount"
+              placeholder="0" inputmode="numeric" style="padding-right:44px;">
+            <span class="currency-label">đ</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="width:auto;padding:11px 18px;"
+          onclick="closeTransferModal()">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:11px 22px;"
+          onclick="executeTransfer()">
           <i class="fa-solid fa-paper-plane"></i> Chuyển ngay
         </button>
       </div>
     </div>
-  </div>
+  </div><!-- /modal-transfer -->
 
   <!-- Bottom Nav -->
   {% include "nav_bottom.html" %}
-</div>
+</div><!-- /app-wrapper -->
 
 <style>
+/* Page-scoped overrides */
 .wallet-action-chip {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -223,7 +460,7 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease;
@@ -239,10 +476,7 @@
   font-weight: 800;
   letter-spacing: 1px;
 }
-.bci-type {
-  font-size: 18px;
-  opacity: 0.85;
-}
+.bci-type { font-size: 18px; opacity: 0.85; }
 .bci-balance small {
   font-size: 11px;
   opacity: 0.75;
@@ -250,7 +484,7 @@
   margin-bottom: 2px;
 }
 .bci-balance strong {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   letter-spacing: -0.5px;
 }
@@ -268,37 +502,571 @@
   gap: 5px;
   font-size: 11px;
 }
+.text-accent { color: var(--accent); }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function openAddWalletModal() {
-  document.getElementById('modal-add-wallet').classList.add('open');
+/* =========================================================================
+   FinLab Wallet Manager v2 — localStorage + Flask API (synced IDs)
+   =========================================================================
+   SOURCE OF TRUTH: localStorage key "finlab_wallets_v1"
+   SERVER SYNC: Flask /api/wallets — best-effort, dùng cùng client ID (Fix #1)
+   TRANSFER API: POST /api/wallets/transfer được sync lên server (Fix #2)
+   ========================================================================= */
+
+const WALLETS_KEY = 'finlab_wallets_v1';
+
+/* ------ Cấu hình loại ví ------ */
+const WALLET_TYPE_CONFIG = {
+  bank:       { label: 'Tài khoản ngân hàng', icon: 'fa-building-columns',      colors: ['linear-gradient(135deg,#1A1A1A 0%,#2A2A2A 50%,#E8632A 100%)','linear-gradient(135deg,#0A4D2E 0%,#006837 60%,#15803D 100%)','linear-gradient(135deg,#0B1D4F 0%,#002060 60%,#1D4ED8 100%)','linear-gradient(135deg,#1E3A5F 0%,#2563EB 100%)'] },
+  ewallet:    { label: 'Ví điện tử',           icon: 'fa-mobile-screen-button', colors: ['linear-gradient(135deg,#A50064 0%,#C4167E 60%,#E8632A 100%)','linear-gradient(135deg,#0068FF 0%,#0099FF 100%)','linear-gradient(135deg,#E14040 0%,#FF6B35 100%)'] },
+  cash:       { label: 'Tiền mặt',             icon: 'fa-money-bill-wave',      colors: ['linear-gradient(135deg,#2D3748 0%,#4A5568 100%)'] },
+  savings:    { label: 'Tài khoản tiết kiệm',  icon: 'fa-piggy-bank',           colors: ['linear-gradient(135deg,#064E3B 0%,#059669 100%)'] },
+  investment: { label: 'Tài khoản đầu tư',    icon: 'fa-chart-line',           colors: ['linear-gradient(135deg,#4C1D95 0%,#7C3AED 100%)'] },
+  other:      { label: 'Ví khác',              icon: 'fa-wallet',               colors: ['linear-gradient(135deg,#374151 0%,#6B7280 100%)'] },
+};
+
+/* Nhãn hiển thị thân thiện cho từng loại (Fix #6: không dùng .toUpperCase() trực tiếp) */
+const BRAND_DISPLAY = {
+  bank: 'NGÂN HÀNG', ewallet: 'VÍ ĐIỆN TỬ',
+  cash: 'TIỀN MẶT', savings: 'TIẾT KIỆM',
+  investment: 'ĐẦU TƯ', other: 'VÍ KHÁC',
+};
+
+let currentWalletType = 'bank';
+let currentMgmtMode   = 'manual';
+/* Fix #4: lưu type khi mở edit modal để có thể update */
+let editCurrentType   = 'other';
+
+/* =========================================================================
+   Đọc / Ghi localStorage
+   ========================================================================= */
+function loadWallets() {
+  try {
+    const raw = localStorage.getItem(WALLETS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.warn('FinLab: Lỗi đọc dữ liệu ví', e);
+    return [];
+  }
 }
+
+function saveWallets(wallets) {
+  try {
+    localStorage.setItem(WALLETS_KEY, JSON.stringify(wallets));
+  } catch (e) {
+    console.warn('FinLab: Lỗi ghi dữ liệu ví', e);
+    if (window.showToast) window.showToast('Không thể lưu dữ liệu. Vui lòng kiểm tra bộ nhớ trình duyệt!', 'error');
+  }
+}
+
+function generateId() {
+  return 'W_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7).toUpperCase();
+}
+
+/* =========================================================================
+   Tiện ích
+   ========================================================================= */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+  /* Fix #9: Bỏ .replace(/'/g,'&#39;') để tránh encode sai trong onclick data-* attribute.
+     Thay vào đó dùng data-id attribute trên button (xem renderWallets bên dưới). */
+}
+
+function formatVND(amount) {
+  const num = parseFloat(amount) || 0;
+  return num.toLocaleString('vi-VN');
+}
+
+/* Fix #6: Tên nhà cung cấp hiển thị đúng case, chỉ viết hoa toàn bộ nếu ngắn (<= 12 ký tự) */
+function formatBrandName(provider, type) {
+  if (!provider) return BRAND_DISPLAY[type] || 'VÍ KHÁC';
+  return provider.length <= 12 ? provider.toUpperCase() : provider;
+}
+
+/* =========================================================================
+   Render danh sách ví (Fix #8: dropdown transfer luôn dùng số dư mới nhất)
+   ========================================================================= */
+function getWalletGradient(type, index) {
+  const cfg = WALLET_TYPE_CONFIG[type] || WALLET_TYPE_CONFIG.other;
+  return cfg.colors[index % cfg.colors.length];
+}
+
+function renderWallets() {
+  const wallets = loadWallets();
+  const list       = document.getElementById('wallets-card-list');
+  const emptyState = document.getElementById('wallet-empty-state');
+  const countLabel = document.getElementById('wallet-count-label');
+  const countBadge = document.getElementById('wallet-count-badge');
+  const totalEl    = document.getElementById('total-assets-value');
+
+  if (!list) return;
+
+  /* Tổng số dư */
+  const totalBalance = wallets.reduce((sum, w) => sum + (parseFloat(w.currentBalance) || 0), 0);
+  if (totalEl)    totalEl.textContent    = formatVND(totalBalance);
+  if (countBadge) countBadge.textContent = wallets.length;
+  if (countLabel) countLabel.textContent = wallets.length + ' tài khoản';
+
+  /* Empty state */
+  if (wallets.length === 0) {
+    list.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    populateTransferDropdowns([]);
+    return;
+  }
+  if (emptyState) emptyState.style.display = 'none';
+
+  /* Render cards — Fix #9: dùng data-id thay vì encode ID vào onclick string */
+  list.innerHTML = wallets.map((w, idx) => {
+    const cfg      = WALLET_TYPE_CONFIG[w.type] || WALLET_TYPE_CONFIG.other;
+    const gradient = getWalletGradient(w.type, idx);
+    const brand    = formatBrandName(w.provider, w.type);  /* Fix #6 */
+    const typeLbl  = WALLET_TYPE_CONFIG[w.type]?.label || 'Ví khác';
+    const statusDot = w.managementMode === 'connect'
+      ? '<i class="fa-solid fa-circle" style="font-size:7px;color:#4ADE80;"></i> Đã kết nối'
+      : '<i class="fa-solid fa-circle" style="font-size:7px;color:#FCD34D;"></i> Thủ công';
+    return `
+      <div class="bank-card-item" style="background:${gradient}; color:#FFFFFF;">
+        <div class="bci-header">
+          <div class="bci-brand">${escapeHtml(brand)}</div>
+          <div class="bci-type"><i class="fa-solid ${cfg.icon}"></i></div>
+        </div>
+        <div style="font-size:10px;opacity:0.6;margin-top:-6px;">${escapeHtml(typeLbl)}</div>
+        <div class="bci-balance">
+          <small>Số dư hiện có</small>
+          <strong>${formatVND(w.currentBalance)} <span style="font-size:13px;font-weight:600;">đ</span></strong>
+        </div>
+        <div class="bci-footer">
+          <span style="font-size:13px;font-weight:700;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(w.name)}</span>
+          <span class="bci-status">${statusDot}</span>
+        </div>
+        ${w.note ? `<div style="font-size:11px;opacity:0.65;margin-top:-2px;">${escapeHtml(w.note)}</div>` : ''}
+        <div class="bci-actions">
+          <button class="bci-action-btn" data-id="${escapeHtml(w.id)}" onclick="openEditWalletModal(this.dataset.id)">
+            <i class="fa-solid fa-pen"></i> Sửa
+          </button>
+          <button class="bci-action-btn danger" data-id="${escapeHtml(w.id)}" data-name="${escapeHtml(w.name)}" onclick="confirmDeleteWallet(this.dataset.id, this.dataset.name)">
+            <i class="fa-solid fa-trash"></i> Xóa
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  /* Fix #8: populate transfer dropdowns ngay sau render để phản ánh số dư mới nhất */
+  populateTransferDropdowns(wallets);
+}
+
+/* =========================================================================
+   Modal: Thêm ví mới
+   ========================================================================= */
+function openAddWalletModal() {
+  document.getElementById('new-wallet-name').value     = '';
+  document.getElementById('new-wallet-provider').value = '';
+  document.getElementById('new-wallet-balance').value  = '';
+  document.getElementById('new-wallet-note').value     = '';
+  hideError('add-wallet-error');
+
+  currentWalletType = 'bank';
+  document.querySelectorAll('#wallet-type-grid .wallet-type-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.type === 'bank');
+  });
+  updateProviderGroupVisibility('bank');
+
+  currentMgmtMode = 'manual';
+  document.querySelectorAll('#mgmt-mode-row .mgmt-mode-option:not(.disabled-opt)').forEach(el => {
+    el.classList.toggle('selected', el.dataset.mode === 'manual');
+  });
+
+  document.getElementById('modal-add-wallet').classList.add('open');
+  setTimeout(() => document.getElementById('new-wallet-name').focus(), 300);
+}
+
 function closeAddWalletModal() {
   document.getElementById('modal-add-wallet').classList.remove('open');
 }
-function saveMockWallet() {
-  const name = document.getElementById('new-wallet-name').value.trim();
+
+function selectWalletType(el, type) {
+  currentWalletType = type;
+  document.querySelectorAll('#wallet-type-grid .wallet-type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  updateProviderGroupVisibility(type);
+  /* Auto-suggest tên ví nếu chưa nhập */
+  const nameInput = document.getElementById('new-wallet-name');
+  if (!nameInput.value.trim()) {
+    const suggestions = { cash: 'Ví tiền mặt', savings: 'Sổ tiết kiệm', investment: 'Tài khoản đầu tư' };
+    if (suggestions[type]) nameInput.value = suggestions[type];
+  }
+}
+
+function updateProviderGroupVisibility(type) {
+  document.getElementById('provider-group').style.display = (type === 'cash') ? 'none' : 'block';
+}
+
+function selectMgmtMode(el, mode) {
+  if (el.classList.contains('disabled-opt')) return;
+  currentMgmtMode = mode;
+  document.querySelectorAll('#mgmt-mode-row .mgmt-mode-option:not(.disabled-opt)').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* Fix #7: validation số dư rõ ràng hơn — phân biệt "không nhập" vs "nhập 0" */
+function formatBalanceInput(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.addEventListener('input', function() {
+    const val = this.value.replace(/[^\d]/g, '');
+    this.value = val ? parseInt(val, 10).toLocaleString('vi-VN') : '';
+  });
+}
+
+function parseBalanceInput(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return null; /* null = chưa nhập gì */
+  const raw = input.value.replace(/[^\d]/g, '');
+  if (raw === '') return null;
+  return parseInt(raw, 10);
+}
+
+function saveWallet() {
+  const name     = document.getElementById('new-wallet-name').value.trim();
+  const provider = document.getElementById('new-wallet-provider').value.trim();
+  const balanceRaw = parseBalanceInput('new-wallet-balance');
+  const note     = document.getElementById('new-wallet-note').value.trim();
+
+  hideError('add-wallet-error');
+
   if (!name) {
-    alert('Vui lòng nhập tên ví hoặc ngân hàng!');
+    showError('add-wallet-error', 'Vui lòng nhập tên ví!');
+    document.getElementById('new-wallet-name').focus();
     return;
   }
+  /* Fix #7: chấp nhận 0 nhưng báo lỗi nếu nhập chữ/ký tự không hợp lệ dẫn đến null */
+  const balance = balanceRaw === null ? 0 : balanceRaw;
+  if (balance < 0) {
+    showError('add-wallet-error', 'Số dư không được âm!');
+    return;
+  }
+
+  const wallet = {
+    id: generateId(),
+    name,
+    type: currentWalletType,
+    provider,
+    initialBalance: balance,
+    currentBalance: balance,
+    managementMode: currentMgmtMode,
+    connectionStatus: 'none',
+    note,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const wallets = loadWallets();
+  wallets.push(wallet);
+  saveWallets(wallets);
+
+  /* Fix #1: truyền cùng ID client lên server để không bị split */
+  syncWalletToServer(wallet);
+
   closeAddWalletModal();
-  alert('Đã thêm ví ' + name + ' thành công!');
-  location.reload();
+  renderWallets();
+  if (window.showToast) window.showToast(`Đã thêm ví "${name}" thành công!`, 'success');
+}
+
+/* Fix #1: server giờ nhận và dùng client ID */
+async function syncWalletToServer(wallet) {
+  try {
+    await fetch('/api/wallets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(wallet),
+    });
+  } catch (e) { /* bỏ qua — localStorage là nguồn chính */ }
+}
+
+/* =========================================================================
+   Modal: Chỉnh sửa ví (Fix #4: thêm selector loại ví, Fix #5: provider là select)
+   ========================================================================= */
+function openEditWalletModal(walletId) {
+  const wallets = loadWallets();
+  const w = wallets.find(x => x.id === walletId);
+  if (!w) return;
+
+  editCurrentType = w.type || 'other';
+
+  document.getElementById('edit-wallet-id').value      = w.id;
+  document.getElementById('edit-wallet-name').value    = w.name;
+  document.getElementById('edit-wallet-note').value    = w.note || '';
+  /* Fix #7: hiển thị số dư đúng định dạng khi mở modal */
+  const bal = parseFloat(w.currentBalance) || 0;
+  document.getElementById('edit-wallet-balance').value = bal > 0 ? Math.round(bal).toLocaleString('vi-VN') : '';
+
+  /* Fix #4: đồng bộ type grid trong edit modal */
+  document.querySelectorAll('#edit-type-grid .wallet-type-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.type === editCurrentType);
+  });
+  updateEditProviderVisibility(editCurrentType);
+
+  /* Fix #5: set provider select đúng giá trị */
+  const provSel = document.getElementById('edit-wallet-provider-select');
+  if (provSel) {
+    /* Tìm option khớp, nếu không có thì set vào "other-text" */
+    const found = Array.from(provSel.options).some(opt => opt.value === w.provider);
+    if (found) {
+      provSel.value = w.provider;
+      document.getElementById('edit-wallet-provider-text').value = '';
+    } else {
+      provSel.value = '__other__';
+      document.getElementById('edit-wallet-provider-text').value = w.provider || '';
+    }
+    updateEditProviderOther(provSel);
+  }
+
+  hideError('edit-wallet-error');
+  document.getElementById('modal-edit-wallet').classList.add('open');
+  setTimeout(() => document.getElementById('edit-wallet-name').focus(), 300);
+}
+
+function closeEditWalletModal() {
+  document.getElementById('modal-edit-wallet').classList.remove('open');
+}
+
+/* Fix #4: chọn type trong edit modal */
+function selectEditWalletType(el, type) {
+  editCurrentType = type;
+  document.querySelectorAll('#edit-type-grid .wallet-type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  updateEditProviderVisibility(type);
+}
+
+function updateEditProviderVisibility(type) {
+  const grp = document.getElementById('edit-provider-group');
+  if (grp) grp.style.display = (type === 'cash') ? 'none' : 'block';
+}
+
+/* Fix #5: ẩn/hiện trường nhập tự do khi chọn "Khác" */
+function updateEditProviderOther(selectEl) {
+  const otherInput = document.getElementById('edit-wallet-provider-text');
+  if (!otherInput) return;
+  otherInput.style.display = (selectEl.value === '__other__') ? 'block' : 'none';
+}
+
+function updateWallet() {
+  const id      = document.getElementById('edit-wallet-id').value;
+  const name    = document.getElementById('edit-wallet-name').value.trim();
+  const note    = document.getElementById('edit-wallet-note').value.trim();
+  const balRaw  = parseBalanceInput('edit-wallet-balance');
+  const balance = balRaw === null ? 0 : balRaw;
+
+  /* Fix #5: lấy provider từ select hoặc free-text */
+  const provSel  = document.getElementById('edit-wallet-provider-select');
+  const provText = document.getElementById('edit-wallet-provider-text');
+  let provider = '';
+  if (provSel) {
+    provider = provSel.value === '__other__'
+      ? (provText?.value.trim() || '')
+      : provSel.value;
+  }
+
+  hideError('edit-wallet-error');
+
+  if (!name) {
+    showError('edit-wallet-error', 'Vui lòng nhập tên ví!');
+    document.getElementById('edit-wallet-name').focus();
+    return;
+  }
+  if (balance < 0) {
+    showError('edit-wallet-error', 'Số dư không được âm!');
+    return;
+  }
+
+  const wallets = loadWallets();
+  const idx = wallets.findIndex(w => w.id === id);
+  if (idx === -1) {
+    showError('edit-wallet-error', 'Không tìm thấy ví! Vui lòng tải lại trang.');
+    return;
+  }
+
+  wallets[idx].name           = name;
+  wallets[idx].type           = editCurrentType;   /* Fix #4 */
+  wallets[idx].provider       = provider;          /* Fix #5 */
+  wallets[idx].currentBalance = balance;
+  wallets[idx].note           = note;
+  wallets[idx].updatedAt      = new Date().toISOString();
+  saveWallets(wallets);
+
+  /* Sync server */
+  fetch(`/api/wallets/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, type: editCurrentType, provider, currentBalance: balance, note }),
+  }).catch(() => {});
+
+  closeEditWalletModal();
+  renderWallets();
+  if (window.showToast) window.showToast(`Đã cập nhật ví "${name}"!`, 'success');
+}
+
+/* =========================================================================
+   Xóa ví (Fix #9: dùng data-id attribute → không cần encode ID vào onclick string)
+   ========================================================================= */
+function confirmDeleteWallet(walletId, walletName) {
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-dialog-overlay';
+  /* Không dùng ID trong onclick string nữa — dùng data attribute trên button */
+  const innerHtml = `
+    <div class="confirm-dialog">
+      <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);margin-right:8px;"></i>Xóa ví?</h3>
+      <p>Bạn sắp xóa ví <strong>"${escapeHtml(walletName)}"</strong>.<br>Hành động này không thể hoàn tác. Lịch sử giao dịch sẽ không bị xóa nhưng ví sẽ không còn hiển thị.</p>
+      <div class="confirm-dialog-btns">
+        <button class="btn-confirm-cancel">Hủy</button>
+        <button class="btn-confirm-danger"><i class="fa-solid fa-trash"></i> Xóa ví</button>
+      </div>
+    </div>`;
+  overlay.innerHTML = innerHtml;
+
+  /* Gắn event listener thay vì inline onclick */
+  overlay.querySelector('.btn-confirm-cancel').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('.btn-confirm-danger').addEventListener('click', () => {
+    doDeleteWallet(walletId);
+    overlay.remove();
+  });
+  /* Đóng khi click backdrop */
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  document.body.appendChild(overlay);
+}
+
+function doDeleteWallet(walletId) {
+  const wallets  = loadWallets();
+  const w        = wallets.find(x => x.id === walletId);
+  const walletName = w ? w.name : '';
+  saveWallets(wallets.filter(x => x.id !== walletId));
+
+  fetch(`/api/wallets/${walletId}`, { method: 'DELETE' }).catch(() => {});
+
+  renderWallets();
+  if (window.showToast) window.showToast(`Đã xóa ví "${walletName}"!`, 'info');
+}
+
+/* =========================================================================
+   Modal: Chuyển tiền nội bộ (Fix #2: sync lên server /api/wallets/transfer)
+   ========================================================================= */
+function populateTransferDropdowns(wallets) {
+  const fromSel = document.getElementById('transfer-from');
+  const toSel   = document.getElementById('transfer-to');
+  if (!fromSel || !toSel) return;
+
+  /* Fix #8: luôn rebuild với số dư mới nhất */
+  const opts = wallets.map(w =>
+    `<option value="${escapeHtml(w.id)}">${escapeHtml(w.name)} (${formatVND(w.currentBalance)}đ)</option>`
+  ).join('');
+  fromSel.innerHTML = opts || '<option value="">— Chưa có ví nào —</option>';
+  toSel.innerHTML   = opts || '<option value="">— Chưa có ví nào —</option>';
+  /* Mặc định chọn ví thứ 2 cho "đến" để tránh trùng với "từ" */
+  if (wallets.length >= 2) toSel.selectedIndex = 1;
 }
 
 function openTransferModal() {
+  const wallets = loadWallets();
+  if (wallets.length < 2) {
+    if (window.showToast) window.showToast('Cần ít nhất 2 ví để chuyển tiền!', 'error');
+    return;
+  }
+  document.getElementById('transfer-amount').value = '';
+  hideError('transfer-error');
+  populateTransferDropdowns(wallets);
   document.getElementById('modal-transfer').classList.add('open');
 }
+
 function closeTransferModal() {
   document.getElementById('modal-transfer').classList.remove('open');
 }
-function executeMockTransfer() {
+
+async function executeTransfer() {
+  const fromId = document.getElementById('transfer-from').value;
+  const toId   = document.getElementById('transfer-to').value;
+  const amount = parseBalanceInput('transfer-amount');
+
+  hideError('transfer-error');
+
+  if (!fromId || !toId) { showError('transfer-error', 'Vui lòng chọn ví!'); return; }
+  if (fromId === toId)  { showError('transfer-error', 'Ví nguồn và ví đích không được giống nhau!'); return; }
+  if (!amount || amount <= 0) { showError('transfer-error', 'Số tiền phải lớn hơn 0!'); return; }
+
+  const wallets = loadWallets();
+  const from = wallets.find(w => w.id === fromId);
+  const to   = wallets.find(w => w.id === toId);
+  if (!from || !to) { showError('transfer-error', 'Không tìm thấy ví! Vui lòng tải lại trang.'); return; }
+
+  if ((parseFloat(from.currentBalance) || 0) < amount) {
+    showError('transfer-error', `Số dư ví "${from.name}" không đủ (hiện có ${formatVND(from.currentBalance)}đ)!`);
+    return;
+  }
+
+  /* Cập nhật localStorage ngay lập tức */
+  from.currentBalance = (parseFloat(from.currentBalance) || 0) - amount;
+  to.currentBalance   = (parseFloat(to.currentBalance)   || 0) + amount;
+  from.updatedAt = to.updatedAt = new Date().toISOString();
+  saveWallets(wallets);
+
+  /* Fix #2: sync transfer lên server */
+  try {
+    await fetch('/api/wallets/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fromId, toId, amount }),
+    });
+  } catch (e) { /* localStorage đã update rồi, bỏ qua lỗi server */ }
+
   closeTransferModal();
-  alert('Giao dịch chuyển tiền nội bộ giữa các ví thành công!');
+  renderWallets();
+  if (window.showToast) {
+    window.showToast(`Đã chuyển ${formatVND(amount)}đ từ "${from.name}" → "${to.name}"!`, 'success');
+  }
 }
+
+/* =========================================================================
+   Helper hiển thị / ẩn lỗi
+   ========================================================================= */
+function showError(containerId, message) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const span = el.querySelector('span');
+  if (span) span.textContent = message;
+  else el.textContent = message;
+  el.style.display = 'flex';
+}
+function hideError(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.style.display = 'none';
+}
+
+/* =========================================================================
+   Đóng modal khi click backdrop
+   ========================================================================= */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+/* =========================================================================
+   Khởi tạo
+   ========================================================================= */
+document.addEventListener('DOMContentLoaded', function() {
+  formatBalanceInput('new-wallet-balance');
+  formatBalanceInput('edit-wallet-balance');
+  formatBalanceInput('transfer-amount');
+  renderWallets();
+});
 </script>
 {% endblock %}

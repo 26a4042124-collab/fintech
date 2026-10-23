@@ -1061,77 +1061,11 @@ def add_transaction():
 @login_required
 def wallets():
     enriched_txns, health_data = get_financial_data()
-    balance = health_data.get('income', 0) - health_data.get('total_expense', 0)
-    
-    wallets_data = [
-        {
-            "id": "tcb",
-            "name": "Techcombank Visa",
-            "type": "Tài khoản thanh toán",
-            "account_no": "1903 •••• 5920",
-            "balance": 28500000,
-            "color": "linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 50%, #E8632A 100%)",
-            "text_color": "#FFFFFF",
-            "brand": "TECHCOMBANK",
-            "icon": "fa-credit-card",
-            "status": "Đang hoạt động"
-        },
-        {
-            "id": "vcb",
-            "name": "Vietcombank Connect24",
-            "type": "Tài khoản nhận lương",
-            "account_no": "1028 •••• 5938",
-            "balance": 18200000,
-            "color": "linear-gradient(135deg, #0A4D2E 0%, #006837 60%, #15803D 100%)",
-            "text_color": "#FFFFFF",
-            "brand": "VIETCOMBANK",
-            "icon": "fa-building-columns",
-            "status": "Đang hoạt động"
-        },
-        {
-            "id": "mbb",
-            "name": "MB Bank Số đẹp",
-            "type": "Tài khoản tiết kiệm",
-            "account_no": "0987 •••• 4321",
-            "balance": 7500000,
-            "color": "linear-gradient(135deg, #0B1D4F 0%, #002060 60%, #1D4ED8 100%)",
-            "text_color": "#FFFFFF",
-            "brand": "MB BANK",
-            "icon": "fa-piggy-bank",
-            "status": "Đang hoạt động"
-        },
-        {
-            "id": "momo",
-            "name": "Ví điện tử MoMo",
-            "type": "Ví thanh toán di động",
-            "account_no": "0912 •••• 789",
-            "balance": 3150000,
-            "color": "linear-gradient(135deg, #A50064 0%, #C4167E 60%, #E8632A 100%)",
-            "text_color": "#FFFFFF",
-            "brand": "MOMO PAY",
-            "icon": "fa-wallet",
-            "status": "Đang hoạt động"
-        },
-        {
-            "id": "cash",
-            "name": "Tiền mặt trong ví",
-            "type": "Tiền mặt",
-            "account_no": "Ví cá nhân",
-            "balance": 2000000,
-            "color": "linear-gradient(135deg, #2D3748 0%, #4A5568 100%)",
-            "text_color": "#FFFFFF",
-            "brand": "TIỀN MẶT",
-            "icon": "fa-money-bill-wave",
-            "status": "Sẵn sàng"
-        }
-    ]
-    total_assets = sum(w['balance'] for w in wallets_data)
-
+    # Fix #3: Không truyền hardcoded wallets_data nữa.
+    # Wallet cards được render hoàn toàn từ localStorage trên client (JS).
+    # Server chỉ cung cấp recent_txns để hiển thị giao dịch gần đây.
     return render_template('wallets.html',
         user=session['user'],
-        wallets=wallets_data,
-        total_assets=total_assets,
-        balance=balance,
         recent_txns=enriched_txns[:6]
     )
 
@@ -1344,7 +1278,157 @@ def api_transactions():
     return jsonify({"total": len(enriched), "transactions": enriched})
 
 # ==========================================================================
-# App Runner
+
+# ==========================================================================
+# 11. Wallet API (localStorage-backed, session as fallback)
+# ==========================================================================
+@app.route('/api/wallets', methods=['GET'])
+@login_required
+def api_get_wallets():
+    """Trả về danh sách ví của người dùng hiện tại từ session."""
+    wallets_list = session.get('user_wallets', [])
+    return jsonify({"success": True, "wallets": wallets_list})
+
+@app.route('/api/wallets', methods=['POST'])
+@login_required
+def api_add_wallet():
+    """Thêm ví mới vào danh sách."""
+    data = request.get_json() or {}
+    # Validate dữ liệu bắt buộc
+    name = (data.get('name') or '').strip()
+    if not name:
+        return jsonify({"success": False, "error": "Tên ví là bắt buộc!"}), 400
+    balance_raw = data.get('initialBalance', 0)
+    try:
+        balance = float(balance_raw)
+        if balance < 0:
+            return jsonify({"success": False, "error": "Số dư không được âm!"}), 400
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "error": "Số dư không hợp lệ!"}), 400
+
+    # Fix #1: Dùng client_id nếu có (để localStorage và session dùng cùng ID)
+    # Client đã tạo ID duy nhất – server chấp nhận để tránh ID bị split
+    client_id = (data.get('id') or '').strip()
+    # Validate client_id: chỉ cho phép ký tự an toàn, không rỗng
+    import re as _re
+    if not client_id or not _re.match(r'^[A-Za-z0-9_\-]{1,64}$', client_id):
+        client_id = f"W_{int(time.time()*1000)}"
+
+    wallet = {
+        "id": client_id,
+        "name": name,
+        "type": data.get('type', 'other'),
+        "provider": (data.get('provider') or '').strip(),
+        "initialBalance": balance,
+        "currentBalance": balance,
+        "managementMode": data.get('managementMode', 'manual'),
+        "connectionStatus": "none",
+        "note": (data.get('note') or '').strip(),
+        "createdAt": data.get('createdAt') or time.strftime('%Y-%m-%dT%H:%M:%S'),
+        "updatedAt": time.strftime('%Y-%m-%dT%H:%M:%S'),
+    }
+    if 'user_wallets' not in session:
+        session['user_wallets'] = []
+    # Ngăn trùng ID: nếu client_id đã tồn tại thì update thay vì thêm mới
+    existing_ids = [w['id'] for w in session['user_wallets']]
+    if client_id in existing_ids:
+        session['user_wallets'] = [wallet if w['id'] == client_id else w
+                                   for w in session['user_wallets']]
+    else:
+        session['user_wallets'] = session['user_wallets'] + [wallet]
+    session.modified = True
+    return jsonify({"success": True, "wallet": wallet}), 201
+
+@app.route('/api/wallets/<wallet_id>', methods=['PUT'])
+@login_required
+def api_update_wallet(wallet_id):
+    """Cập nhật thông tin ví."""
+    data = request.get_json() or {}
+    wallets_list = session.get('user_wallets', [])
+    updated = None
+    new_list = []
+    for w in wallets_list:
+        if w.get('id') == wallet_id:
+            # Chỉ cho phép sửa các trường an toàn
+            if 'name' in data:
+                w['name'] = (data['name'] or '').strip()
+            if 'type' in data:
+                w['type'] = data['type']
+            if 'provider' in data:
+                w['provider'] = (data['provider'] or '').strip()
+            if 'note' in data:
+                w['note'] = (data['note'] or '').strip()
+            if 'currentBalance' in data:
+                try:
+                    bal = float(data['currentBalance'])
+                    if bal >= 0:
+                        w['currentBalance'] = bal
+                except (TypeError, ValueError):
+                    pass
+            w['updatedAt'] = time.strftime('%Y-%m-%dT%H:%M:%S')
+            updated = w
+        new_list.append(w)
+    if not updated:
+        return jsonify({"success": False, "error": "Không tìm thấy ví!"}), 404
+    session['user_wallets'] = new_list
+    session.modified = True
+    return jsonify({"success": True, "wallet": updated})
+
+@app.route('/api/wallets/<wallet_id>', methods=['DELETE'])
+@login_required
+def api_delete_wallet(wallet_id):
+    """Xóa ví theo ID."""
+    wallets_list = session.get('user_wallets', [])
+    new_list = [w for w in wallets_list if w.get('id') != wallet_id]
+    if len(new_list) == len(wallets_list):
+        return jsonify({"success": False, "error": "Không tìm thấy ví!"}), 404
+    session['user_wallets'] = new_list
+    session.modified = True
+    return jsonify({"success": True})
+
+# Fix #2: API chuyển tiền nội bộ
+@app.route('/api/wallets/transfer', methods=['POST'])
+@login_required
+def api_transfer_wallet():
+    """Chuyển tiền giữa 2 ví trong session."""
+    data = request.get_json() or {}
+    from_id = (data.get('fromId') or '').strip()
+    to_id   = (data.get('toId')   or '').strip()
+    try:
+        amount = float(data.get('amount', 0))
+    except (TypeError, ValueError):
+        amount = 0
+
+    if not from_id or not to_id:
+        return jsonify({"success": False, "error": "Thiếu thông tin ví!"}), 400
+    if from_id == to_id:
+        return jsonify({"success": False, "error": "Ví nguồn và ví đích không được giống nhau!"}), 400
+    if amount <= 0:
+        return jsonify({"success": False, "error": "Số tiền phải lớn hơn 0!"}), 400
+
+    wallets_list = session.get('user_wallets', [])
+    from_w = next((w for w in wallets_list if w['id'] == from_id), None)
+    to_w   = next((w for w in wallets_list if w['id'] == to_id),   None)
+    if not from_w:
+        return jsonify({"success": False, "error": "Không tìm thấy ví nguồn!"}), 404
+    if not to_w:
+        return jsonify({"success": False, "error": "Không tìm thấy ví đích!"}), 404
+    if (float(from_w.get('currentBalance', 0)) < amount):
+        return jsonify({"success": False, "error": f"Số dư ví '{from_w['name']}' không đủ!"}), 400
+
+    from_w['currentBalance'] = float(from_w.get('currentBalance', 0)) - amount
+    to_w['currentBalance']   = float(to_w.get('currentBalance',   0)) + amount
+    from_w['updatedAt'] = to_w['updatedAt'] = time.strftime('%Y-%m-%dT%H:%M:%S')
+    session['user_wallets'] = wallets_list
+    session.modified = True
+    return jsonify({
+        "success": True,
+        "fromBalance": from_w['currentBalance'],
+        "toBalance":   to_w['currentBalance'],
+    })
+
+# ==========================================================================
+# 12. App Runner
 # ==========================================================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
