@@ -297,10 +297,10 @@ def compute_financial_health(
         f"{'Cần cắt giảm chi tiêu ngay để tránh cạn ví vào cuối tháng!' if is_deficit_risk else 'Dòng tiền duy trì ổn định, tiếp tục giữ vững phong độ!'}",
         
         f"Phát hiện {len(subscription_items)} khoản dịch vụ số định kỳ trừ ngầm {total_sub_leak:,.0f} VNĐ/tháng "
-        f"(Netflix, Spotify, iCloud...). Khuyến nghị hủy các gói ít sử dụng để tiết kiệm ngay ~350.000 VNĐ.",
+        f"(Netflix, Spotify, iCloud...). Khuyến nghị hủy các gói ít sử dụng để tiết kiệm ngay ~{total_sub_leak:,.0f} VNĐ.",
         
         f"Ghi nhận {len(night_impulse_items)} đơn mua sắm đêm sau 22h00 tổng cộng {total_night_impulse:,.0f} VNĐ. "
-        f"Khuyến nghị áp dụng quy tắc 'chờ 24 giờ' để tiết kiệm thêm ~1.850.000 VNĐ.",
+        f"Khuyến nghị áp dụng quy tắc 'chờ 24 giờ' để tiết kiệm thêm ~{total_night_impulse:,.0f} VNĐ.",
         
         f"Đã gom được {monthly_round_up_total:,.0f} VNĐ tiền lẻ làm tròn từ {round_up_txns_count} giao dịch. "
         f"Bạn có thể chuyển ngay vào hũ Mục tiêu tài chính để kích hoạt lãi kép micro-investing!"
@@ -336,12 +336,14 @@ def compute_financial_health(
         "subscription_leaks": {
             "count": len(subscription_items),
             "total_amount": total_sub_leak,
-            "list": subscription_items
+            "list": subscription_items,
+            "items": subscription_items
         },
         "impulse_night_spending": {
             "count": len(night_impulse_items),
             "total_amount": total_night_impulse,
-            "list": night_impulse_items
+            "list": night_impulse_items,
+            "items": night_impulse_items
         },
         "category_breakdown": category_breakdown,
         "cashflow_forecast": cashflow_forecast,

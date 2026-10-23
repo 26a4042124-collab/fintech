@@ -15,8 +15,29 @@ def generate_chatbot_response(user_message, health_data):
     bench_wants = target_ratio.get("wants", 30)
     bench_savings = target_ratio.get("savings", 20)
     
+    # 0. Câu hỏi về Tổng chi tiêu / Tiêu bao nhiêu / Đã tiêu
+    if any(k in msg for k in ["tiêu bao nhiêu", "tổng chi", "chi tiêu tháng", "đã tiêu", "tổng chi tiêu"]):
+        tot_exp = health_data.get("total_expense", 0)
+        needs_amt = health_data.get("needs", {}).get("amount", 0)
+        needs_pct = health_data.get("needs", {}).get("percentage", 0)
+        wants_amt = health_data.get("wants", {}).get("amount", 0)
+        wants_pct = health_data.get("wants", {}).get("percentage", 0)
+        sav_amt = health_data.get("savings", {}).get("amount", 0)
+        sav_pct = health_data.get("savings", {}).get("percentage", 0)
+        rem = health_data.get("net_remaining", 0)
+        burn = health_data.get("cashflow_forecast", {}).get("daily_burn_rate", 0)
+        return (
+            f"💸 **Tổng kết chi tiêu tháng này của bạn:**\n\n"
+            f"• **Tổng đã chi**: **{tot_exp:,.0f} VNĐ** (trên tổng thu nhập {income:,.0f} VNĐ)\n"
+            f"• **Thiết yếu (Needs)**: **{needs_amt:,.0f} VNĐ** ({needs_pct}%)\n"
+            f"• **Mong muốn (Wants)**: **{wants_amt:,.0f} VNĐ** ({wants_pct}%)\n"
+            f"• **Tiết kiệm (Savings)**: **{sav_amt:,.0f} VNĐ** ({sav_pct}%)\n"
+            f"• **Số dư ròng còn lại**: **{rem:,.0f} VNĐ**\n\n"
+            f"💡 Tốc độ tiêu dùng trung bình hiện tại: **{burn:,.0f} VNĐ/ngày**."
+        )
+
     # 1. Câu hỏi về Dự báo Dòng tiền / Cạn ví / Cuối tháng / Burn rate
-    if any(k in msg for k in ["dự báo", "dòng tiền", "cạn ví", "hết tiền", "thâm hụt", "burn rate", "tốc độ tiêu", "cuối tháng"]):
+    elif any(k in msg for k in ["dự báo", "dòng tiền", "cạn ví", "hết tiền", "thâm hụt", "burn rate", "tốc độ tiêu", "cuối tháng"]):
         cf = health_data.get("cashflow_forecast", {})
         burn = cf.get("daily_burn_rate", 0)
         day_broke = cf.get("day_broke")
@@ -90,7 +111,7 @@ def generate_chatbot_response(user_message, health_data):
         return reply
 
     # 5. Câu hỏi về Ăn uống / Cà phê
-    elif any(k in msg for k in ["ăn", "uống", "cà phê", "cafe", "nhà hàng"]):
+    elif any(re.search(r'\b' + re.escape(w) + r'\b', msg) for w in ["ăn", "uống", "ăn uống", "cà phê", "cafe", "nhà hàng", "quán ăn", "trà sữa", "cơm trưa"]):
         cat_breakdown = health_data.get("category_breakdown", {})
         dining_amt = cat_breakdown.get("Ăn uống & Cà phê ngoài", 0)
         pct = round((dining_amt / income) * 100, 1)
@@ -103,13 +124,13 @@ def generate_chatbot_response(user_message, health_data):
     # 6. Câu hỏi về Gói đăng ký ngầm / Rò rỉ định kỳ / Netflix / Spotify
     elif any(k in msg for k in ["ngầm", "rò rỉ", "định kỳ", "subscription", "netflix", "spotify", "icloud"]):
         sub_data = health_data.get("subscription_leaks", {})
-        items = sub_data.get("items", [])
+        items = sub_data.get("items") or sub_data.get("list") or []
         total = sub_data.get("total_amount", 0)
-        item_names = ", ".join([f"{it['merchant'][:25]} ({it['amount']:,.0f}đ)" for it in items])
+        item_names = ", ".join([f"{it['merchant'][:45]} ({it['amount']:,.0f}đ)" for it in items])
         return (
             f"🔍 Hệ thống phát hiện **{len(items)} dịch vụ gia hạn tự động ngầm** hàng tháng của bạn với tổng số tiền **{total:,.0f} VNĐ/tháng**:\n"
-            f"- Chi tiết: {item_names}.\n"
-            f"💡 **Khuyến nghị**: Bạn nên rà soát lại gói nào ít sử dụng để hủy ngay trước kỳ thanh toán tới, bảo vệ thêm **350.000 VNĐ** mỗi tháng!"
+            f"- Chi tiết: {item_names or 'Không có'}.\n"
+            f"💡 **Khuyến nghị**: Bạn nên rà soát lại gói nào ít sử dụng để hủy ngay trước kỳ thanh toán tới, bảo vệ thêm **{total:,.0f} VNĐ** mỗi tháng!"
         )
         
     # 7. Câu hỏi về Mua sắm đêm / Chi tiêu bốc đồng / Shopee / TikTok
@@ -119,7 +140,7 @@ def generate_chatbot_response(user_message, health_data):
         cnt = impulse_data.get("count", 0)
         return (
             f"🌙 Hệ thống ghi nhận **{cnt} đơn hàng mua sắm/ăn vặt sau 22h00 đêm**, tổng cộng **{total:,.0f} VNĐ**.\n"
-            f"Đây là thói quen 'chi tiêu cảm xúc' khiến ngân sách thâm hụt nhanh nhất. Áp dụng ngay quy tắc **'chờ 24 giờ trước khi thanh toán giỏ hàng đêm'** để cắt giảm ít nhất **1.850.000 VNĐ** lãng phí!"
+            f"Đây là thói quen 'chi tiêu cảm xúc' khiến ngân sách thâm hụt nhanh nhất. Áp dụng ngay quy tắc **'chờ 24 giờ trước khi thanh toán giỏ hàng đêm'** để cắt giảm ít nhất **{total:,.0f} VNĐ** lãng phí!"
         )
         
     # 8. Câu hỏi về Điểm sức khỏe tài chính & Tỷ lệ tùy chọn

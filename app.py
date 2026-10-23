@@ -100,8 +100,9 @@ def get_financial_data():
     custom_txns = session.get('custom_transactions', [])
     all_txns = list(custom_txns) + list(raw_txns)
     enriched_txns = process_all_transactions(all_txns)
+    enriched_txns_sorted = sorted(enriched_txns, key=lambda x: x.get('timestamp', ''), reverse=True)
     health_data = compute_financial_health(enriched_txns, total_income=monthly_income)
-    return enriched_txns, health_data
+    return enriched_txns_sorted, health_data
 
 # ==========================================================================
 # 1. Landing / Onboarding
@@ -1141,11 +1142,14 @@ def wallets():
 @app.route('/budgets', methods=['GET', 'POST'])
 @login_required
 def budgets():
+    enriched_txns, health_data = get_financial_data()
+    cb = health_data.get('category_breakdown', {})
+
     budgets_list = [
         {
             "category": "Ăn uống & Cà phê",
             "icon": "utensils",
-            "spent": 4200000,
+            "spent": cb.get("Ăn uống & Cà phê ngoài", 0) or 4200000,
             "limit": 5500000,
             "color": "#E8632A",
             "bg": "rgba(232, 99, 42, 0.12)"
@@ -1153,7 +1157,7 @@ def budgets():
         {
             "category": "Đi lại & Xăng xe",
             "icon": "motorcycle",
-            "spent": 950000,
+            "spent": cb.get("Đi lại & Xăng xe", 0) or 950000,
             "limit": 1500000,
             "color": "#3B82F6",
             "bg": "rgba(59, 130, 246, 0.12)"
@@ -1161,7 +1165,7 @@ def budgets():
         {
             "category": "Mua sắm cá nhân",
             "icon": "bag-shopping",
-            "spent": 3100000,
+            "spent": cb.get("Mua sắm cá nhân", 0) or 3100000,
             "limit": 3000000,
             "color": "#EF4444",
             "bg": "rgba(239, 68, 68, 0.12)"
@@ -1169,7 +1173,7 @@ def budgets():
         {
             "category": "Nhà cửa & Hóa đơn",
             "icon": "house",
-            "spent": 3500000,
+            "spent": cb.get("Nhà ở & Hóa đơn tiện ích", 0) or 3500000,
             "limit": 4000000,
             "color": "#10B981",
             "bg": "rgba(16, 185, 129, 0.12)"
@@ -1177,7 +1181,7 @@ def budgets():
         {
             "category": "Giải trí & Bạn bè",
             "icon": "film",
-            "spent": 1200000,
+            "spent": cb.get("Giải trí & Phim ảnh", 0) or 1200000,
             "limit": 2000000,
             "color": "#8B5CF6",
             "bg": "rgba(139, 92, 246, 0.12)"
@@ -1185,7 +1189,7 @@ def budgets():
         {
             "category": "Sức khỏe & Thuốc",
             "icon": "heart-pulse",
-            "spent": 350000,
+            "spent": cb.get("Y tế & Giáo dục", 0) or 350000,
             "limit": 1000000,
             "color": "#06B6D4",
             "bg": "rgba(6, 182, 212, 0.12)"

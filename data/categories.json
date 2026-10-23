@@ -9,12 +9,14 @@
     "is_default": true,
     "is_hidden": false,
     "keywords": [
-      "LUONG",
-      "THUONG",
       "CHUYEN LUONG",
+      "TIEN LUONG",
+      "BANG LUONG",
       "SALARY",
       "BONUS",
-      "THU NHAP"
+      "THUONG",
+      "THU NHAP",
+      "PAYROLL"
     ]
   },
   {
@@ -51,7 +53,10 @@
       "VNPT",
       "VIETTEL",
       "FPT",
-      "DIEN THOAI TRA SAU"
+      "DIEN THOAI TRA SAU",
+      "HOA DON SINH HOAT",
+      "HOA DON",
+      "TIEN NHA"
     ]
   },
   {
@@ -69,7 +74,8 @@
       "BACH HOA XANH",
       "THUC PHAM",
       "SIEU THI",
-      "CHO "
+      "CHO ",
+      "DI CHO"
     ]
   },
   {
@@ -88,7 +94,9 @@
       "XANH SM",
       "PETROLIMEX",
       "XANG",
-      "GUI XE"
+      "GUI XE",
+      "DI LAI",
+      "XANG XE"
     ]
   },
   {
@@ -108,7 +116,8 @@
       "THUOC",
       "KHOA HOC",
       "TIENG ANH",
-      "HOC PHI"
+      "HOC PHI",
+      "SUC KHOE"
     ]
   },
   {
@@ -131,7 +140,10 @@
       "BUN DAU",
       "LAU MANWAH",
       "GRABFOOD",
-      "SHOPEEFOOD"
+      "SHOPEEFOOD",
+      "AN UONG",
+      "CA PHE",
+      "TRA SUA"
     ]
   },
   {
@@ -150,7 +162,8 @@
       "THOI TRANG",
       "MY PHAM",
       "TAI NGHE",
-      "GIAY"
+      "GIAY",
+      "MUA SAM"
     ]
   },
   {
@@ -169,7 +182,9 @@
       "ICLOUD",
       "YOUTUBE",
       "CHATGPT",
-      "GYM"
+      "GYM",
+      "SUBSCRIPTION",
+      "DINH KY"
     ]
   },
   {
@@ -186,7 +201,8 @@
       "LOTTE CINEMA",
       "KARAOKE",
       "VE XEM PHIM",
-      "DU LICH"
+      "DU LICH",
+      "GIAI TRI"
     ]
   },
   {

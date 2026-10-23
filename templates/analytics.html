@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.65)', boxWidth: 10, padding: 14, font: { size: 12, weight: '600' } } },
+          legend: { position: 'bottom', labels: { color: '#334155', boxWidth: 12, padding: 14, font: { size: 12, weight: '600' } } },
           tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${(ctx.raw||0).toLocaleString('vi-VN')}đ` } }
         },
         cutout: '65%'
@@ -197,8 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
           tooltip: { callbacks: { label: ctx => ` ${(ctx.raw||0).toLocaleString('vi-VN')}đ` } }
         },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => (v/1e6).toFixed(1)+'Tr', font:{size:11} } },
-          y: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)', font:{size:11,weight:'600'} } }
+          x: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#64748B', callback: v => (v/1e6).toFixed(1)+'Tr', font:{size:11, weight:'500'} } },
+          y: { grid: { display: false }, ticks: { color: '#1E293B', font:{size:11,weight:'600'} } }
         }
       }
     });

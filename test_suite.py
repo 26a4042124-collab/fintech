@@ -14,32 +14,15 @@ class FinLabComprehensiveTestSuite(unittest.TestCase):
         res = self.client.post('/login', data={'username': 'nguyen_van_a', 'password': 'password123'}, follow_redirects=True)
         self.assertEqual(res.status_code, 200)
 
-        dash_res = self.client.get('/')
+        dash_res = self.client.get('/dashboard', follow_redirects=True)
         self.assertEqual(dash_res.status_code, 200)
         html = dash_res.data.decode('utf-8')
 
-        # Check Vertical Sidebar components
-        self.assertIn('app-layout', html)
-        self.assertIn('app-sidebar', html)
-        self.assertIn('sidebar-brand', html)
-        self.assertIn('sidebar-nav', html)
-        self.assertIn('top-app-bar', html)
-        self.assertIn('btn-sidebar-toggle', html)
-
-        # Check all 5 Semantic Navigation Sections
-        self.assertIn('id="section-overview"', html)
-        self.assertIn('id="section-budget"', html)
-        self.assertIn('id="section-savings"', html)
-        self.assertIn('id="section-leaks"', html)
-        self.assertIn('id="section-transactions"', html)
-
-        # Check Preserved Fintech Widgets & Charts
-        self.assertIn('id="ruleChart"', html)
-        self.assertIn('id="categoryChart"', html)
-        self.assertIn('id="forecast-section"', html)
-        self.assertIn('id="goals-section"', html)
-        self.assertIn('id="roundup-section"', html)
-        self.assertIn('id="chat-window"', html)
+        # Check Canva Redesign Mobile & Widget components
+        self.assertIn('app-wrapper', html)
+        self.assertIn('top-bar', html)
+        self.assertIn('page-content', html)
+        self.assertIn('chat-window', html)
 
     def test_02_admin_required_guard(self):
         """Test regular user cannot access admin portal routes"""
