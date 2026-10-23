@@ -71,6 +71,76 @@ Mở trình duyệt web và truy cập địa chỉ:
 
 ---
 
+## 📱 Chạy FinLab trên Điện thoại cùng WiFi
+
+### Yêu cầu
+- ✅ Máy tính và điện thoại **cùng mạng WiFi**
+- ✅ Python 3.x đã cài đặt trên máy tính
+- ✅ Dependencies đã cài: `pip install -r requirements.txt`
+
+### Các bước thực hiện
+
+1. **Khởi chạy Flask app:**
+   ```bash
+   python app.py
+   ```
+   
+   Khi ứng dụng khởi chạy, bạn sẽ thấy thông báo:
+   ```
+   ===========================================================================
+   🚀 FINLAB ENTERPRISE PFM & ADMIN PORTAL ĐANG KHỞI CHẠY...
+   
+   💻 Trên máy tính này:   http://127.0.0.1:5000
+   📱 Trên điện thoại cùng WiFi: http://192.168.0.145:5000
+   
+   👉 Tài khoản User Demo:  nguyen_van_a | Mật khẩu: password123
+   👉 Tài khoản Admin Demo: admin        | Mật khẩu: admin123
+   ===========================================================================
+   ```
+
+2. **Truy cập từ điện thoại:**
+   - Trên điện thoại, mở trình duyệt (Chrome, Safari, Firefox, v.v.)
+   - Nhập URL: **`http://192.168.0.145:5000`** (thay IP theo thông báo ở terminal)
+   - Đợi trang tải (lần đầu có thể mất 1-2 giây)
+   - Đăng nhập với tài khoản demo
+
+### 🔧 Xử lý sự cố
+
+**❌ Không thể kết nối từ điện thoại?**
+
+1. **Kiểm tra kết nối WiFi:**
+   - Đảm bảo điện thoại và máy tính dùng **cùng 1 WiFi network**
+   - Tránh một thiết bị dùng WiFi, một thiết bị dùng Ethernet
+
+2. **Kiểm tra Firewall Windows:**
+   - Bật Windows Defender Firewall → "Cho phép ứng dụng qua tường lửa"
+   - Tìm Python, đảm bảo "Private networks" được cho phép ✅
+
+3. **Xác nhận IP đúng:**
+   ```bash
+   # Chạy lệnh để lấy IP chính xác:
+   ipconfig
+   
+   # Tìm dòng "IPv4 Address" trong kết nối WiFi của bạn
+   ```
+
+4. **Port 5000 bị chiếm?**
+   ```bash
+   # Thay đổi port sang 8080:
+   set PORT=8080
+   python app.py
+   
+   # Rồi truy cập: http://192.168.0.145:8080
+   ```
+
+### 💡 Tips & Mẹo
+
+- **Tự động reload:** Nhờ `debug=True`, app sẽ tự động reload khi bạn sửa file Python. Trên điện thoại, chỉ cần reload trình duyệt (F5 hoặc pull down)
+- **Tắt Debug Mode (khi deploy):** Sửa dòng cuối `app.py`: `app.run(host='0.0.0.0', port=port, debug=False)`
+- **localStorage:** Dữ liệu ví, giao dịch được lưu trên điện thoại; sessions lưu trên server
+
+---
+
 ## 🔑 Tài khoản Đăng nhập Demo
 
 Hệ thống có sẵn các nút **Đăng nhập 1-chạm** trên giao diện đăng nhập:

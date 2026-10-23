@@ -1432,10 +1432,25 @@ def api_transfer_wallet():
 # ==========================================================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print("=" * 65)
+    
+    # Lấy IP address của máy tính
+    import socket
+    try:
+        # Lấy IP address local
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        local_ip = '127.0.0.1'
+    
+    print("=" * 75)
     print("🚀 FINLAB ENTERPRISE PFM & ADMIN PORTAL ĐANG KHỞI CHẠY...")
-    print(f"👉 Mở trình duyệt web và truy cập: http://127.0.0.1:{port}")
-    print("👉 Tài khoản User Demo:  nguyen_van_a | Mật khẩu: password123")
-    print("👉 Tài khoản Admin Demo: admin        | Mật khẩu: admin123")
-    print("=" * 65)
+    print(f"")
+    print(f"💻 Trên máy tính này:   http://127.0.0.1:{port}")
+    print(f"📱 Trên điện thoại cùng WiFi: http://{local_ip}:{port}")
+    print(f"")
+    print(f"👉 Tài khoản User Demo:  nguyen_van_a | Mật khẩu: password123")
+    print(f"👉 Tài khoản Admin Demo: admin        | Mật khẩu: admin123")
+    print("=" * 75)
     app.run(host='0.0.0.0', port=port, debug=True)
