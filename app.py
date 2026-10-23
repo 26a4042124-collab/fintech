@@ -89,11 +89,7 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user' not in session:
-            user = get_user_by_id('usr_001') or get_user_by_id('user_001')
-            if user:
-                session['user'] = sanitize_user(user)
-            else:
-                return redirect(url_for('login'))
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated
 
@@ -113,11 +109,8 @@ def get_financial_data():
 # ==========================================================================
 @app.route('/')
 def landing():
-    if 'user' not in session:
-        user = get_user_by_id('usr_001') or get_user_by_id('user_001')
-        if user:
-            session['user'] = sanitize_user(user)
-    return redirect(url_for('dashboard'))
+    # User requirement: truy cập link là vào thẳng trang login
+    return redirect(url_for('login'))
 
 @app.route('/landing')
 def landing_page():
@@ -260,13 +253,17 @@ def register_goals():
 # ==========================================================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'user' in session:
+    # Cho phép truy cập thẳng vào trang login hoặc chuyển tiếp nếu user bấm tiếp tục
+    if request.args.get('continue') and 'user' in session:
         if session['user'].get('role') == 'admin':
             return redirect(url_for('admin_overview'))
         return redirect(url_for('dashboard'))
+
     error = None
     username = ''
     register_success = session.pop('register_success', False)
+    current_session_user = session.get('user')
+
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
@@ -299,7 +296,12 @@ def login():
                 ip=request.remote_addr or "127.0.0.1"
             )
             
-    return render_template('login.html', error=error, username=username, register_success=register_success)
+    return render_template('login.html', 
+        error=error, 
+        username=username, 
+        register_success=register_success,
+        current_session_user=current_session_user
+    )
 
 @app.route('/logout')
 def logout():
@@ -1205,6 +1207,11 @@ def budgets():
             "bg": "rgba(6, 182, 212, 0.12)"
         }
     ]
+    # Áp dụng các hạn mức do người dùng tự điều chỉnh (nếu có)
+    custom_limits = session.get('custom_budget_limits', {})
+    for b in budgets_list:
+        if b['category'] in custom_limits:
+            b['limit'] = float(custom_limits[b['category']])
     
     total_spent = sum(b['spent'] for b in budgets_list)
     total_limit = sum(b['limit'] for b in budgets_list)
@@ -1219,6 +1226,23 @@ def budgets():
         percent_spent=percent_spent,
         days_left=days_left
     )
+
+@app.route('/api/budgets/update', methods=['POST'])
+@login_required
+def api_update_budget():
+    data = request.get_json() or {}
+    category = data.get('category')
+    new_limit = data.get('limit')
+    try:
+        new_limit = float(new_limit)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Số tiền hạn mức không hợp lệ!"}), 400
+    
+    if 'custom_budget_limits' not in session:
+        session['custom_budget_limits'] = {}
+    session['custom_budget_limits'][category] = new_limit
+    session.modified = True
+    return jsonify({"success": True, "message": f"Đã cập nhật hạn mức danh mục '{category}' thành {new_limit:,.0f}đ!"})
 
 # ==========================================================================
 # 5e. Notifications (Thông báo)

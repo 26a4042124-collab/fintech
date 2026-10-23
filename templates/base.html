@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#FFF8F5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>{% block title %}FinLab{% endblock %} — Quản lý Tài chính</title>
+  <title>{% block title %}FinLab{% endblock %} — Quản lý Tài chính Thông minh</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,196 +16,218 @@
 </head>
 <body class="phone-mockup-body">
   
-  <div class="app-layout-wrapper">
-    <!-- Desktop Sidebar (Visible on screens >= 768px) -->
-    <aside class="desktop-sidebar" id="desktop-sidebar">
-      <div class="sidebar-brand-box">
-        <div class="sidebar-logo-icon">🧪</div>
-        <div class="sidebar-brand-text">
-          <span class="brand-title">FIN<span>LAB</span></span>
-          <span class="brand-sub">PFM &amp; OPEN BANKING</span>
-        </div>
+  <!-- Main Studio Stage (Centers the Smartphone Mockup) -->
+  <div class="app-stage-wrapper">
+    <!-- Desktop Ambient Control Bar -->
+    <aside class="desktop-app-toolbar">
+      <div class="toolbar-brand">
+        <span class="toolbar-logo-icon">🧪</span>
+        <span class="toolbar-app-name">FIN<span>LAB</span> <small>MOBILE PFM APP</small></span>
       </div>
-
-      <!-- User Card -->
-      <div class="sidebar-user-card">
-        <div class="sidebar-user-avatar">
-          {{ session.user.full_name[0] if session.user and session.user.full_name else 'A' }}
-        </div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name">{{ session.user.full_name if session.user else 'Nguyễn Văn A' }}</div>
-          <div class="sidebar-user-role">
-            <span class="user-status-dot"></span> {{ 'Quản trị viên' if session.user and session.user.role == 'admin' else 'Tài khoản cá nhân' }}
-          </div>
-        </div>
+      <div class="toolbar-actions">
+        <button class="toolbar-btn active" id="btn-mode-phone" title="Chế độ App Chuẩn (iPhone 16 Pro)"><i class="fa-solid fa-mobile-screen"></i> <span>Chế độ App</span></button>
+        <button class="toolbar-btn" id="btn-mode-max" title="Kích thước Lớn"><i class="fa-solid fa-mobile"></i> <span>Màn hình lớn</span></button>
+        <button class="toolbar-btn" id="btn-mode-fullscreen" title="Toàn màn hình"><i class="fa-solid fa-expand"></i> <span>Toàn màn hình</span></button>
       </div>
-
-      <!-- Navigation Links -->
-      <nav class="sidebar-nav-container">
-        <div class="sidebar-group-title">QUẢN LÝ TÀI CHÍNH</div>
-        <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item {% if active_page == 'dashboard' %}active{% endif %}">
-          <i class="fa-solid fa-house"></i>
-          <span>Bảng điều khiển</span>
-        </a>
-        <a href="{{ url_for('transactions') }}" class="sidebar-nav-item {% if active_page == 'transactions' %}active{% endif %}">
-          <i class="fa-solid fa-receipt"></i>
-          <span>Sổ giao dịch</span>
-        </a>
-        <a href="{{ url_for('wallets') }}" class="sidebar-nav-item {% if active_page == 'wallets' %}active{% endif %}">
-          <i class="fa-solid fa-wallet"></i>
-          <span>Ví &amp; Thẻ ngân hàng</span>
-        </a>
-        <a href="{{ url_for('budgets') }}" class="sidebar-nav-item {% if active_page == 'budgets' %}active{% endif %}">
-          <i class="fa-solid fa-chart-pie"></i>
-          <span>Ngân sách chi tiêu</span>
-        </a>
-        <a href="{{ url_for('analytics') }}" class="sidebar-nav-item {% if active_page == 'analytics' %}active{% endif %}">
-          <i class="fa-solid fa-chart-line"></i>
-          <span>Phân tích tài chính</span>
-        </a>
-        <a href="{{ url_for('goals') }}" class="sidebar-nav-item {% if active_page == 'goals' %}active{% endif %}">
-          <i class="fa-solid fa-bullseye"></i>
-          <span>Mục tiêu tài chính</span>
-        </a>
-
-        <div class="sidebar-group-title">HỆ THỐNG</div>
-        <a href="{{ url_for('notifications') }}" class="sidebar-nav-item {% if active_page == 'notifications' %}active{% endif %}">
-          <i class="fa-solid fa-bell"></i>
-          <span>Thông báo</span>
-          <span class="sidebar-badge-count">4</span>
-        </a>
-        <a href="{{ url_for('profile') }}" class="sidebar-nav-item {% if active_page == 'profile' %}active{% endif %}">
-          <i class="fa-solid fa-user-gear"></i>
-          <span>Hồ sơ &amp; Quyền dữ liệu</span>
-        </a>
-        <a href="{{ url_for('admin_overview') }}" class="sidebar-nav-item admin-portal-nav">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>Cổng Quản trị Admin</span>
-        </a>
-      </nav>
-
-      <div class="sidebar-bottom-actions">
-        <a href="{{ url_for('logout') }}" class="sidebar-logout-btn">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          <span>Đăng xuất</span>
-        </a>
+      <div class="toolbar-hint">
+        <span class="live-clock-badge"><i class="fa-regular fa-clock"></i> <span id="desktop-clock">--:--</span></span>
       </div>
     </aside>
 
-    <!-- Main Workspace Stage -->
-    <div class="app-stage-wrapper">
-      <!-- Desktop Ambient Control Bar -->
-      <aside class="desktop-app-toolbar">
-        <div class="toolbar-brand">
-          <button class="mobile-drawer-toggle" onclick="toggleMobileDrawer()" title="Menu"><i class="fa-solid fa-bars"></i></button>
-          <span class="toolbar-logo-icon">🧪</span>
-          <span class="toolbar-app-name">FIN<span>LAB</span> <small>MOBILE APP</small></span>
-        </div>
-        <div class="toolbar-actions">
-          <button class="toolbar-btn active" id="btn-mode-phone" title="Chế độ App Chuẩn (iPhone 16 Pro)"><i class="fa-solid fa-mobile-screen"></i> <span>Chế độ App</span></button>
-          <button class="toolbar-btn" id="btn-mode-max" title="Kích thước Lớn"><i class="fa-solid fa-mobile"></i> <span>Màn hình lớn</span></button>
-          <button class="toolbar-btn" id="btn-mode-fullscreen" title="Toàn màn hình"><i class="fa-solid fa-expand"></i> <span>Toàn màn hình</span></button>
-        </div>
-        <div class="toolbar-hint">
-          <span class="live-clock-badge"><i class="fa-regular fa-clock"></i> <span id="desktop-clock">--:--</span></span>
-        </div>
-      </aside>
-
-      <!-- Device Studio Stage -->
-      <div class="device-studio-stage">
+    <!-- Device Studio Stage -->
+    <div class="device-studio-stage">
+      
+      <!-- Phone Mockup Frame -->
+      <div class="phone-mockup-container" id="phone-container">
         
-        <!-- Phone Mockup Frame -->
-        <div class="phone-mockup-container" id="phone-container">
-          
-          <!-- Hardware Buttons (External Bezel) -->
-          <div class="hardware-btn hw-action" title="Nút Tác vụ"></div>
-          <div class="hardware-btn hw-vol-up" title="Tăng âm lượng"></div>
-          <div class="hardware-btn hw-vol-down" title="Giảm âm lượng"></div>
-          <div class="hardware-btn hw-power" title="Nút Nguồn"></div>
+        <!-- Hardware Buttons (External Bezel) -->
+        <div class="hardware-btn hw-action" title="Nút Tác vụ"></div>
+        <div class="hardware-btn hw-vol-up" title="Tăng âm lượng"></div>
+        <div class="hardware-btn hw-vol-down" title="Giảm âm lượng"></div>
+        <div class="hardware-btn hw-power" title="Nút Nguồn"></div>
 
-          <!-- Phone Outer Bezel -->
-          <div class="phone-device-bezel">
-            
-            <!-- Dynamic Island Cutout -->
-            <div class="dynamic-island-cutout">
-              <div class="di-camera"></div>
-              <div class="di-sensor"></div>
+        <!-- Phone Outer Bezel -->
+        <div class="phone-device-bezel">
+          
+          <!-- Dynamic Island Cutout (Micro & Sleek, never overlaps text) -->
+          <div class="dynamic-island-cutout">
+            <div class="di-camera"></div>
+            <div class="di-sensor"></div>
+          </div>
+
+          <!-- Phone Inner Viewport (Contains all app pages) -->
+          <main class="phone-app-viewport" id="app-viewport">
+            {% block body %}{% endblock %}
+          </main>
+
+          <!-- In-App Drawer Backdrop & Sidebar (CONTAINED INSIDE THE MOBILE PHONE) -->
+          <div class="in-app-drawer-backdrop" id="in-app-drawer-backdrop" onclick="toggleInAppDrawer()"></div>
+          <aside class="in-app-drawer" id="in-app-drawer">
+            <div class="drawer-header">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="drawer-logo-icon">🧪</span>
+                <span class="drawer-brand-title">FIN<span>LAB</span></span>
+              </div>
+              <button class="drawer-close-btn" onclick="toggleInAppDrawer()" title="Đóng menu"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- Phone Inner Viewport (Contains all app pages) -->
-            <main class="phone-app-viewport" id="app-viewport">
-              {% block body %}{% endblock %}
-            </main>
+            {% if session.user %}
+            <div class="drawer-user-card">
+              <div class="drawer-user-avatar">
+                {{ session.user.full_name[0] if session.user.full_name else 'U' }}
+              </div>
+              <div class="drawer-user-info">
+                <div class="drawer-user-name">{{ session.user.full_name }}</div>
+                <div class="drawer-user-role">
+                  <span class="user-status-dot"></span>
+                  {{ 'Quản trị viên' if session.user.role == 'admin' else 'Tài khoản cá nhân' }}
+                </div>
+              </div>
+            </div>
+            {% endif %}
 
-            <!-- iOS Home Indicator bar at the bottom -->
-            <div class="phone-home-indicator"></div>
+            <nav class="drawer-nav-container">
+              <div class="drawer-group-title">QUẢN LÝ TÀI CHÍNH</div>
+              <a href="{{ url_for('dashboard') }}" class="drawer-nav-item {% if active_page == 'dashboard' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-house"></i> <span>Bảng điều khiển</span>
+              </a>
+              <a href="{{ url_for('transactions') }}" class="drawer-nav-item {% if active_page == 'transactions' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-receipt"></i> <span>Sổ giao dịch</span>
+              </a>
+              <a href="{{ url_for('wallets') }}" class="drawer-nav-item {% if active_page == 'wallets' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-wallet"></i> <span>Ví &amp; Tài khoản</span>
+              </a>
+              <a href="{{ url_for('budgets') }}" class="drawer-nav-item {% if active_page == 'budgets' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-chart-pie"></i> <span>Ngân sách chi tiêu</span>
+              </a>
+              <a href="{{ url_for('analytics') }}" class="drawer-nav-item {% if active_page == 'analytics' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-chart-line"></i> <span>Phân tích tài chính</span>
+              </a>
+              <a href="{{ url_for('goals') }}" class="drawer-nav-item {% if active_page == 'goals' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-bullseye"></i> <span>Mục tiêu tài chính</span>
+              </a>
 
+              <div class="drawer-group-title">HỆ THỐNG</div>
+              <a href="{{ url_for('notifications') }}" class="drawer-nav-item {% if active_page == 'notifications' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-bell"></i> <span>Thông báo</span>
+                <span class="drawer-badge-count">4</span>
+              </a>
+              <a href="{{ url_for('profile') }}" class="drawer-nav-item {% if active_page == 'profile' %}active{% endif %}" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-user-gear"></i> <span>Hồ sơ &amp; Quyền dữ liệu</span>
+              </a>
+              {% if session.user and session.user.role == 'admin' %}
+              <a href="{{ url_for('admin_overview') }}" class="drawer-nav-item admin-portal-nav" onclick="toggleInAppDrawer()">
+                <i class="fa-solid fa-shield-halved"></i> <span>Cổng Quản trị Admin</span>
+              </a>
+              {% endif %}
+              <a href="{{ url_for('logout') }}" class="drawer-nav-item" style="color:var(--danger);margin-top:10px;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Đăng xuất</span>
+              </a>
+            </nav>
+          </aside>
+
+          <!-- In-App Chatbot Window (CONTAINED INSIDE THE MOBILE PHONE) -->
+          <div class="in-app-chat-window" id="in-app-chat-window">
+            <div class="chat-header">
+              <div class="chat-header-left">
+                <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                  <div class="chat-title">FinLab AI Advisor</div>
+                  <div class="chat-status"><span class="user-status-dot"></span> Sẵn sàng trợ giúp</div>
+                </div>
+              </div>
+              <button class="chat-close" onclick="toggleInAppChat()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chat-messages" id="in-app-chat-messages">
+              <div class="msg msg-bot">
+                Xin chào <strong>{{ session.user.full_name if session.user else 'bạn' }}</strong>! Tôi là trợ lý AI tài chính của bạn. Bạn muốn tôi phân tích hoặc giải đáp điều gì hôm nay? 💰
+              </div>
+            </div>
+            <div class="chat-chips">
+              <button class="chip" onclick="askAiPrompt('Tháng này tôi tiêu bao nhiêu?')">💸 Chi tiêu tháng?</button>
+              <button class="chip" onclick="askAiPrompt('Có khoản chi nào bất thường không?')">⚠️ Bất thường?</button>
+              <button class="chip" onclick="askAiPrompt('Làm sao để tiết kiệm thêm?')">💡 Tiết kiệm?</button>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" class="chat-input" id="in-app-chat-input" placeholder="Hỏi AI về tài chính..." onkeydown="if(event.key==='Enter') sendInAppChatMessage()">
+              <button class="chat-send" onclick="sendInAppChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
           </div>
+
+          <!-- iOS Home Indicator bar at the bottom -->
+          <div class="phone-home-indicator"></div>
+
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Mobile Drawer Backdrop & Menu -->
-  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="toggleMobileDrawer()"></div>
-  <aside class="mobile-app-drawer" id="mobile-app-drawer">
-    <div class="drawer-header">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="sidebar-logo-icon">🧪</span>
-        <span class="brand-title" style="font-size:18px;font-weight:900;color:var(--text-primary);">FIN<span style="color:var(--accent);">LAB</span></span>
-      </div>
-      <button class="drawer-close-btn" onclick="toggleMobileDrawer()"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="sidebar-user-card" style="margin: 10px 14px 14px; background:var(--bg-surface);">
-      <div class="sidebar-user-avatar">{{ session.user.full_name[0] if session.user and session.user.full_name else 'A' }}</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name">{{ session.user.full_name if session.user else 'Nguyễn Văn A' }}</div>
-        <div class="sidebar-user-role"><span class="user-status-dot"></span> Online</div>
-      </div>
-    </div>
-    <nav class="sidebar-nav-container" style="padding: 0 10px;">
-      <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item {% if active_page == 'dashboard' %}active{% endif %}">
-        <i class="fa-solid fa-house"></i> <span>Bảng điều khiển</span>
-      </a>
-      <a href="{{ url_for('transactions') }}" class="sidebar-nav-item {% if active_page == 'transactions' %}active{% endif %}">
-        <i class="fa-solid fa-receipt"></i> <span>Sổ giao dịch</span>
-      </a>
-      <a href="{{ url_for('wallets') }}" class="sidebar-nav-item {% if active_page == 'wallets' %}active{% endif %}">
-        <i class="fa-solid fa-wallet"></i> <span>Ví &amp; Thẻ ngân hàng</span>
-      </a>
-      <a href="{{ url_for('budgets') }}" class="sidebar-nav-item {% if active_page == 'budgets' %}active{% endif %}">
-        <i class="fa-solid fa-chart-pie"></i> <span>Ngân sách chi tiêu</span>
-      </a>
-      <a href="{{ url_for('analytics') }}" class="sidebar-nav-item {% if active_page == 'analytics' %}active{% endif %}">
-        <i class="fa-solid fa-chart-line"></i> <span>Phân tích tài chính</span>
-      </a>
-      <a href="{{ url_for('goals') }}" class="sidebar-nav-item {% if active_page == 'goals' %}active{% endif %}">
-        <i class="fa-solid fa-bullseye"></i> <span>Mục tiêu tài chính</span>
-      </a>
-      <a href="{{ url_for('notifications') }}" class="sidebar-nav-item {% if active_page == 'notifications' %}active{% endif %}">
-        <i class="fa-solid fa-bell"></i> <span>Thông báo</span>
-      </a>
-      <a href="{{ url_for('profile') }}" class="sidebar-nav-item {% if active_page == 'profile' %}active{% endif %}">
-        <i class="fa-solid fa-user-gear"></i> <span>Hồ sơ &amp; Quyền dữ liệu</span>
-      </a>
-      <a href="{{ url_for('admin_overview') }}" class="sidebar-nav-item admin-portal-nav">
-        <i class="fa-solid fa-shield-halved"></i> <span>Cổng Quản trị Admin</span>
-      </a>
-      <a href="{{ url_for('logout') }}" class="sidebar-nav-item" style="color:var(--danger);margin-top:14px;">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Đăng xuất</span>
-      </a>
-    </nav>
-  </aside>
-
   <script>
-    // Toggle Mobile Drawer
-    function toggleMobileDrawer() {
-      const drawer = document.getElementById('mobile-app-drawer');
-      const backdrop = document.getElementById('mobile-drawer-backdrop');
+    // In-App Sidebar Drawer Toggler
+    function toggleInAppDrawer() {
+      const drawer = document.getElementById('in-app-drawer');
+      const backdrop = document.getElementById('in-app-drawer-backdrop');
       if (drawer && backdrop) {
         drawer.classList.toggle('active');
         backdrop.classList.toggle('active');
       }
+    }
+    // Backward compatibility for existing toggleMobileDrawer calls
+    function toggleMobileDrawer() {
+      toggleInAppDrawer();
+    }
+
+    // In-App Chatbot Toggler
+    function toggleInAppChat() {
+      const win = document.getElementById('in-app-chat-window');
+      if (win) {
+        win.classList.toggle('active');
+        if (win.classList.contains('active')) {
+          const inp = document.getElementById('in-app-chat-input');
+          if (inp) inp.focus();
+        }
+      }
+    }
+    function askAiPrompt(q) {
+      const inp = document.getElementById('in-app-chat-input');
+      if (inp) {
+        inp.value = q;
+        sendInAppChatMessage();
+      }
+    }
+    function sendInAppChatMessage() {
+      const inp = document.getElementById('in-app-chat-input');
+      const box = document.getElementById('in-app-chat-messages');
+      if (!inp || !box) return;
+      const msg = inp.value.trim();
+      if (!msg) return;
+
+      const userDiv = document.createElement('div');
+      userDiv.className = 'msg msg-user';
+      userDiv.textContent = msg;
+      box.appendChild(userDiv);
+      inp.value = '';
+      box.scrollTop = box.scrollHeight;
+
+      const loadDiv = document.createElement('div');
+      loadDiv.className = 'msg msg-bot';
+      loadDiv.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> FinLab AI đang tính toán...';
+      box.appendChild(loadDiv);
+      box.scrollTop = box.scrollHeight;
+
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      })
+      .then(r => r.json())
+      .then(data => {
+        loadDiv.innerHTML = data.reply || 'Xin lỗi, tôi chưa nhận diện được yêu cầu này!';
+        box.scrollTop = box.scrollHeight;
+      })
+      .catch(() => {
+        loadDiv.innerHTML = 'Lỗi kết nối máy chủ AI. Vui lòng thử lại sau!';
+      });
     }
 
     // Realtime Clock Synchronizer

@@ -45,52 +45,45 @@
       </div>
     </div>
 
-    <!-- 50/30/20 Financial Rule Banner -->
-    <div class="glass-card-solid" style="padding:14px 16px;margin-bottom:18px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;">
-          <i class="fa-solid fa-scale-balanced"></i>
+    <!-- Custom Budget Control Banner -->
+    <div class="glass-card-solid" style="padding:12px 14px;margin-bottom:14px;background:linear-gradient(135deg, rgba(255,247,237,0.8), #FFFFFF);border:1px solid #FED7AA;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:10px;background:rgba(232,99,42,0.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <div style="font-size:12.5px;font-weight:800;color:var(--text-primary);">Tự điều chỉnh hạn mức</div>
+            <div style="font-size:10.5px;color:var(--text-muted);">Linh hoạt theo nhu cầu cá nhân thực tế</div>
+          </div>
         </div>
-        <div>
-          <div style="font-size:13px;font-weight:700;">Quy tắc tài chính 50/30/20</div>
-          <div style="font-size:11px;color:var(--text-muted);">Phân bổ ngân sách khoa học</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;">
-        <div style="background:var(--bg-surface);padding:8px 4px;border-radius:8px;">
-          <div style="font-size:10px;color:var(--text-muted);font-weight:600;">50% Thiết yếu</div>
-          <div style="font-size:12px;font-weight:800;color:#2563EB;">9.000.000đ</div>
-        </div>
-        <div style="background:var(--bg-surface);padding:8px 4px;border-radius:8px;">
-          <div style="font-size:10px;color:var(--text-muted);font-weight:600;">30% Sở thích</div>
-          <div style="font-size:12px;font-weight:800;color:#E8632A;">5.400.000đ</div>
-        </div>
-        <div style="background:var(--bg-surface);padding:8px 4px;border-radius:8px;">
-          <div style="font-size:10px;color:var(--text-muted);font-weight:600;">20% Tích lũy</div>
-          <div style="font-size:12px;font-weight:800;color:#16A34A;">3.600.000đ</div>
-        </div>
+        <button class="btn-primary" onclick="openCreateBudgetModal()" style="width:auto;padding:5px 12px;font-size:11.5px;border-radius:8px;">
+          <i class="fa-solid fa-pen-to-square"></i> Điều chỉnh
+        </button>
       </div>
     </div>
 
     <!-- Category Budgets List -->
     <div class="section-title">
-      <span>Hạn mức theo danh mục</span>
-      <button class="btn-ghost" onclick="openCreateBudgetModal()" style="font-size:12px;">+ Tạo mới</button>
+      <span>Hạn mức theo danh mục ({{ budgets|length }})</span>
+      <button class="btn-ghost" onclick="openCreateBudgetModal()" style="font-size:11.5px;font-weight:700;">+ Đặt hạn mức</button>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
       {% for b in budgets %}
       {% set pct = [((b.spent / b.limit) * 100)|round|int, 100]|min if b.limit > 0 else 0 %}
       {% set is_over = b.spent > b.limit %}
-      <div class="budget-card-item">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="budget-card-item" onclick="quickEditCategory('{{ b.category }}', {{ b.limit|int }})" style="cursor:pointer;" title="Chạm để điều chỉnh hạn mức">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:38px;height:38px;border-radius:12px;background:{{ b.bg }};color:{{ b.color }};display:flex;align-items:center;justify-content:center;font-size:16px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:{{ b.bg }};color:{{ b.color }};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
               <i class="fa-solid fa-{{ b.icon }}"></i>
             </div>
             <div>
-              <div style="font-size:14px;font-weight:700;">{{ b.category }}</div>
-              <div style="font-size:11px;color:var(--text-muted);">
+              <div style="font-size:13px;font-weight:800;color:var(--text-primary);">
+                {{ b.category }} <i class="fa-solid fa-pen" style="font-size:9.5px;color:var(--text-muted);margin-left:3px;opacity:0.6;"></i>
+              </div>
+              <div style="font-size:10.5px;color:var(--text-muted);">
                 {% if is_over %}
                   <span style="color:#EF4444;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Vượt {{ "{:,.0f}".format(b.spent - b.limit) }}đ</span>
                 {% else %}
@@ -100,23 +93,23 @@
             </div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:14px;font-weight:800;color:{% if is_over %}#EF4444{% else %}var(--text-primary){% endif %};">
+            <div style="font-size:13px;font-weight:800;color:{% if is_over %}#EF4444{% else %}var(--text-primary){% endif %};">
               {{ "{:,.0f}".format(b.spent) }}đ
             </div>
-            <div style="font-size:11px;color:var(--text-muted);">
+            <div style="font-size:10.5px;color:var(--text-muted);">
               / {{ "{:,.0f}".format(b.limit) }}đ
             </div>
           </div>
         </div>
 
         <!-- Progress Bar -->
-        <div style="background:var(--bg-surface);border-radius:99px;height:7px;overflow:hidden;position:relative;">
+        <div style="background:var(--bg-surface);border-radius:99px;height:6px;overflow:hidden;position:relative;">
           <div style="background:{% if is_over %}#EF4444{% else %}{{ b.color }}{% endif %};height:100%;width:{{ pct }}%;border-radius:99px;transition:width 0.8s ease;"></div>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--text-muted);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;font-size:10.5px;color:var(--text-muted);">
           <span>Tiến độ chi tiêu</span>
-          <span style="font-weight:700;color:{% if is_over %}#EF4444{% else %}{{ b.color }}{% endif %};">{{ pct }}%</span>
+          <span style="font-weight:800;color:{% if is_over %}#EF4444{% else %}{{ b.color }}{% endif %};">{{ pct }}%</span>
         </div>
       </div>
       {% endfor %}
@@ -124,43 +117,57 @@
 
   </div>
 
-  <!-- Modal Create Budget (Static) -->
+  <!-- Native Mobile Bottom Sheet for Custom Budget Adjustment -->
   <div class="modal-overlay" id="modal-budget">
     <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-sliders text-accent"></i> Thiết lập hạn mức chi tiêu</div>
+        <div class="modal-title">
+          <i class="fa-solid fa-sliders text-accent"></i> 
+          <span>Điều chỉnh hạn mức chi tiêu</span>
+        </div>
         <button class="modal-close" onclick="closeCreateBudgetModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="padding:14px 16px;">
         <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Chọn danh mục</label>
-          <select class="form-input" id="new-budget-cat" style="padding:12px;background:#FFF;">
-            <option>Ăn uống & Cà phê</option>
-            <option>Đi lại & Xăng xe</option>
-            <option>Mua sắm cá nhân</option>
-            <option>Nhà cửa & Hóa đơn</option>
-            <option>Giải trí & Bạn bè</option>
-            <option>Sức khỏe & Thuốc men</option>
-            <option>Giáo dục & Sách vở</option>
+          <label class="form-label" style="font-size:11.5px;font-weight:700;">Danh mục chi tiêu</label>
+          <select class="form-input" id="new-budget-cat" style="padding:10px;background:#FFF;font-size:12.5px;">
+            {% for b in budgets %}
+            <option value="{{ b.category }}">{{ b.category }}</option>
+            {% endfor %}
           </select>
         </div>
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Hạn mức mỗi tháng (VNĐ)</label>
-          <input type="number" class="form-input" id="new-budget-limit" placeholder="Ví dụ: 3000000" style="padding:12px;background:#FFF;">
+        
+        <div class="form-group mb-10">
+          <label class="form-label" style="font-size:11.5px;font-weight:700;">Hạn mức mong muốn (VNĐ)</label>
+          <input type="number" class="form-input" id="new-budget-limit" placeholder="Ví dụ: 5000000" style="padding:10px;background:#FFF;font-size:13px;font-weight:700;">
         </div>
+
+        <!-- Quick Presets -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10.5px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">⚡ Chọn nhanh hạn mức:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="preset-pill" onclick="setPresetLimit(1500000)">1.5 Triệu</button>
+            <button type="button" class="preset-pill" onclick="setPresetLimit(3000000)">3 Triệu</button>
+            <button type="button" class="preset-pill" onclick="setPresetLimit(5000000)">5 Triệu</button>
+            <button type="button" class="preset-pill" onclick="setPresetLimit(8000000)">8 Triệu</button>
+            <button type="button" class="preset-pill" onclick="setPresetLimit(10000000)">10 Triệu</button>
+          </div>
+        </div>
+
         <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;">Cảnh báo khi đạt ngưỡng</label>
-          <select class="form-input" style="padding:12px;background:#FFF;">
-            <option>Khi chi tiêu đạt 80%</option>
-            <option>Khi chi tiêu đạt 90%</option>
-            <option>Chỉ khi vượt 100% hạn mức</option>
+          <label class="form-label" style="font-size:11.5px;font-weight:700;">Cảnh báo đẩy (Notification)</label>
+          <select class="form-input" style="padding:10px;background:#FFF;font-size:12px;">
+            <option>Cảnh báo sớm khi chạm 80%</option>
+            <option>Cảnh báo khi đạt 90%</option>
+            <option>Chỉ báo động khi vượt quá 100%</option>
           </select>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeCreateBudgetModal()">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveMockBudget()">
-          <i class="fa-solid fa-check"></i> Lưu ngân sách
+      <div class="modal-footer" style="padding:10px 16px 16px;">
+        <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:12px;" onclick="closeCreateBudgetModal()">Hủy</button>
+        <button class="btn-primary" style="flex:1;padding:9px 18px;font-size:12.5px;" id="btn-save-budget" onclick="submitCustomBudget()">
+          <i class="fa-solid fa-floppy-disk"></i> Lưu hạn mức ngay
         </button>
       </div>
     </div>
@@ -174,13 +181,30 @@
 .budget-card-item {
   background: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
+  border-radius: 14px;
+  padding: 12px 14px;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease;
 }
 .budget-card-item:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+.preset-pill {
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.preset-pill:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 </style>
 {% endblock %}
@@ -193,16 +217,60 @@ function openCreateBudgetModal() {
 function closeCreateBudgetModal() {
   document.getElementById('modal-budget').classList.remove('open');
 }
-function saveMockBudget() {
+function quickEditCategory(categoryName, currentLimit) {
+  const catSelect = document.getElementById('new-budget-cat');
+  const limitInput = document.getElementById('new-budget-limit');
+  if (catSelect) catSelect.value = categoryName;
+  if (limitInput) limitInput.value = currentLimit;
+  openCreateBudgetModal();
+}
+function setPresetLimit(amount) {
+  const limitInput = document.getElementById('new-budget-limit');
+  if (limitInput) limitInput.value = amount;
+}
+function submitCustomBudget() {
   const cat = document.getElementById('new-budget-cat').value;
   const limit = document.getElementById('new-budget-limit').value;
-  if (!limit || parseInt(limit) <= 0) {
+  if (!limit || parseFloat(limit) <= 0) {
     alert('Vui lòng nhập số tiền hạn mức hợp lệ!');
     return;
   }
-  closeCreateBudgetModal();
-  alert('Đã thiết lập hạn mức cho ' + cat + ' thành công!');
-  location.reload();
+  const btn = document.getElementById('btn-save-budget');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+  }
+
+  fetch('/api/budgets/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category: cat, limit: parseFloat(limit) })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      closeCreateBudgetModal();
+      if (window.showToast) {
+        window.showToast(res.message, 'success');
+      } else {
+        alert(res.message);
+      }
+      setTimeout(() => location.reload(), 450);
+    } else {
+      alert(res.message || 'Lỗi khi cập nhật hạn mức!');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu hạn mức ngay';
+      }
+    }
+  })
+  .catch(() => {
+    alert('Không thể kết nối máy chủ để lưu hạn mức!');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu hạn mức ngay';
+    }
+  });
 }
 </script>
 {% endblock %}

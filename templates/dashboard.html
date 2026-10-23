@@ -199,91 +199,124 @@
   <!-- Bottom Nav -->
   {% include "nav_bottom.html" %}
 
-  <!-- Chatbot FAB -->
-  <button class="chatbot-fab" id="chatbot-trigger">
-    <i class="fa-solid fa-robot"></i>
-  </button>
-
-  <!-- Chat Window -->
-  <div class="chat-window" id="chat-window">
-    <div class="chat-header">
-      <div class="chat-header-left">
-        <div class="chat-avatar"><i class="fa-solid fa-brain"></i></div>
-        <div>
-          <div class="chat-title">FinLab AI Advisor</div>
-          <div class="chat-status">Đang phân tích dòng tiền</div>
-        </div>
-      </div>
-      <button class="chat-close" id="chat-close"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="chat-messages" id="chat-messages">
-      <div class="msg msg-bot">
-        Xin chào <strong>{{ user.full_name }}</strong>! Tôi đã phân tích toàn bộ giao dịch của bạn. Bạn muốn hỏi gì về tài chính tháng này? 💰
-      </div>
-    </div>
-    <div class="chat-chips">
-      <button class="chip" data-q="Tháng này tôi tiêu bao nhiêu?">💸 Chi tiêu tháng?</button>
-      <button class="chip" data-q="Có subscription nào đang trừ tiền không?">🔄 Rò rỉ subscription?</button>
-      <button class="chip" data-q="Làm sao để tiết kiệm thêm mỗi tháng?">💡 Cách tiết kiệm?</button>
-      <button class="chip" data-q="Điểm sức khỏe tài chính của tôi như thế nào?">❤️ Sức khỏe tài chính?</button>
-    </div>
-    <div class="chat-input-row">
-      <input type="text" class="chat-input" id="chat-input" placeholder="Hỏi AI về tài chính...">
-      <button class="chat-send" id="chat-send"><i class="fa-solid fa-paper-plane"></i></button>
-    </div>
-  </div>
-
-  <!-- Open Banking Modal -->
+  <!-- Open Banking Native Bottom Sheet -->
   <div class="modal-overlay" id="modal-bank">
     <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-building-columns" style="color:var(--accent);"></i> Kết nối Open Banking</div>
+        <div class="modal-title">
+          <i class="fa-solid fa-building-columns text-accent"></i> 
+          <span>Liên kết Open Banking API</span>
+          <span style="font-size:9.5px;background:#EEF2FF;color:#4F46E5;padding:2px 6px;border-radius:6px;font-weight:700;">ISO 20022</span>
+        </div>
         <button class="modal-close" onclick="document.getElementById('modal-bank').classList.remove('open')">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <div class="modal-body">
-        {% for bank in banks %}
-        <div class="bank-choice {% if loop.first %}selected{% endif %}" data-bank="{{ bank.id }}">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div class="bank-avatar-box bank-bg-{{ bank.id|lower }}">
-              {{ bank.short_name }}
-            </div>
-            <div>
-              <div style="font-size:14px;font-weight:700;">{{ bank.name }}</div>
-              <div style="font-size:12px;color:var(--text-muted);">{{ bank.description }}</div>
-            </div>
-          </div>
-          <i class="fa-solid fa-circle-check" style="color:var(--accent);font-size:18px;"></i>
+
+      <div class="modal-body" style="padding:12px 16px;max-height:70vh;overflow-y:auto;">
+        <!-- Bank Selector -->
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">
+          1. Chọn ngân hàng kết nối:
         </div>
-        {% endfor %}
-        <div style="font-size:12px;color:var(--text-muted);background:var(--bg-card, #FFFFFF);border-radius:10px;padding:12px;margin-top:12px;line-height:1.6;">
-          🔒 Tuân thủ Thông tư 64/2024/TT-NHNN &amp; Nghị định 13/2023/NĐ-CP. Chỉ đọc lịch sử, không có quyền chuyển tiền.
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+          {% for bank in banks %}
+          <div class="bank-choice {% if loop.first %}selected{% endif %}" data-bank="{{ bank.id }}" onclick="selectBank(this)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="bank-avatar-box bank-bg-{{ bank.id|lower }}">
+                {{ bank.short_name }}
+              </div>
+              <div>
+                <div style="font-size:12.5px;font-weight:800;color:var(--text-primary);">{{ bank.name }}</div>
+                <div style="font-size:10.5px;color:var(--text-muted);">{{ bank.description }}</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-circle-check bank-check-icon" style="color:var(--accent);font-size:16px;{% if not loop.first %}opacity:0.25;{% endif %}"></i>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Data Access Scopes -->
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">
+          2. Phạm vi chia sẻ dữ liệu (Data Scopes):
+        </div>
+        <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-primary);">
+            <i class="fa-solid fa-circle-check" style="color:#16A34A;font-size:13px;"></i>
+            <span>Truy vấn số dư khả dụng &amp; thông tin tài khoản</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-primary);">
+            <i class="fa-solid fa-circle-check" style="color:#16A34A;font-size:13px;"></i>
+            <span>Đồng bộ lịch sử giao dịch 90 ngày để AI tự động phân loại chi tiêu</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-primary);">
+            <i class="fa-solid fa-circle-check" style="color:#16A34A;font-size:13px;"></i>
+            <span>Nhận diện rò rỉ subscription &amp; phí dịch vụ định kỳ</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#DC2626;border-top:1px dashed var(--border);padding-top:6px;margin-top:2px;">
+            <i class="fa-solid fa-shield-halved" style="font-size:13px;"></i>
+            <span><strong>Cam kết an toàn:</strong> Không có quyền chuyển tiền hay trích nợ tài khoản</span>
+          </div>
+        </div>
+
+        <!-- Compliance & Legal -->
+        <div style="font-size:10.5px;color:var(--text-muted);background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 10px;line-height:1.45;margin-bottom:10px;">
+          <i class="fa-solid fa-lock" style="color:#6366F1;"></i> Kết nối bảo mật chuẩn OAuth 2.0 &amp; tuân thủ nghiêm ngặt <strong>Nghị định 13/2023/NĐ-CP</strong> về Bảo vệ dữ liệu cá nhân và <strong>Thông tư 64/2024/TT-NHNN</strong>.
+        </div>
+
+        <!-- Mandatory User Consent Checkbox -->
+        <div style="background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:12px;padding:10px 12px;margin-bottom:8px;">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:11.5px;color:var(--text-primary);line-height:1.4;">
+            <input type="checkbox" id="ob-consent-checkbox" onchange="toggleObConsent(this)" style="margin-top:2px;accent-color:var(--accent);width:16px;height:16px;cursor:pointer;flex-shrink:0;">
+            <span><strong>Tôi xác nhận và đồng ý</strong> chia sẻ dữ liệu giao dịch tài khoản qua Open Banking API để FinLab phân loại ngân sách và bảo vệ theo Nghị định 13/2023/NĐ-CP.</span>
+          </label>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:12px 20px;" onclick="document.getElementById('modal-bank').classList.remove('open')">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:12px 24px;" id="btn-sync">
-          <i class="fa-solid fa-arrows-rotate"></i> Đồng bộ ngay
+
+      <div class="modal-footer" style="padding:10px 16px 16px;">
+        <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:12px;" onclick="document.getElementById('modal-bank').classList.remove('open')">Hủy</button>
+        <button class="btn-primary" style="flex:1;padding:9px 18px;font-size:12.5px;opacity:0.4;pointer-events:none;transition:all 0.2s;" id="btn-sync" onclick="executeOpenBankingSync()">
+          <i class="fa-solid fa-link"></i> Liên kết Open Banking ngay
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal overlay style -->
-  <style>
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:all 0.3s ease;}
-    .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal-box{background:var(--bg-surface);border:1px solid var(--border);border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:0;overflow:hidden;transform:translateY(40px);transition:transform 0.3s ease;}
-    .modal-overlay.open .modal-box{transform:translateY(0);}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0;}
-    .modal-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .modal-close{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;}
-    .modal-body{padding:16px 20px;}
-    .modal-footer{padding:16px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);}
-    .bank-choice{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg-card, #FFFFFF);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:var(--transition);}
-    .bank-choice.selected{border-color:var(--accent);background:var(--accent-light);}
-  </style>
+  <script>
+    function selectBank(el) {
+      document.querySelectorAll('.bank-choice').forEach(b => {
+        b.classList.remove('selected');
+        const ico = b.querySelector('.bank-check-icon');
+        if (ico) ico.style.opacity = '0.25';
+      });
+      el.classList.add('selected');
+      const curIco = el.querySelector('.bank-check-icon');
+      if (curIco) curIco.style.opacity = '1';
+    }
+
+    function toggleObConsent(cb) {
+      const btn = document.getElementById('btn-sync');
+      if (!btn) return;
+      if (cb.checked) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+      } else {
+        btn.style.opacity = '0.4';
+        btn.style.pointerEvents = 'none';
+      }
+    }
+
+    function executeOpenBankingSync() {
+      const selected = document.querySelector('.bank-choice.selected');
+      const bankName = selected ? selected.querySelector('strong, .bank-name, div[style*="font-weight:800"]')?.textContent.trim() : 'Ngân hàng';
+      document.getElementById('modal-bank').classList.remove('open');
+      if (window.showToast) {
+        window.showToast(`Đã cấp quyền và kết nối Open Banking API thành công với ${bankName}!`, 'success');
+      } else {
+        alert(`Đã cấp quyền và kết nối Open Banking API thành công với ${bankName}!`);
+      }
+    }
+  </script>
 
   <script type="application/json" id="dash-data">{{ health | tojson }}</script>
 </div>
