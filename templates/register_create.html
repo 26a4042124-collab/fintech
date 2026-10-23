@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Cập nhật thông tin{% endblock %}
+{% block body %}
+<div class="auth-wrapper">
+  <!-- Blobs -->
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-orange-2"></div>
+
+  <!-- Status Bar -->
+  <div class="auth-status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="profile-form-logo" style="padding-top:20px;">
+    <img src="{{ url_for('static', filename='images/logo.png') }}"
+         alt="FinLab"
+         style="height:56px; width:auto; object-fit:contain;"
+         onerror="this.outerHTML='<div style=\'display:flex;align-items:center;gap:8px;\'><span style=\'font-size:32px;\'>🧪</span><span style=\'font-size:26px;font-weight:900;color:#E8632A;\'>FINLAB</span></div>'">
+  </div>
+
+  <!-- Heading -->
+  <div class="auth-heading" style="margin-top:24px;">
+    <h1 class="auth-title">Cập nhật <span class="highlight">thông tin</span></h1>
+    <p class="auth-subtitle">Điền chính xác thông tin cá nhân bao gồm Họ và tên, Ngày sinh, Số điện thoại, email sử dụng.</p>
+  </div>
+
+  <!-- Form Body -->
+  <div class="auth-body" style="flex:1; overflow-y:auto;">
+    {% if error %}
+    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register_create') }}">
+      <div class="form-group">
+        <label class="form-label">Họ và tên người dùng <span class="required">*</span></label>
+        <input type="text" name="full_name" class="form-input"
+          placeholder=""
+          value="{{ form_data.get('full_name', '') }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ngày sinh</label>
+        <input type="date" name="birthday" class="form-input"
+          value="{{ form_data.get('birthday', '') }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Số điện thoại <span class="required">*</span></label>
+        <input type="tel" name="phone_display" class="form-input"
+          placeholder=""
+          value="{{ form_data.get('phone_display', phone or '') }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-input"
+          placeholder=""
+          value="{{ form_data.get('email', '') }}">
+      </div>
+
+      <!-- Hidden password fields for compatibility -->
+      <input type="hidden" name="password" value="auto_otp_pass">
+      <input type="hidden" name="confirm_password" value="auto_otp_pass">
+
+      <div class="form-group">
+        <label class="form-label">Tiền tệ sử dụng <span class="required">*</span></label>
+        <div class="currency-row">
+          <button type="button" class="currency-flag" id="currency-toggle">🇻🇳 <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i></button>
+          <div class="currency-text">Việt Nam đồng</div>
+        </div>
+        <input type="hidden" name="currency" value="VND">
+      </div>
+
+      <div style="height:32px;"></div>
+      <button type="submit" class="btn-primary">Tiếp tục</button>
+    </form>
+  </div>
+
+  <!-- Bottom home indicator space -->
+  <div style="height:32px;"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Password show/hide (kept for compatibility)
+function togglePw(id, el) {
+  const input = document.getElementById(id);
+  const icon = el.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa-regular fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa-regular fa-eye';
+  }
+}
+</script>
+{% endblock %}

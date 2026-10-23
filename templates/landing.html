@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Chào mừng{% endblock %}
+
+{% block body %}
+<div class="landing-wrapper">
+  <!-- Blobs -->
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-orange-2"></div>
+  <div class="blob blob-peach"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Slide 1 — Splash Logo -->
+  <div class="slide active" id="slide-1">
+    <div class="splash-slide" style="flex:1;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+        <img src="{{ url_for('static', filename='images/logo.png') }}"
+             alt="FinLab Logo"
+             style="width:260px; height:auto; object-fit:contain;"
+             onerror="this.style.display='none'; document.getElementById('logo-fallback-1').style.display='flex';">
+        <div id="logo-fallback-1" style="display:none; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size:80px;">🧪</span>
+          <span style="font-size:52px; font-weight:900; color:#E8632A; letter-spacing:-2px;">FIN<span style="color:#1A1A1A;">LAB</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2 — "Theo dõi chi tiết dòng tiền" -->
+  <div class="slide" id="slide-2">
+    <div class="onboarding-slide" style="flex:1; display:flex; flex-direction:column;">
+      <div class="onboarding-title-block" style="padding-top:28px;">
+        <h1 class="onboarding-title">
+          Theo dõi chi tiết<br>
+          <span class="highlight">dòng tiền của bạn.</span>
+        </h1>
+      </div>
+      <div class="onboarding-illustration" style="flex:1; padding:20px;">
+        <img src="{{ url_for('static', filename='pdf_preview/page_02.png') }}"
+             alt="Theo dõi dòng tiền"
+             style="width:100%; max-width:340px; border-radius:20px; object-fit:contain;">
+      </div>
+      <div class="onboarding-bottom">
+        <div class="slide-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="slide-actions">
+          <button class="btn-primary" onclick="nextSlide()">Tiếp tục</button>
+          <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3 — "Kiểm soát được chi tiêu cá nhân" -->
+  <div class="slide" id="slide-3">
+    <div class="onboarding-slide" style="flex:1; display:flex; flex-direction:column;">
+      <div class="onboarding-title-block" style="padding-top:28px;">
+        <h1 class="onboarding-title">
+          Kiểm soát được<br>
+          <span class="highlight">chi tiêu cá nhân.</span>
+        </h1>
+      </div>
+      <div class="onboarding-illustration" style="flex:1; padding:20px;">
+        <img src="{{ url_for('static', filename='pdf_preview/page_03.png') }}"
+             alt="Kiểm soát chi tiêu"
+             style="width:100%; max-width:340px; border-radius:20px; object-fit:contain;">
+      </div>
+      <div class="onboarding-bottom">
+        <div class="slide-dots">
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="slide-actions">
+          <button class="btn-primary" onclick="nextSlide()">Tiếp tục</button>
+          <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4 — "Tư vấn & tối ưu tài chính" -->
+  <div class="slide" id="slide-4">
+    <div class="onboarding-slide" style="flex:1; display:flex; flex-direction:column;">
+      <div class="onboarding-title-block" style="padding-top:28px;">
+        <h1 class="onboarding-title">
+          Tư vấn &amp; tối ưu<br>
+          <span class="highlight">tài chính cá nhân.</span>
+        </h1>
+      </div>
+      <div class="onboarding-illustration" style="flex:1; padding:20px;">
+        <img src="{{ url_for('static', filename='pdf_preview/page_04.png') }}"
+             alt="Tư vấn tài chính"
+             style="width:100%; max-width:340px; border-radius:20px; object-fit:contain;">
+      </div>
+      <div class="onboarding-bottom">
+        <div class="slide-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot active"></div>
+        </div>
+        <div class="slide-actions">
+          <a href="{{ url_for('register') }}" class="btn-primary" style="display:flex; align-items:center; justify-content:center;">
+            Bắt đầu
+          </a>
+          <p class="slide-link">Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let current = 1;
+  const total = 4;
+
+  // Auto-advance from splash after 1.5s
+  setTimeout(() => {
+    if (current === 1) nextSlide();
+  }, 1500);
+
+  function nextSlide() {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = current < total ? current + 1 : total;
+    document.getElementById('slide-' + current).classList.add('active');
+  }
+</script>
+{% endblock %}

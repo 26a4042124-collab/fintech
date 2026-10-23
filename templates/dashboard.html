@@ -1,1232 +1,290 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Bảng điều khiển - FinLab | Nền tảng PFM &amp; Open Banking Toàn diện</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom Style -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
-    </style>
-</head>
-<body>
-    <div class="app-layout">
-        <!-- Backdrop for mobile drawer -->
-        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+{% extends "base.html" %}
+{% block title %}Trang chủ{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
 
-        <!-- ==================================================================== -->
-        <!-- 1. LEFT SIDEBAR (Vertical Sidebar Layout - 260px) -->
-        <!-- ==================================================================== -->
-        <aside class="app-sidebar" id="app-sidebar">
-            <!-- Brand / Logo Header -->
-            <div class="sidebar-brand">
-                <a href="/" class="brand-link">
-                    <div class="brand-logo-box">
-                        <i class="fa-solid fa-chart-pie"></i>
-                    </div>
-                    <div class="brand-info">
-                        <div class="brand-title">FinLab</div>
-                        <span class="brand-badge"><i class="fa-solid fa-shield-halved"></i> Open Banking</span>
-                    </div>
-                </a>
-                <button class="btn-sidebar-close" id="btn-sidebar-close" title="Đóng menu">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+{% block body %}
+{% set active_page = 'dashboard' %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.15;"></div>
+  <div class="blob blob-orange-2" style="opacity:0.10;"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="{{ url_for('profile') }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+      <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;box-shadow:0 4px 12px rgba(255,107,53,0.35);">
+        {{ user.full_name[0] if user.full_name else 'U' }}
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;">Xin chào 👋</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text-primary);">{{ user.full_name }}</div>
+      </div>
+    </a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      {% if user.role == 'admin' %}
+      <a href="{{ url_for('admin_overview') }}" class="top-bar-action" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);text-decoration:none;" title="Cổng Quản trị Admin">
+        <i class="fa-solid fa-shield-halved" style="color:#6366f1;font-size:14px;"></i>
+      </a>
+      {% endif %}
+      <a href="{{ url_for('notifications') }}" class="top-bar-action" style="position:relative;text-decoration:none;" title="Thông báo">
+        <i class="fa-solid fa-bell" style="color:var(--text-secondary);font-size:15px;"></i>
+        <span style="position:absolute;top:6px;right:7px;width:7px;height:7px;background:var(--accent);border-radius:50%;"></span>
+      </a>
+      <button class="top-bar-action" id="chatbot-fab-top" title="Trợ lý AI">
+        <i class="fa-solid fa-robot" style="color:var(--accent);"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Balance Card -->
+    <div class="balance-card">
+      <div class="balance-label">Số dư khả dụng tháng 10/2026</div>
+      <div class="balance-amount">
+        {{ "{:,.0f}".format(balance) }}
+        <span>VNĐ</span>
+      </div>
+      <div class="balance-stats">
+        <div class="balance-stat">
+          <div class="balance-stat-icon stat-icon-in"><i class="fa-solid fa-arrow-down"></i></div>
+          <div>
+            <div class="balance-stat-label">Thu nhập</div>
+            <div class="balance-stat-value">{{ "{:,.0f}".format(health.income) }}đ</div>
+          </div>
+        </div>
+        <div class="balance-stat">
+          <div class="balance-stat-icon stat-icon-out"><i class="fa-solid fa-arrow-up"></i></div>
+          <div>
+            <div class="balance-stat-label">Chi tiêu</div>
+            <div class="balance-stat-value">{{ "{:,.0f}".format(health.total_expense) }}đ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions" style="grid-template-columns: repeat(4, 1fr);">
+      <a href="{{ url_for('add_transaction') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon accent"><i class="fa-solid fa-plus"></i></div>
+        <div class="qa-label">Ghi chép</div>
+      </a>
+      <a href="{{ url_for('wallets') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon"><i class="fa-solid fa-wallet"></i></div>
+        <div class="qa-label">Ví &amp; Thẻ</div>
+      </a>
+      <a href="{{ url_for('budgets') }}" class="quick-action" style="text-decoration:none;">
+        <div class="qa-icon"><i class="fa-solid fa-sliders"></i></div>
+        <div class="qa-label">Ngân sách</div>
+      </a>
+      <div class="quick-action" onclick="document.getElementById('modal-bank').classList.add('open')">
+        <div class="qa-icon"><i class="fa-solid fa-building-columns"></i></div>
+        <div class="qa-label">Ngân hàng</div>
+      </div>
+    </div>
+
+    <!-- Health Score -->
+    <div class="score-card">
+      <div class="score-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="score-ring-bg" cx="40" cy="40" r="34"/>
+          <circle class="score-ring-fill" cx="40" cy="40" r="34"
+            stroke="{% if health.health_score >= 80 %}#22c55e{% elif health.health_score >= 50 %}#f59e0b{% else %}#ef4444{% endif %}"
+            stroke-dasharray="{{ (health.health_score / 100) * 213.6 }} 213.6"
+            id="score-circle"/>
+        </svg>
+        <div class="score-ring-text">
+          {{ health.health_score }}<small>/100</small>
+        </div>
+      </div>
+      <div class="score-info">
+        <div class="score-title">Sức khỏe tài chính</div>
+        <span class="score-badge
+          {% if health.health_score >= 80 %}score-success
+          {% elif health.health_score >= 50 %}score-warning
+          {% else %}score-danger{% endif %}">
+          {{ health.health_status }}
+        </span>
+        <div class="score-tip">Tiết kiệm đang ở <strong>{{ health.savings.percentage }}%</strong> — chuẩn là 20%. <a href="{{ url_for('analytics') }}" style="color:var(--accent);font-weight:700;text-decoration:none;">Xem Analytics →</a></div>
+      </div>
+    </div>
+
+    <!-- Leak Alerts -->
+    <div class="section-title">
+      <span>⚠️ Cảnh báo rò rỉ</span>
+    </div>
+
+    <div class="leak-card">
+      <div class="leak-card-left-border lb-danger"></div>
+      <div class="leak-icon leak-icon-danger"><i class="fa-solid fa-repeat"></i></div>
+      <div class="leak-body">
+        <div class="leak-title">Dịch vụ số tự động (Subscriptions)</div>
+        <div class="leak-desc">AI phát hiện {{ health.subscription_leaks.count }} dịch vụ định kỳ trừ thẻ ngầm</div>
+        <div class="leak-amount">-{{ "{:,.0f}".format(health.subscription_leaks.total_amount) }}đ/tháng</div>
+        <div class="leak-tags">
+          {% for sub in health.subscription_leaks.list %}
+          <span class="leak-tag">{{ sub.merchant[:16] }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="leak-card">
+      <div class="leak-card-left-border lb-warning"></div>
+      <div class="leak-icon leak-icon-warning"><i class="fa-solid fa-moon"></i></div>
+      <div class="leak-body">
+        <div class="leak-title">Chi tiêu đêm bốc đồng (Sau 22h)</div>
+        <div class="leak-desc">{{ health.impulse_night_spending.count }} giao dịch mua sắm cảm xúc sau 22h</div>
+        <div class="leak-amount">-{{ "{:,.0f}".format(health.impulse_night_spending.total_amount) }}đ</div>
+        <div class="leak-tags">
+          <span class="leak-tag">ShopeePay đêm</span>
+          <span class="leak-tag">TikTok Shop</span>
+          <span class="leak-tag">Grab đêm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section-title" style="margin-top:24px;">
+      <span>Giao dịch gần đây</span>
+      <a href="{{ url_for('transactions') }}">Xem tất cả →</a>
+    </div>
+
+    <div class="glass-card-solid">
+      {% for t in transactions %}
+      {% set icons = {
+        'INCOME': ('fa-arrow-down', '#22c55e', 'rgba(34,197,94,0.15)'),
+        'NEEDS': ('fa-shield', '#3b82f6', 'rgba(59,130,246,0.15)'),
+        'WANTS': ('fa-bag-shopping', '#f59e0b', 'rgba(245,158,11,0.15)'),
+        'SAVINGS': ('fa-piggy-bank', '#a855f7', 'rgba(168,85,247,0.15)')
+      } %}
+      {% set ico = icons.get(t.ai_bucket, ('fa-circle-dot', '#64748b', 'rgba(100,116,139,0.15)')) %}
+      <div class="txn-item">
+        <div class="txn-icon" style="background:{{ ico[2] }}; color:{{ ico[1] }};">
+          <i class="fa-solid {{ ico[0] }}"></i>
+        </div>
+        <div class="txn-info">
+          <div class="txn-name">{{ t.description[:32] }}{% if t.description|length > 32 %}...{% endif %}</div>
+          <div class="txn-meta">
+            {% if 'Vietcom' in t.bank %}<span class="txn-bank-tag tag-vcb">VCB</span>
+            {% elif 'Techcom' in t.bank %}<span class="txn-bank-tag tag-tcb">TCB</span>
+            {% elif 'MB' in t.bank %}<span class="txn-bank-tag tag-mbb">MB</span>
+            {% else %}<span class="txn-bank-tag">{{ t.bank[:4] }}</span>{% endif %}
+            <span>{{ t.timestamp[:10] }}</span>
+          </div>
+        </div>
+        <div class="txn-amount {% if t.type == 'INFLOW' %}amt-in{% else %}amt-out{% endif %}">
+          {{ '+' if t.type == 'INFLOW' else '-' }}{{ "{:,.0f}".format(t.amount) }}đ
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div><!-- /page-content -->
+
+  <!-- Bottom Nav -->
+  {% include "nav_bottom.html" %}
+
+  <!-- Chatbot FAB -->
+  <button class="chatbot-fab" id="chatbot-trigger">
+    <i class="fa-solid fa-robot"></i>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar"><i class="fa-solid fa-brain"></i></div>
+        <div>
+          <div class="chat-title">FinLab AI Advisor</div>
+          <div class="chat-status">Đang phân tích dòng tiền</div>
+        </div>
+      </div>
+      <button class="chat-close" id="chat-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg msg-bot">
+        Xin chào <strong>{{ user.full_name }}</strong>! Tôi đã phân tích toàn bộ giao dịch của bạn. Bạn muốn hỏi gì về tài chính tháng này? 💰
+      </div>
+    </div>
+    <div class="chat-chips">
+      <button class="chip" data-q="Tháng này tôi tiêu bao nhiêu?">💸 Chi tiêu tháng?</button>
+      <button class="chip" data-q="Có subscription nào đang trừ tiền không?">🔄 Rò rỉ subscription?</button>
+      <button class="chip" data-q="Làm sao để tiết kiệm thêm mỗi tháng?">💡 Cách tiết kiệm?</button>
+      <button class="chip" data-q="Điểm sức khỏe tài chính của tôi như thế nào?">❤️ Sức khỏe tài chính?</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Hỏi AI về tài chính...">
+      <button class="chat-send" id="chat-send"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- Open Banking Modal -->
+  <div class="modal-overlay" id="modal-bank">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-building-columns" style="color:var(--accent);"></i> Kết nối Open Banking</div>
+        <button class="modal-close" onclick="document.getElementById('modal-bank').classList.remove('open')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% for bank in banks %}
+        <div class="bank-choice {% if loop.first %}selected{% endif %}" data-bank="{{ bank.id }}">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:38px;height:38px;border-radius:10px;background:{{ bank.color }};display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:12px;">
+              {{ bank.short_name }}
             </div>
-
-            <!-- Navigation Links -->
-            <nav class="sidebar-nav" id="sidebar-nav">
-                <div class="nav-section-title">QUẢN LÝ TÀI CHÍNH</div>
-                
-                <a href="#section-overview" class="nav-link active" data-section="section-overview">
-                    <div class="nav-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <span class="nav-text">Tổng quan (Overview)</span>
-                </a>
-
-                <a href="#section-budget" class="nav-link" data-section="section-budget">
-                    <div class="nav-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                    <span class="nav-text">Phân tích Ngân sách</span>
-                </a>
-
-                <a href="#section-savings" class="nav-link" data-section="section-savings">
-                    <div class="nav-icon"><i class="fa-solid fa-bullseye"></i></div>
-                    <span class="nav-text">Mục tiêu &amp; Tích lũy</span>
-                    {% if health.round_up.monthly_round_up_total > 0 %}
-                    <span class="nav-pill pill-green">Heo đất</span>
-                    {% endif %}
-                </a>
-
-                <a href="#section-leaks" class="nav-link" data-section="section-leaks">
-                    <div class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <span class="nav-text">Kiểm toán Rò rỉ</span>
-                    {% if health.subscription_leaks.total_amount > 0 %}
-                    <span class="nav-pill pill-danger">Cảnh báo</span>
-                    {% endif %}
-                </a>
-
-                <a href="#section-transactions" class="nav-link" data-section="section-transactions">
-                    <div class="nav-icon"><i class="fa-solid fa-receipt"></i></div>
-                    <span class="nav-text">Lịch sử Giao dịch</span>
-                </a>
-
-                <div class="nav-section-title" style="margin-top: 1.25rem;">TIỆN ÍCH OPEN BANKING &amp; AI</div>
-
-                <button type="button" class="nav-link nav-btn-trigger" id="sidebar-btn-consent" title="Quản trị quyền riêng tư theo Nghị định 13/2023/NĐ-CP">
-                    <div class="nav-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <span class="nav-text">Quyền &amp; Consent (NĐ 13)</span>
-                </button>
-
-                <button type="button" class="nav-link nav-btn-trigger" id="sidebar-btn-open-banking" title="Đồng bộ kết nối Open Banking API">
-                    <div class="nav-icon"><i class="fa-solid fa-building-columns"></i></div>
-                    <span class="nav-text">Cổng Open Banking</span>
-                </button>
-
-                <button type="button" class="nav-link nav-btn-trigger" id="sidebar-btn-ai-chat" title="Mở Trợ lý AI FinLab">
-                    <div class="nav-icon"><i class="fa-solid fa-robot"></i></div>
-                    <span class="nav-text">Trợ lý AI FinLab</span>
-                    <span class="nav-pill pill-ai">24/7</span>
-                </button>
-
-                {% if user.role == 'admin' %}
-                <div class="nav-section-title" style="margin-top: 1.25rem;">HỆ THỐNG</div>
-                <a href="/admin" class="nav-link nav-admin-highlight" title="Chuyển sang Cổng Quản trị Admin">
-                    <div class="nav-icon"><i class="fa-solid fa-server"></i></div>
-                    <span class="nav-text">Trang Quản trị Admin</span>
-                    <span class="nav-pill pill-admin">Admin</span>
-                </a>
-                {% endif %}
-            </nav>
-
-            <!-- User Profile Bottom Bar -->
-            <div class="sidebar-footer">
-                <div class="sidebar-user-card">
-                    <div class="user-avatar-circle">
-                        {{ user.full_name[0] if user else 'U' }}
-                    </div>
-                    <div class="user-info-text">
-                        <div class="user-full-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</div>
-                        <div class="user-role-badge">
-                            {% if user.role == 'admin' %}
-                            <span class="role-badge-admin"><i class="fa-solid fa-shield"></i> Quản trị viên</span>
-                            {% else %}
-                            <span class="role-badge-user"><i class="fa-solid fa-user-check"></i> Khách hàng PFM</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <a href="{{ url_for('logout') }}" class="btn-sidebar-logout" title="Đăng xuất">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        <!-- ==================================================================== -->
-        <!-- 2. RIGHT MAIN CONTENT AREA -->
-        <!-- ==================================================================== -->
-        <main class="app-main-content">
-            <!-- Top App Bar -->
-            <header class="top-app-bar">
-                <div class="top-bar-left">
-                    <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" title="Mở menu điều hướng">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <div class="top-greeting-box">
-                        <h1 class="top-greeting-title">Xin chào, {{ user.full_name if user else 'Bạn' }} 👋</h1>
-                        <p class="top-greeting-subtitle">
-                            <span id="current-live-date"><i class="fa-regular fa-calendar"></i> Thứ Sáu, 16/10/2026</span>
-                            <span class="top-dot-separator">&bull;</span>
-                            <span class="top-sync-status"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Đã kết nối Open API (VCB, TCB, MB)</span>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="top-bar-right">
-                    <!-- Custom Budget Ratio Modal Trigger -->
-                    <button class="top-action-btn" id="btn-open-budget-ratio" title="Thiết lập tỷ lệ phân bổ ngân sách tùy chọn">
-                        <i class="fa-solid fa-sliders"></i>
-                        <span>Tỷ lệ Ngân sách</span>
-                    </button>
-
-                    <!-- Open Banking Consent Manager Trigger -->
-                    <button class="top-action-btn" id="btn-open-consent-mgr" title="Quản trị quyền riêng tư theo Nghị định 13/2023/NĐ-CP">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span>Quyền &amp; Consent</span>
-                    </button>
-
-                    <!-- Sync Bank Trigger -->
-                    <button class="btn-open-banking-top" id="btn-open-banking" title="Đồng bộ dữ liệu ngân hàng">
-                        <i class="fa-solid fa-building-columns"></i>
-                        <span>Đồng bộ API</span>
-                    </button>
-
-                    <!-- Admin Switch Button if role is admin -->
-                    {% if user.role == 'admin' %}
-                    <a href="/admin" class="btn-admin-switch-top" title="Chuyển tới Trang Quản trị Hệ thống">
-                        <i class="fa-solid fa-server"></i>
-                        <span>Trang Admin</span>
-                    </a>
-                    {% endif %}
-                </div>
-            </header>
-
-            <!-- Main Inner Scrollable Content -->
-            <div class="main-content-inner">
-                <!-- ============================================================ -->
-                <!-- SECTION 1: TỔNG QUAN (OVERVIEW) & CHỈ SỐ -->
-                <!-- ============================================================ -->
-                <section class="content-section" id="section-overview">
-                    <div class="page-header">
             <div>
-                <h1 class="page-title">Chào bạn, {{ user.full_name if user else 'Bạn' }} 👋</h1>
-                <p class="page-subtitle">Báo cáo tài chính cá nhân toàn diện, kiểm toán rò rỉ &amp; dự báo dòng tiền tháng 10/2026</p>
+              <div style="font-size:14px;font-weight:700;">{{ bank.name }}</div>
+              <div style="font-size:12px;color:var(--text-muted);">{{ bank.description }}</div>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <span class="live-badge">
-                    <span class="live-dot"></span>
-                    Đồng bộ 3 tài khoản Open API (VCB, TCB, MB)
-                </span>
-                <span class="compliance-badge" title="Tuân thủ Nghị định 13/2023/NĐ-CP">
-                    <i class="fa-solid fa-shield-check"></i> Tuân thủ NĐ 13/2023/NĐ-CP
-                </span>
-            </div>
+          </div>
+          <i class="fa-solid fa-circle-check" style="color:var(--accent);font-size:18px;"></i>
         </div>
-
-        <!-- TÍNH NĂNG 4: WIDGET DỰ BÁO DÒNG TIỀN CUỐI THÁNG (CASHFLOW FORECAST) -->
-        <div class="cashflow-forecast-banner {{ 'danger-alert' if health.cashflow_forecast.is_deficit_risk else 'success-safe' }}" id="forecast-section">
-            <div class="forecast-icon-box">
-                <i class="fa-solid {{ 'fa-triangle-exclamation' if health.cashflow_forecast.is_deficit_risk else 'fa-shield-halved' }}"></i>
-            </div>
-            <div class="forecast-info">
-                <div class="forecast-header">
-                    <div class="forecast-title-badge">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI DỰ BÁO DÒNG TIỀN CUỐI THÁNG (NGÀY 30)
-                    </div>
-                    <span class="forecast-status-tag {{ 'tag-danger' if health.cashflow_forecast.is_deficit_risk else 'tag-success' }}">
-                        {{ health.cashflow_forecast.forecast_status }}
-                    </span>
-                </div>
-                <div class="forecast-message">
-                    {{ health.cashflow_forecast.forecast_message }}
-                </div>
-                <div class="forecast-metrics-row">
-                    <div class="forecast-metric">
-                        <span class="metric-label">Tốc độ tiêu bình quân:</span>
-                        <strong class="metric-val">{{ "{:,.0f}".format(health.cashflow_forecast.daily_burn_rate) }} đ/ngày</strong>
-                    </div>
-                    <div class="forecast-metric">
-                        <span class="metric-label">Dự phóng tổng chi cuối tháng:</span>
-                        <strong class="metric-val">{{ "{:,.0f}".format(health.cashflow_forecast.projected_expense) }} VNĐ</strong>
-                    </div>
-                    <div class="forecast-metric">
-                        <span class="metric-label">{{ 'Dự kiến thâm hụt:' if health.cashflow_forecast.is_deficit_risk else 'Dự kiến thặng dư:' }}</span>
-                        <strong class="metric-val {{ 'text-danger' if health.cashflow_forecast.is_deficit_risk else 'text-success' }}">
-                            {{ "{:,.0f}".format(health.cashflow_forecast.deficit_amount if health.cashflow_forecast.is_deficit_risk else health.cashflow_forecast.surplus_amount) }} VNĐ
-                        </strong>
-                    </div>
-                </div>
-            </div>
+        {% endfor %}
+        <div style="font-size:12px;color:var(--text-muted);background:var(--bg-card, #FFFFFF);border-radius:10px;padding:12px;margin-top:12px;line-height:1.6;">
+          🔒 Tuân thủ Thông tư 64/2024/TT-NHNN &amp; Nghị định 13/2023/NĐ-CP. Chỉ đọc lịch sử, không có quyền chuyển tiền.
         </div>
-
-        <!-- 4 Stat Cards -->
-        <div class="stats-grid" id="stats-section">
-            <!-- Thu nhập -->
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-title">Tổng thu nhập</span>
-                    <div class="stat-icon icon-blue">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                </div>
-                <div class="stat-value">{{ "{:,.0f}".format(health.income) }} <span style="font-size: 1rem; font-weight: 500;">VNĐ</span></div>
-                <div class="stat-desc">
-                    <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
-                    Chuyển lương công ty (VCB)
-                </div>
-            </div>
-
-            <!-- Tổng chi tiêu -->
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-title">Tổng chi tiêu tháng</span>
-                    <div class="stat-icon icon-rose">
-                        <i class="fa-solid fa-arrow-trend-down"></i>
-                    </div>
-                </div>
-                <div class="stat-value">{{ "{:,.0f}".format(health.total_expense) }} <span style="font-size: 1rem; font-weight: 500;">VNĐ</span></div>
-                <div class="stat-desc" style="color: #ef4444;">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    Chiếm {{ "{:.1f}".format((health.total_expense / health.income) * 100) }}% thu nhập
-                </div>
-            </div>
-
-            <!-- Tiết kiệm còn lại -->
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-title">Quỹ tích lũy thực tế</span>
-                    <div class="stat-icon icon-emerald">
-                        <i class="fa-solid fa-piggy-bank"></i>
-                    </div>
-                </div>
-                <div class="stat-value">{{ "{:,.0f}".format(health.savings.amount) }} <span style="font-size: 1rem; font-weight: 500;">VNĐ</span></div>
-                <div class="stat-desc">
-                    <span class="score-badge badge-warning" style="padding: 0.1rem 0.5rem; font-size: 0.72rem;">
-                        Đạt {{ health.savings.percentage }}% / Mục tiêu {{ health.savings.benchmark_pct }}%
-                    </span>
-                </div>
-            </div>
-
-            <!-- Điểm sức khỏe tài chính -->
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <span class="stat-title">Điểm sức khỏe tài chính</span>
-                    <div class="stat-icon icon-amber">
-                        <i class="fa-solid fa-heart-pulse"></i>
-                    </div>
-                </div>
-                <div class="stat-value">
-                    {{ health.health_score }} <span style="font-size: 1rem; color: #64748b;">/ 100</span>
-                </div>
-                <div class="stat-desc">
-                    <span class="score-badge badge-{{ health.health_color }}">
-                        {{ health.health_status }}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </section><!-- /section-overview -->
-
-    <!-- ============================================================ -->
-    <!-- SECTION 2: PHÂN TÍCH NGÂN SÁCH (BUDGET ANALYSIS) -->
-    <!-- ============================================================ -->
-    <section class="content-section" id="section-budget">
-        <!-- Visual Analytics Section (TÍNH NĂNG 1 & TÍNH NĂNG 5) -->
-        <div class="analytics-grid" id="analytics-section">
-            <!-- TÍNH NĂNG 1: Custom Budget Rule Analysis -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <i class="fa-solid fa-chart-pie" style="color: #3b82f6;"></i>
-                            Cơ cấu Ngân sách (Mục tiêu: {{ health.target_ratio.needs }}/{{ health.target_ratio.wants }}/{{ health.target_ratio.savings }})
-                        </h2>
-                        <p class="card-subtitle">So sánh tỷ trọng chi tiêu thực tế với mục tiêu phân bổ của bạn</p>
-                    </div>
-                    <button class="btn-card-action" id="btn-card-edit-ratio" title="Cài đặt tỷ lệ ngân sách">
-                        <i class="fa-solid fa-sliders"></i> Tùy chỉnh
-                    </button>
-                </div>
-
-                <div class="chart-wrapper">
-                    <canvas id="ruleChart"></canvas>
-                </div>
-
-                <div class="budget-rule-section" style="margin-top: 1.5rem;">
-                    <!-- Needs -->
-                    <div class="budget-row">
-                        <div class="budget-row-header">
-                            <span class="budget-row-label">
-                                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span>
-                                Chi tiêu Thiết yếu (Needs)
-                            </span>
-                            <span class="budget-row-values">{{ health.needs.percentage }}% / Mục tiêu {{ health.needs.benchmark_pct }}%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill bg-needs" style="width: {{ health.needs.percentage }}%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Wants -->
-                    <div class="budget-row">
-                        <div class="budget-row-header">
-                            <span class="budget-row-label">
-                                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#f59e0b;"></span>
-                                Mong muốn cá nhân (Wants)
-                            </span>
-                            <span class="budget-row-values" style="color: {{ '#dc2626' if health.wants.percentage > health.wants.benchmark_pct else '#10b981' }};">
-                                {{ health.wants.percentage }}% / Mục tiêu {{ health.wants.benchmark_pct }}%
-                                {% if health.wants.percentage > health.wants.benchmark_pct %}
-                                (VƯỢT +{{ "{:.1f}".format(health.wants.percentage - health.wants.benchmark_pct) }}%)
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill bg-wants" style="width: {{ [health.wants.percentage, 100]|min }}%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Savings -->
-                    <div class="budget-row">
-                        <div class="budget-row-header">
-                            <span class="budget-row-label">
-                                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
-                                Quỹ Tích lũy &amp; Đầu tư (Savings)
-                            </span>
-                            <span class="budget-row-values" style="color: {{ '#dc2626' if health.savings.percentage < health.savings.benchmark_pct else '#10b981' }};">
-                                {{ health.savings.percentage }}% / Mục tiêu {{ health.savings.benchmark_pct }}%
-                                {% if health.savings.percentage < health.savings.benchmark_pct %}
-                                (THIẾU -{{ "{:.1f}".format(health.savings.benchmark_pct - health.savings.percentage) }}%)
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill bg-savings" style="width: {{ health.savings.percentage }}%;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spending Breakdown & Action Plan -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <i class="fa-solid fa-list-check" style="color: #6366f1;"></i>
-                            Cơ cấu Chi tiêu &amp; Phác đồ Hành động AI
-                        </h2>
-                        <p class="card-subtitle">AI đề xuất kế hoạch bù đắp {{ "{:,.0f}".format(health.savings_gap) }}đ thiếu hụt quỹ tích lũy</p>
-                    </div>
-                </div>
-
-                <div class="chart-wrapper" style="height: 190px;">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-
-                <div style="margin-top: 1.25rem;">
-                    <div style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; margin-bottom: 0.65rem;">
-                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #6366f1;"></i> Đề xuất tối ưu tự động từ AI:
-                    </div>
-                    <ul class="rec-list">
-                        {% for rec in health.recommendations %}
-                        <li class="rec-item">
-                            <i class="fa-solid fa-circle-check rec-icon"></i>
-                            <div>{{ rec }}</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- TÍNH NĂNG 5: HẠN MỨC CHI TIÊU & CẢNH BÁO THEO DANH MỤC (CATEGORY BUDGET ALERTS) -->
-        <div class="card" style="margin-top: 1.75rem;" id="category-budgets-section">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">
-                        <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i>
-                        Giám Sát Hạn Mức Chi Tiêu Theo Danh Mục (Category Budget Alerts)
-                    </h2>
-                    <p class="card-subtitle">Kiểm soát trần chi tiêu ngăn ngừa thâm hụt: Xanh (&lt;80%), Vàng (80%-99%), Đỏ (&gt;=100% Vượt mức)</p>
-                </div>
-                <button class="btn-card-action" id="btn-trigger-edit-limits">
-                    <i class="fa-solid fa-pen-to-square"></i> Cài đặt Hạn mức
-                </button>
-            </div>
-
-            <div class="category-limits-grid">
-                {% for b in health.category_budgets %}
-                <div class="limit-item-card border-{{ b.status }}">
-                    <div class="limit-item-header">
-                        <span class="limit-cat-name">{{ b.category }}</span>
-                        <span class="limit-status-badge {{ b.tag_class }}">{{ b.label }}</span>
-                    </div>
-
-                    <div class="limit-figures">
-                        <div>
-                            <span class="figure-label">Đã chi:</span>
-                            <span class="figure-val">{{ "{:,.0f}".format(b.spent) }}đ</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="figure-label">Hạn mức trần:</span>
-                            <span class="figure-val">{{ "{:,.0f}".format(b.limit) }}đ</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-track" style="height: 8px; margin: 0.5rem 0;">
-                        <div class="progress-fill fill-{{ b.status }}" style="width: {{ [b.percentage, 100]|min }}%;"></div>
-                    </div>
-
-                    <div class="limit-item-footer">
-                        <span>Đã dùng: <strong>{{ b.percentage }}%</strong></span>
-                        {% if b.status == 'danger' %}
-                        <span class="text-danger">Vượt: +{{ "{:,.0f}".format(b.overspent) }}đ</span>
-                        {% else %}
-                        <span>Còn lại: {{ "{:,.0f}".format(b.remaining) }}đ</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section><!-- /section-budget -->
-
-    <!-- ============================================================ -->
-    <!-- SECTION 3: MỤC TIÊU TÀI CHÍNH & TÍCH LŨY (SAVINGS GOALS & ROUND-UP) -->
-    <!-- ============================================================ -->
-    <section class="content-section" id="section-savings">
-        <!-- TÍNH NĂNG 2: MỤC TIÊU TÀI CHÍNH (SAVINGS GOALS / HŨ TÍCH LŨY SỐ) -->
-        <div class="goals-section-container" id="goals-section">
-            <div class="section-header-box">
-                <div>
-                    <h2 class="section-title">
-                        <i class="fa-solid fa-bullseye" style="color: #10b981;"></i>
-                        Hũ Tích Lũy &amp; Mục Tiêu Tài Chính Thông Minh
-                    </h2>
-                    <p class="section-subtitle">Theo dõi tiến độ tích lũy số và thời gian dự kiến hoàn thành theo tốc độ dòng tiền thực tế</p>
-                </div>
-                <button class="btn-add-goal" id="btn-trigger-add-goal">
-                    <i class="fa-solid fa-plus"></i> Tạo Mục Tiêu Mới
-                </button>
-            </div>
-
-            <div class="goals-grid">
-                {% for goal in health.savings_goals %}
-                <div class="goal-card" style="border-top: 4px solid {{ goal.color }};">
-                    <div class="goal-card-header">
-                        <div class="goal-icon-box" style="background: {{ goal.color }}20; color: {{ goal.color }};">
-                            <i class="fa-solid {{ goal.icon }}"></i>
-                        </div>
-                        <div class="goal-header-text">
-                            <span class="goal-category">{{ goal.category }}</span>
-                            <h3 class="goal-name">{{ goal.name }}</h3>
-                        </div>
-                        <button class="btn-goal-delete" onclick="deleteGoal('{{ goal.id }}')" title="Xóa mục tiêu này">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-
-                    <div class="goal-amounts-row">
-                        <div>
-                            <span class="goal-amt-label">Hiện có:</span>
-                            <span class="goal-current-amt">{{ "{:,.0f}".format(goal.current_amount) }}đ</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="goal-amt-label">Mục tiêu:</span>
-                            <span class="goal-target-amt">{{ "{:,.0f}".format(goal.target_amount) }}đ</span>
-                        </div>
-                    </div>
-
-                    <div class="progress-track" style="height: 10px; margin: 0.75rem 0;">
-                        <div class="progress-fill" style="width: {{ goal.percentage }}%; background: {{ goal.color }};"></div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-bottom: 0.85rem;">
-                        <span>Tiến độ: <strong>{{ goal.percentage }}%</strong></span>
-                        <span>Hạn chót: <strong>{{ goal.deadline or 'Không giới hạn' }}</strong></span>
-                    </div>
-
-                    <div class="goal-ai-forecast">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>{{ goal.ai_forecast }}</span>
-                    </div>
-
-                    <div class="goal-card-footer">
-                        <button class="btn-goal-deposit" onclick="openDepositModal('{{ goal.id }}', '{{ goal.name }}')">
-                            <i class="fa-solid fa-circle-plus"></i> Nạp thêm tiền tích lũy
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- TÍNH NĂNG 3: HEODAT ROUND-UP SAVINGS (MICRO-INVESTING) -->
-        <div class="roundup-card-container" id="roundup-section" style="margin-top: 1.75rem;">
-            <div class="roundup-card">
-                <div class="roundup-left">
-                    <div class="roundup-icon-wrapper">
-                        <i class="fa-solid fa-piggy-bank"></i>
-                    </div>
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 0.6rem;">
-                            <h3 class="roundup-title">Tích Lũy Tiền Lẻ Tự Động (Micro-investing Round-Up)</h3>
-                            <span class="roundup-badge">Cơ chế Heo Đất MoMo / Acorns</span>
-                        </div>
-                        <p class="roundup-desc">
-                            Mỗi khi bạn chi tiêu qua thẻ ngân hàng, hệ thống tự động làm tròn số tiền lẻ lên hàng chục nghìn để gửi vào hũ tiết kiệm.
-                        </p>
-                        <div class="roundup-stats-strip">
-                            <div class="roundup-stat-pill">
-                                <span class="label">Đã gom trong tháng:</span>
-                                <strong class="val">+{{ "{:,.0f}".format(health.round_up.monthly_round_up_total) }} VNĐ</strong>
-                                <span class="sub">({{ health.round_up.transactions_count }} giao dịch)</span>
-                            </div>
-                            <div class="roundup-stat-pill">
-                                <span class="label">Số dư Heo đất khả dụng:</span>
-                                <strong class="val text-success">{{ "{:,.0f}".format(health.round_up.accumulated_total) }} VNĐ</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="roundup-right">
-                    <div class="roundup-controls-group">
-                        <div class="toggle-control-box">
-                            <span style="font-size: 0.85rem; font-weight: 700; color: #1e293b;">Tự động gom tiền lẻ:</span>
-                            <label class="switch">
-                                <input type="checkbox" id="toggle-roundup-enabled" {{ 'checked' if health.round_up.enabled else '' }}>
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-
-                        <div class="step-selector-box">
-                            <label style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Mức làm tròn:</label>
-                            <select id="select-roundup-step" class="step-select">
-                                <option value="10000" {{ 'selected' if health.round_up.step == 10000 else '' }}>Lên 10.000 VNĐ</option>
-                                <option value="50000" {{ 'selected' if health.round_up.step == 50000 else '' }}>Lên 50.000 VNĐ</option>
-                            </select>
-                        </div>
-
-                        <button class="btn-transfer-roundup" id="btn-transfer-roundup" {{ 'disabled' if health.round_up.accumulated_total <= 0 else '' }}>
-                            <i class="fa-solid fa-arrow-right-arrow-left"></i> Chuyển {{ "{:,.0f}".format(health.round_up.accumulated_total) }}đ vào Mục tiêu
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section><!-- /section-savings -->
-
-    <!-- ============================================================ -->
-    <!-- SECTION 4: KIỂM TOÁN RÒ RỈ (LEAKS AUDIT) -->
-    <!-- ============================================================ -->
-    <section class="content-section" id="section-leaks">
-        <!-- Critical Leakage Alerts -->
-        <div class="leak-alerts-grid" id="leaks-section">
-            <!-- Leak 1: Subscriptions -->
-            <div class="leak-card danger">
-                <div class="leak-icon-box">
-                    <i class="fa-solid fa-repeat"></i>
-                </div>
-                <div class="leak-content">
-                    <div class="leak-header">
-                        <span class="leak-title">Rò rỉ Dịch vụ Số Tự động (Subscriptions)</span>
-                        <span class="leak-amount">-{{ "{:,.0f}".format(health.subscription_leaks.total_amount) }}đ / tháng</span>
-                    </div>
-                    <p class="leak-desc">
-                        AI phát hiện <strong>03 dịch vụ định kỳ</strong> trừ thẻ ngầm tự động (Netflix, Spotify, iCloud). Khuyến nghị hủy các gói ít sử dụng để bảo vệ ngân sách.
-                    </p>
-                    <div class="leak-tags">
-                        {% for sub in health.subscription_leaks['items'] %}
-                        <span class="leak-tag">
-                            <i class="fa-solid fa-tag"></i> {{ sub.merchant[:18] }} ({{ "{:,.0f}".format(sub.amount) }}đ)
-                        </span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Leak 2: Night Shopping -->
-            <div class="leak-card warning">
-                <div class="leak-icon-box">
-                    <i class="fa-solid fa-moon"></i>
-                </div>
-                <div class="leak-content">
-                    <div class="leak-header">
-                        <span class="leak-title">Bẫy Chi tiêu Đêm Bốc đồng (Sau 22h00)</span>
-                        <span class="leak-amount">-{{ "{:,.0f}".format(health.impulse_night_spending.total_amount) }}đ</span>
-                    </div>
-                    <p class="leak-desc">
-                        Ghi nhận <strong>06 giao dịch mua sắm cảm xúc</strong> qua Shopee, TikTok Shop và ăn đêm phát sinh từ 22h00 - 03h00 sáng khi khả năng kiểm soát lý trí suy giảm.
-                    </p>
-                    <div class="leak-tags">
-                        <span class="leak-tag"><i class="fa-solid fa-cart-shopping"></i> ShopeePay đêm</span>
-                        <span class="leak-tag"><i class="fa-solid fa-bolt"></i> TikTok Shop Flash sale</span>
-                        <span class="leak-tag"><i class="fa-solid fa-utensils"></i> Đặt đồ ăn đêm Grab</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section><!-- /section-leaks -->
-
-    <!-- ============================================================ -->
-    <!-- SECTION 5: LỊCH SỬ GIAO DỊCH (TRANSACTIONS) -->
-    <!-- ============================================================ -->
-    <section class="content-section" id="section-transactions">
-        <!-- Transactions Table -->
-        <div class="table-card" id="transactions-section" style="margin-top: 0;">
-            <div class="table-toolbar">
-                <div>
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">Lịch sử Giao dịch Đã đồng bộ qua Open Banking</h3>
-                    <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Chuẩn Open API Thông tư 64/2024/TT-NHNN - Tự động gán nhãn NLP &amp; Làm tròn tiền lẻ</p>
-                </div>
-
-                <div style="display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap;">
-                    <div class="table-filter-pills">
-                        <button class="filter-btn active" data-bank="ALL">Tất cả ngân hàng</button>
-                        <button class="filter-btn" data-bank="Vietcombank">Vietcombank</button>
-                        <button class="filter-btn" data-bank="Techcombank">Techcombank</button>
-                        <button class="filter-btn" data-bank="MB Bank">MB Bank</button>
-                    </div>
-
-                    <div class="table-search">
-                        <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8;"></i>
-                        <input type="text" id="search-input" placeholder="Tìm giao dịch, shopee, ăn uống...">
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="fin-table">
-                    <thead>
-                        <tr>
-                            <th>Thời gian</th>
-                            <th>Ngân hàng</th>
-                            <th>Nội dung giao dịch</th>
-                            <th>Phân loại AI</th>
-                            <th>Cảnh báo Rò rỉ</th>
-                            <th style="text-align: right;">Số tiền (VNĐ)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for t in transactions %}
-                        <tr data-bank="{{ t.bank }}">
-                            <td style="color: #64748b; font-size: 0.8rem; white-space: nowrap;">
-                                {{ t.timestamp }}
-                            </td>
-                            <td>
-                                {% if 'Vietcom' in t.bank %}
-                                <span class="bank-tag tag-vcb">VCB</span>
-                                {% elif 'Techcom' in t.bank %}
-                                <span class="bank-tag tag-tcb">TCB</span>
-                                {% else %}
-                                <span class="bank-tag tag-mbb">MB</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div style="font-weight: 600; color: #1e293b; max-width: 380px;">{{ t.description }}</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8;">Mã Ref: {{ t.reference_code }}</div>
-                            </td>
-                            <td>
-                                {% if t.ai_bucket == 'INCOME' %}
-                                <span class="bucket-pill bucket-income"><i class="fa-solid fa-arrow-down"></i> Thu nhập</span>
-                                {% elif t.ai_bucket == 'NEEDS' %}
-                                <span class="bucket-pill bucket-needs"><i class="fa-solid fa-shield"></i> {{ t.ai_category }}</span>
-                                {% elif t.ai_bucket == 'WANTS' %}
-                                <span class="bucket-pill bucket-wants"><i class="fa-solid fa-bag-shopping"></i> {{ t.ai_category }}</span>
-                                {% elif t.ai_bucket == 'SAVINGS' %}
-                                <span class="bucket-pill bucket-savings"><i class="fa-solid fa-piggy-bank"></i> {{ t.ai_category }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if t.is_subscription %}
-                                <span class="leak-badge badge-sub"><i class="fa-solid fa-repeat"></i> Gói Định kỳ</span>
-                                {% endif %}
-                                {% if t.is_night_spending %}
-                                <span class="leak-badge badge-night"><i class="fa-solid fa-moon"></i> Chi tiêu đêm</span>
-                                {% endif %}
-                                {% if not t.is_subscription and not t.is_night_spending %}
-                                <span style="color: #cbd5e1; font-size: 0.8rem;">—</span>
-                                {% endif %}
-                            </td>
-                            <td style="text-align: right;">
-                                {% if t.type == 'INFLOW' %}
-                                <span class="amt-inflow">+{{ "{:,.0f}".format(t.amount) }}đ</span>
-                                {% else %}
-                                <span class="amt-outflow">-{{ "{:,.0f}".format(t.amount) }}đ</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section><!-- /section-transactions -->
-    </div><!-- /main-content-inner -->
-</main><!-- /app-main-content -->
-</div><!-- /app-layout -->
-
-    <!-- Mobile App Bottom Navigation Bar -->
-    <nav class="mobile-bottom-nav">
-        <a href="#stats-section" class="mobile-nav-item active">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Chỉ số</span>
-        </a>
-        <a href="#forecast-section" class="mobile-nav-item">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Dự báo</span>
-        </a>
-        <a href="#goals-section" class="mobile-nav-item">
-            <i class="fa-solid fa-bullseye"></i>
-            <span>Mục tiêu</span>
-        </a>
-        <a href="#analytics-section" class="mobile-nav-item">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Ngân sách</span>
-        </a>
-        <a href="javascript:void(0)" class="mobile-nav-item mobile-ai-trigger" id="mobile-nav-ai-btn">
-            <i class="fa-solid fa-robot"></i>
-            <span>Trợ lý AI</span>
-        </a>
-    </nav>
-
-    <!-- Floating Chatbot Widget Trigger -->
-    <button class="chatbot-trigger" id="chatbot-trigger" title="Hỏi Trợ lý AI FinLab">
-        <i class="fa-solid fa-robot"></i>
-        <span class="chatbot-badge" id="chatbot-badge">AI</span>
-    </button>
-
-    <!-- Floating Chatbot Window -->
-    <div class="chat-window" id="chat-window">
-        <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="chat-bot-avatar">
-                    <i class="fa-solid fa-brain"></i>
-                </div>
-                <div>
-                    <div class="chat-bot-title">FinLab AI Financial Advisor</div>
-                    <div class="chat-bot-status">
-                        <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%;"></span>
-                        Đang phân tích dòng tiền &amp; dự báo
-                    </div>
-                </div>
-            </div>
-            <button class="chat-close-btn" id="chat-close-btn">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="chat-messages" id="chat-messages">
-            <div class="msg-bubble msg-bot">
-                Xin chào {{ user.full_name if user else 'bạn' }}! Tôi là <strong>Trợ lý AI FinLab</strong>. Tôi đã cập nhật đầy đủ tỷ lệ ngân sách {{ health.target_ratio.needs }}/{{ health.target_ratio.wants }}/{{ health.target_ratio.savings }}, tiến độ các mục tiêu và dự báo dòng tiền cuối tháng của bạn. Bạn có thể hỏi tôi bất kỳ điều gì!
-            </div>
-        </div>
-
-        <div class="chat-suggestions">
-            <button class="chip-btn" data-question="Dự báo dòng tiền cuối tháng của tôi thế nào, có bị cạn ví không?">
-                🔮 Dự báo dòng tiền cuối tháng?
-            </button>
-            <button class="chip-btn" data-question="Tháng này tôi gom được bao nhiêu tiền lẻ Heo đất?">
-                🐷 Tiền lẻ tích lũy Heo đất?
-            </button>
-            <button class="chip-btn" data-question="Tiến độ mục tiêu mua Laptop và Quỹ khẩn cấp ra sao?">
-                🎯 Tiến độ mục tiêu tài chính?
-            </button>
-            <button class="chip-btn" data-question="Các danh mục nào đang vượt hạn mức chi tiêu?">
-                ⚠️ Danh mục vượt hạn mức?
-            </button>
-            <button class="chip-btn" data-question="Tháng này tôi tiêu bao nhiêu tiền ăn uống?">
-                🍔 Chi tiêu ăn uống ngoài?
-            </button>
-            <button class="chip-btn" data-question="Có khoản đăng ký ngầm nào đang trừ tiền không?">
-                🔄 Rò rỉ gói định kỳ?
-            </button>
-        </div>
-
-        <div class="chat-input-area">
-            <input type="text" id="chat-user-input" placeholder="Hỏi AI về dòng tiền, dự báo, mục tiêu...">
-            <button class="chat-send-btn" id="chat-send-btn">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="width:auto;padding:12px 20px;" onclick="document.getElementById('modal-bank').classList.remove('open')">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:12px 24px;" id="btn-sync">
+          <i class="fa-solid fa-arrows-rotate"></i> Đồng bộ ngay
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- ==================================================================== -->
-    <!-- MODAL 1: TÍNH NĂNG 1 - TÙY CHỌN TỶ LỆ NGÂN SÁCH (CUSTOM BUDGET RATIO) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-budget-ratio">
-        <div class="modal-box" style="max-width: 520px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-sliders" style="color: #2563eb;"></i>
-                    Thiết Lập Tỷ Lệ Phân Bổ Ngân Sách
-                </div>
-                <button class="btn-modal-close-icon" onclick="closeModal('modal-budget-ratio')">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1.25rem;">
-                    Điều chỉnh tỷ trọng mục tiêu giữa 3 nhóm dòng tiền phù hợp với thu nhập và giai đoạn cuộc sống của bạn (Tổng phải bằng 100%):
-                </p>
+  <!-- Modal overlay style -->
+  <style>
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:all 0.3s ease;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:var(--bg-surface);border:1px solid var(--border);border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:0;overflow:hidden;transform:translateY(40px);transition:transform 0.3s ease;}
+    .modal-overlay.open .modal-box{transform:translateY(0);}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0;}
+    .modal-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .modal-close{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;}
+    .modal-body{padding:16px 20px;}
+    .modal-footer{padding:16px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);}
+    .bank-choice{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg-card, #FFFFFF);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:var(--transition);}
+    .bank-choice.selected{border-color:var(--accent);background:var(--accent-light);}
+  </style>
 
-                <!-- Quick Presets -->
-                <div style="margin-bottom: 1.25rem;">
-                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem;">
-                        Gợi ý phân bổ nhanh:
-                    </div>
-                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                        <button class="btn-preset-pill" onclick="setRatioPreset(50, 30, 20)">50/30/20 (Chuẩn)</button>
-                        <button class="btn-preset-pill" onclick="setRatioPreset(50, 20, 30)">50/20/30 (Tích cực)</button>
-                        <button class="btn-preset-pill" onclick="setRatioPreset(60, 20, 20)">60/20/20 (Gia đình)</button>
-                        <button class="btn-preset-pill" onclick="setRatioPreset(70, 20, 10)">70/20/10 (Sinh viên)</button>
-                    </div>
-                </div>
+  <script type="application/json" id="dash-data">{{ health | tojson }}</script>
+</div>
+{% endblock %}
 
-                <!-- Sliders -->
-                <div class="ratio-slider-group">
-                    <div class="ratio-slider-item">
-                        <div class="slider-header">
-                            <span class="slider-label" style="color: #2563eb;">
-                                <i class="fa-solid fa-shield"></i> Thiết yếu (Needs):
-                            </span>
-                            <span class="slider-val" id="val-needs">{{ health.target_ratio.needs }}%</span>
-                        </div>
-                        <input type="range" min="10" max="80" value="{{ health.target_ratio.needs }}" id="slider-needs" class="range-slider">
-                    </div>
-
-                    <div class="ratio-slider-item">
-                        <div class="slider-header">
-                            <span class="slider-label" style="color: #d97706;">
-                                <i class="fa-solid fa-bag-shopping"></i> Mong muốn (Wants):
-                            </span>
-                            <span class="slider-val" id="val-wants">{{ health.target_ratio.wants }}%</span>
-                        </div>
-                        <input type="range" min="5" max="60" value="{{ health.target_ratio.wants }}" id="slider-wants" class="range-slider">
-                    </div>
-
-                    <div class="ratio-slider-item">
-                        <div class="slider-header">
-                            <span class="slider-label" style="color: #059669;">
-                                <i class="fa-solid fa-piggy-bank"></i> Tiết kiệm (Savings):
-                            </span>
-                            <span class="slider-val" id="val-savings">{{ health.target_ratio.savings }}%</span>
-                        </div>
-                        <input type="range" min="5" max="50" value="{{ health.target_ratio.savings }}" id="slider-savings" class="range-slider">
-                    </div>
-                </div>
-
-                <!-- Sum Checker Display -->
-                <div class="ratio-sum-box" id="ratio-sum-box">
-                    <span>Tổng phân bổ:</span>
-                    <strong id="ratio-total-sum">100%</strong>
-                    <span id="ratio-sum-msg" style="font-size: 0.78rem; margin-left: auto; color: #10b981;">
-                        <i class="fa-solid fa-check-circle"></i> Hợp lệ
-                    </span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('modal-budget-ratio')">Hủy</button>
-                <button class="btn-primary" id="btn-save-budget-ratio">
-                    <i class="fa-solid fa-floppy-disk"></i> Lưu thiết lập
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================================================================== -->
-    <!-- MODAL 2: TÍNH NĂNG 2 - TẠO MỤC TIÊU MỚI (ADD SAVINGS GOAL) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-add-goal">
-        <div class="modal-box" style="max-width: 480px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-bullseye" style="color: #10b981;"></i>
-                    Tạo Mục Tiêu Tài Chính Mới
-                </div>
-                <button class="btn-modal-close-icon" onclick="closeModal('modal-add-goal')">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label">Tên mục tiêu tích lũy:</label>
-                    <input type="text" id="goal-name-input" class="form-control" placeholder="Ví dụ: Mua iPhone 16 Pro, Đổi xe máy...">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label">Số tiền mục tiêu (VNĐ):</label>
-                    <input type="number" id="goal-target-input" class="form-control" placeholder="25000000" min="100000">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label">Số tiền hiện có sẵn (VNĐ):</label>
-                    <input type="number" id="goal-current-input" class="form-control" placeholder="0" value="0">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label">Hạn chót dự kiến hoàn thành:</label>
-                    <input type="date" id="goal-deadline-input" class="form-control">
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
-                    <div>
-                        <label class="form-label">Danh mục / Icon:</label>
-                        <select id="goal-icon-select" class="form-control">
-                            <option value="fa-shield-halved">Quỹ khẩn cấp</option>
-                            <option value="fa-laptop">Công nghệ / Laptop</option>
-                            <option value="fa-plane-departure">Du lịch</option>
-                            <option value="fa-car">Xe cộ</option>
-                            <option value="fa-house">Nhà cửa</option>
-                            <option value="fa-graduation-cap">Học tập</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Màu sắc nhận diện:</label>
-                        <select id="goal-color-select" class="form-control">
-                            <option value="#3b82f6">Xanh dương (Blue)</option>
-                            <option value="#10b981">Xanh lục (Emerald)</option>
-                            <option value="#8b5cf6">Tím (Purple)</option>
-                            <option value="#f59e0b">Cam (Amber)</option>
-                            <option value="#ec4899">Hồng (Pink)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('modal-add-goal')">Hủy</button>
-                <button class="btn-primary" id="btn-submit-add-goal">
-                    <i class="fa-solid fa-check"></i> Tạo mục tiêu
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================================================================== -->
-    <!-- MODAL 3: NẠP TIỀN VÀO MỤC TIÊU (DEPOSIT GOAL) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-deposit-goal">
-        <div class="modal-box" style="max-width: 420px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-circle-plus" style="color: #10b981;"></i>
-                    Nạp Tiền Vào Mục Tiêu
-                </div>
-                <button class="btn-modal-close-icon" onclick="closeModal('modal-deposit-goal')">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1rem;" id="deposit-modal-subtitle">
-                    Nạp thêm tiền tích lũy vào mục tiêu:
-                </p>
-                <input type="hidden" id="deposit-goal-id">
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label">Số tiền nạp (VNĐ):</label>
-                    <input type="number" id="deposit-amount-input" class="form-control" placeholder="1000000" min="10000">
-                </div>
-
-                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                    <button class="btn-preset-pill" onclick="document.getElementById('deposit-amount-input').value = 500000">+500.000đ</button>
-                    <button class="btn-preset-pill" onclick="document.getElementById('deposit-amount-input').value = 1000000">+1.000.000đ</button>
-                    <button class="btn-preset-pill" onclick="document.getElementById('deposit-amount-input').value = 2000000">+2.000.000đ</button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('modal-deposit-goal')">Hủy</button>
-                <button class="btn-primary" id="btn-submit-deposit">
-                    <i class="fa-solid fa-arrow-down-to-bracket"></i> Xác nhận nạp
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================================================================== -->
-    <!-- MODAL 4: TÍNH NĂNG 5 - CÀI ĐẶT HẠN MỨC DANH MỤC (CATEGORY BUDGETS) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-category-budgets">
-        <div class="modal-box" style="max-width: 520px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-sliders" style="color: #f59e0b;"></i>
-                    Cài Đặt Hạn Mức Chi Tiêu Danh Mục
-                </div>
-                <button class="btn-modal-close-icon" onclick="closeModal('modal-category-budgets')">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1.25rem;">
-                    Đặt hạn mức trần chi tiêu tối đa trong tháng cho từng danh mục. Hệ thống sẽ phát cảnh báo tự động khi chạm 80% hoặc vượt mức:
-                </p>
-
-                <div class="cat-limit-edit-list">
-                    {% for b in health.category_budgets %}
-                    <div class="cat-limit-edit-row">
-                        <label class="cat-edit-label">{{ b.category }}:</label>
-                        <div style="display: flex; align-items: center; gap: 0.4rem;">
-                            <input type="number" class="cat-budget-input form-control" data-category="{{ b.category }}" value="{{ b.limit }}" step="100000">
-                            <span style="font-size: 0.8rem; color: #64748b;">VNĐ</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('modal-category-budgets')">Hủy</button>
-                <button class="btn-primary" id="btn-save-category-limits">
-                    <i class="fa-solid fa-floppy-disk"></i> Lưu hạn mức
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================================================================== -->
-    <!-- MODAL 5: TÍNH NĂNG 6 - TRUNG TÂM QUẢN TRỊ QUYỀN VÀ CONSENT (NGHỊ ĐỊNH 13) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-consent-mgr">
-        <div class="modal-box" style="max-width: 620px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i>
-                    Trung Tâm Quản Trị Quyền Dữ Liệu &amp; Kết Nối (Open Banking Consent)
-                </div>
-                <button class="btn-modal-close-icon" onclick="closeModal('modal-consent-mgr')">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Legal Banner -->
-                <div class="consent-compliance-box">
-                    <i class="fa-solid fa-scale-balanced" style="font-size: 1.3rem; color: #2563eb;"></i>
-                    <div>
-                        <div style="font-weight: 700; font-size: 0.88rem; color: #1e3a8a;">Tuân thủ Nghị định 13/2023/NĐ-CP &amp; Thông tư 64/2024/TT-NHNN</div>
-                        <div style="font-size: 0.78rem; color: #3b82f6; margin-top: 2px;">
-                            Bạn có toàn quyền kiểm soát, bật/tắt từng phạm vi dữ liệu hoặc thu hồi ủy quyền bất kỳ lúc nào. FinLab cam kết bảo vệ dữ liệu cá nhân theo tiêu chuẩn ngân hàng mở.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="consent-bank-list">
-                    {% for consent in user.consents %}
-                    <div class="consent-bank-card {{ 'card-revoked' if consent.status != 'ACTIVE' else '' }}">
-                        <div class="consent-bank-header">
-                            <div>
-                                <span style="font-weight: 700; font-size: 0.95rem; color: #0f172a;">{{ consent.bank_name }}</span>
-                                <span style="font-size: 0.75rem; color: #64748b; margin-left: 6px;">STK: {{ consent.account_no }}</span>
-                            </div>
-                            <div>
-                                {% if consent.status == 'ACTIVE' %}
-                                <span class="consent-status-badge badge-active">
-                                    <i class="fa-solid fa-circle-check"></i> ĐANG ỦY QUYỀN
-                                </span>
-                                {% else %}
-                                <span class="consent-status-badge badge-revoked">
-                                    <i class="fa-solid fa-circle-pause"></i> ĐÃ THU HỒI
-                                </span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div style="font-size: 0.75rem; color: #64748b; margin: 0.4rem 0 0.75rem 0;">
-                            Cấp quyền: {{ consent.granted_at }} &bull; Hết hạn: {{ consent.expires_at }} (Chuẩn 90 ngày)
-                        </div>
-
-                        <!-- Scopes Checklist -->
-                        <div class="consent-scopes-box">
-                            <label class="scope-toggle-item">
-                                <input type="checkbox" class="scope-check" data-bank-id="{{ consent.bank_id }}" data-scope="read_balance" {{ 'checked' if consent.scopes.read_balance else '' }} {{ 'disabled' if consent.status != 'ACTIVE' else '' }}>
-                                <span><i class="fa-solid fa-wallet"></i> Xem số dư tài khoản (read:balance)</span>
-                            </label>
-                            <label class="scope-toggle-item">
-                                <input type="checkbox" class="scope-check" data-bank-id="{{ consent.bank_id }}" data-scope="read_transactions" {{ 'checked' if consent.scopes.read_transactions else '' }} {{ 'disabled' if consent.status != 'ACTIVE' else '' }}>
-                                <span><i class="fa-solid fa-receipt"></i> Xem lịch sử giao dịch (read:transactions)</span>
-                            </label>
-                            <label class="scope-toggle-item">
-                                <input type="checkbox" class="scope-check" data-bank-id="{{ consent.bank_id }}" data-scope="analyze_ai" {{ 'checked' if consent.scopes.analyze_ai else '' }} {{ 'disabled' if consent.status != 'ACTIVE' else '' }}>
-                                <span><i class="fa-solid fa-brain"></i> Phân tích AI PFM &amp; Rò rỉ (analyze:ai_pfm)</span>
-                            </label>
-                        </div>
-
-                        <div class="consent-actions-bar">
-                            {% if consent.status == 'ACTIVE' %}
-                            <button class="btn-revoke-consent" onclick="revokeConsent('{{ consent.bank_id }}')">
-                                <i class="fa-solid fa-ban"></i> Thu hồi quyền truy cập (Revoke Consent)
-                            </button>
-                            {% else %}
-                            <button class="btn-reauthorize-consent" onclick="reauthorizeConsent('{{ consent.bank_id }}')">
-                                <i class="fa-solid fa-arrows-rotate"></i> Cấp lại quyền truy cập (90 ngày)
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('modal-consent-mgr')">Đóng</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================================================================== -->
-    <!-- MODAL 6: OPEN BANKING CONNECT (EXISTING MODAL) -->
-    <!-- ==================================================================== -->
-    <div class="modal-overlay" id="modal-bank-sync">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fa-solid fa-building-columns" style="color: #2563eb;"></i>
-                    Cổng Kết nối Open Banking API
-                </div>
-                <button class="btn-modal-close-icon" id="btn-modal-close">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1rem;">
-                    Chọn tài khoản ngân hàng để thực hiện cấp quyền truy cập dữ liệu giao dịch (AIS) qua cơ chế OAuth 2.0 Consent:
-                </p>
-
-                <div class="bank-select-list">
-                    <div class="bank-choice-card selected" data-bank-id="VCB">
-                        <div class="bank-info-left">
-                            <div class="bank-icon-sm" style="background: #006837;">VCB</div>
-                            <div>
-                                <div style="font-weight: 700; font-size: 0.9rem;">Vietcombank (Tài khoản chính)</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">STK: 1028475938 &bull; Nhận lương</div>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-circle-check" style="color: #2563eb; font-size: 1.15rem;"></i>
-                    </div>
-
-                    <div class="bank-choice-card" data-bank-id="TCB">
-                        <div class="bank-info-left">
-                            <div class="bank-icon-sm" style="background: #E31B23;">TCB</div>
-                            <div>
-                                <div style="font-weight: 700; font-size: 0.9rem;">Techcombank (Chi tiêu hàng ngày)</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">STK: 19038475920 &bull; Quẹt mã QR &amp; Shopee</div>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-circle-check" style="color: #cbd5e1; font-size: 1.15rem;"></i>
-                    </div>
-
-                    <div class="bank-choice-card" data-bank-id="MBB">
-                        <div class="bank-info-left">
-                            <div class="bank-icon-sm" style="background: #002060;">MB</div>
-                            <div>
-                                <div style="font-weight: 700; font-size: 0.9rem;">MB Bank (Tiết kiệm số)</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">STK: 0987654321 &bull; Quỹ tích lũy</div>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-circle-check" style="color: #cbd5e1; font-size: 1.15rem;"></i>
-                    </div>
-                </div>
-
-                <div class="bank-consent-terms">
-                    <i class="fa-solid fa-shield-halved" style="color: #2563eb; margin-right: 4px;"></i>
-                    <strong>Cam kết Bảo mật Dữ liệu:</strong> Quá trình kết nối tuân thủ <em>Thông tư 64/2024/TT-NHNN</em> về Tiêu chuẩn Open API ngành Ngân hàng &amp; <em>Nghị định 13/2023/NĐ-CP</em>. FinLab chỉ được cấp quyền Đọc (Read-only AIS), không có quyền thực hiện chuyển tiền.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="btn-modal-cancel">Hủy</button>
-                <button class="btn-primary" id="btn-confirm-sync">
-                    <i class="fa-solid fa-arrows-rotate"></i> Kết nối &amp; Đồng bộ ngay
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Embedded Dashboard Data for Chart.js -->
-    <script type="application/json" id="dashboard-data">
-        {{ health | tojson }}
-    </script>
-
-    <!-- Custom Scripts -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+{% endblock %}

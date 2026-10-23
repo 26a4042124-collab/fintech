@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Mục tiêu{% endblock %}
+
+{% block body %}
+<div class="app-wrapper">
+  <div class="blob blob-orange" style="opacity:0.10;"></div>
+  <div class="blob blob-gold" style="opacity:0.08;"></div>
+
+  <div class="status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Mục tiêu tài chính</div>
+    <button class="top-bar-action" id="btn-add-goal" title="Thêm mục tiêu">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Overview banner -->
+    <div class="balance-card" style="margin-bottom:20px;">
+      <div class="balance-label">Tổng tiết kiệm đang tích lũy</div>
+      <div class="balance-amount">
+        {% set total_current = goals | sum(attribute='current') %}
+        {{ "{:,.0f}".format(total_current) }}<span>VNĐ</span>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.55);margin-top:8px;position:relative;z-index:1;">
+        🎯 {{ goals | length }} mục tiêu đang theo dõi
+      </div>
+    </div>
+
+    <!-- Goals list -->
+    {% for g in goals %}
+    {% set pct = ((g.current / g.target) * 100) | round(1) %}
+    <div class="goal-progress-card">
+      <div class="gpc-header">
+        <div class="gpc-icon" style="background:{{ g.color }}22; color:{{ g.color }}; font-size:22px;">
+          <i class="fa-solid fa-{{ g.icon }}"></i>
+        </div>
+        <div class="gpc-info">
+          <div class="gpc-name">{{ g.name }}</div>
+          <div class="gpc-meta">Mục tiêu: {{ "{:,.0f}".format(g.target) }}đ</div>
+        </div>
+        <div class="gpc-percent" style="color:{{ g.color }};">{{ pct }}%</div>
+      </div>
+      <div class="gpc-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:{{ pct }}%;background:{{ g.color }};"></div>
+        </div>
+      </div>
+      <div class="gpc-amounts">
+        <span>Đã có: <strong>{{ "{:,.0f}".format(g.current) }}đ</strong></span>
+        <span>Còn thiếu: <strong style="color:var(--text-secondary);">{{ "{:,.0f}".format(g.target - g.current) }}đ</strong></span>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Add goal tip -->
+    <div style="background:var(--accent-light);border:1px dashed var(--border-accent);border-radius:16px;padding:18px;text-align:center;margin-top:8px;cursor:pointer;" id="add-goal-card">
+      <div style="font-size:28px;margin-bottom:8px;">➕</div>
+      <div style="font-size:14px;font-weight:700;color:var(--accent);">Thêm mục tiêu mới</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Mua nhà, du lịch, quỹ khẩn cấp...</div>
+    </div>
+
+    <!-- Tips section -->
+    <div class="chart-card" style="margin-top:16px;">
+      <div class="chart-card-title">
+        <i class="fa-solid fa-lightbulb" style="color:var(--gold);"></i>
+        Mẹo tiết kiệm từ AI
+      </div>
+      <div class="rec-item" style="margin-top:12px;">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>Tự động chuyển <strong>900,000đ/tháng</strong> vào tài khoản tiết kiệm ngay ngày nhận lương để đảm bảo đạt 20% thu nhập.</div>
+      </div>
+      <div class="rec-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>Hủy các gói subscription ít dùng (Netflix, iCloud) để tiết kiệm thêm <strong>{{ "{:,.0f}".format(609000) }}đ/tháng</strong>.</div>
+      </div>
+      <div class="rec-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>Giảm chi tiêu đêm xuống còn 200,000đ/tháng — giúp tiết kiệm thêm <strong>~1,800,000đ</strong> mỗi tháng.</div>
+      </div>
+    </div>
+  </div>
+
+  {% include "nav_bottom.html" %}
+
+  <!-- Add Goal Modal -->
+  <div class="modal-overlay" id="modal-add-goal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-bullseye" style="color:var(--accent);"></i> Thêm mục tiêu</div>
+        <button class="modal-close" onclick="document.getElementById('modal-add-goal').classList.remove('open')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tên mục tiêu</label>
+          <input type="text" class="form-input" placeholder="Ví dụ: Mua xe máy">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Số tiền mục tiêu (VNĐ)</label>
+          <input type="number" class="form-input" placeholder="30,000,000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Thời hạn</label>
+          <input type="month" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="width:auto;padding:12px 20px;" onclick="document.getElementById('modal-add-goal').classList.remove('open')">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:12px 24px;" onclick="showToast('Tính năng sắp ra mắt! 🚀','info');document.getElementById('modal-add-goal').classList.remove('open');">
+          <i class="fa-solid fa-plus"></i> Thêm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:all 0.3s ease;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{background:var(--bg-surface);border:1px solid var(--border);border-radius:28px 28px 0 0;width:100%;max-width:430px;overflow:hidden;transform:translateY(40px);transition:transform 0.3s ease;}
+    .modal-overlay.open .modal-box{transform:translateY(0);}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0;}
+    .modal-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .modal-close{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;}
+    .modal-body{padding:16px 20px;}
+    .modal-footer{padding:16px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);}
+  </style>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+document.getElementById('btn-add-goal').addEventListener('click', () => {
+  document.getElementById('modal-add-goal').classList.add('open');
+});
+document.getElementById('add-goal-card').addEventListener('click', () => {
+  document.getElementById('modal-add-goal').classList.add('open');
+});
+</script>
+{% endblock %}

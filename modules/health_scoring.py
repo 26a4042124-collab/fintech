@@ -336,14 +336,12 @@ def compute_financial_health(
         "subscription_leaks": {
             "count": len(subscription_items),
             "total_amount": total_sub_leak,
-            "items": subscription_items,
-            "items_list": subscription_items
+            "list": subscription_items
         },
         "impulse_night_spending": {
             "count": len(night_impulse_items),
             "total_amount": total_night_impulse,
-            "items": night_impulse_items,
-            "items_list": night_impulse_items
+            "list": night_impulse_items
         },
         "category_breakdown": category_breakdown,
         "cashflow_forecast": cashflow_forecast,

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Xác thực OTP{% endblock %}
+{% block body %}
+<div class="auth-wrapper">
+  <!-- Blobs -->
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-orange-2"></div>
+
+  <!-- Status Bar -->
+  <div class="auth-status-bar">
+    <span>12:00</span>
+    <div class="status-bar-right">
+      <i class="fa-solid fa-signal"></i>
+      <i class="fa-solid fa-wifi"></i>
+      <i class="fa-solid fa-battery-full"></i>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="profile-form-logo" style="padding-top:20px;">
+    <img src="{{ url_for('static', filename='images/logo.png') }}"
+         alt="FinLab"
+         style="height:56px; width:auto; object-fit:contain;"
+         onerror="this.outerHTML='<div style=\'display:flex;align-items:center;gap:8px;\'><span style=\'font-size:32px;\'>🧪</span><span style=\'font-size:26px;font-weight:900;color:#E8632A;\'>FINLAB</span></div>'">
+  </div>
+
+  <!-- Heading -->
+  <div class="auth-heading" style="margin-top:24px;">
+    <h1 class="auth-title">Xác thực <span class="highlight">OTP</span></h1>
+    <p class="auth-subtitle">
+      Nhập mã 6 chữ số đã được gửi đến<br>
+      <strong style="color:var(--text-primary);">{{ contact }}</strong>
+    </p>
+  </div>
+
+  <!-- Form Body -->
+  <div class="auth-body" style="flex:1; overflow-y:auto;">
+
+    {% if resend_ok %}
+    <div class="form-success"><i class="fa-solid fa-circle-check"></i> Mã OTP mới đã được gửi!</div>
+    {% endif %}
+
+    {% if dev_hint %}
+    <div class="form-success" style="background:rgba(255,215,0,0.10);border-color:rgba(255,215,0,0.3);">
+      <div style="color:#E8632A;font-weight:700;margin-bottom:4px;">⚙️ Dev mode — Mã OTP của bạn:</div>
+      <span style="font-size:24px;font-weight:900;color:#E8632A;letter-spacing:6px;">{{ dev_hint }}</span>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register_otp') }}" id="otp-form">
+      <input type="hidden" name="action" value="verify">
+
+      <div class="otp-inputs">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      </div>
+      <input type="hidden" name="otp" id="otp-hidden">
+
+      <div class="otp-resend">
+        Không nhận được mã?
+        <button type="button" id="resend-btn">Gửi lại (<span id="countdown">60</span>s)</button>
+      </div>
+
+      <button type="submit" class="btn-primary" id="verify-btn" disabled>Tiếp tục</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('register_otp') }}" id="resend-form" style="display:none;">
+      <input type="hidden" name="action" value="resend">
+    </form>
+
+    {% if mail_configured %}
+    <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--text-muted);line-height:1.6;">
+      <i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i>
+      OTP gửi qua Gmail · Hết hạn sau 5 phút
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="height:32px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/otp.js') }}"></script>
+<script>
+document.getElementById('resend-btn').addEventListener('click', function() {
+  if (!this.classList.contains('active')) return;
+  document.getElementById('resend-form').submit();
+});
+</script>
+{% endblock %}
