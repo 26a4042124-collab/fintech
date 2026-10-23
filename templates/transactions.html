@@ -12,8 +12,12 @@
     </div>
   </div>
 
+  <!-- Top Bar -->
   <div class="top-bar">
-    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="{{ url_for('dashboard') }}" class="top-bar-back" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
+      <button class="top-bar-action" onclick="toggleMobileDrawer()" title="Menu chức năng"><i class="fa-solid fa-bars"></i></button>
+    </div>
     <div class="top-bar-title">Lịch sử giao dịch</div>
     <a href="{{ url_for('add_transaction') }}" class="top-bar-action" title="Ghi chép mới" style="text-decoration:none;"><i class="fa-solid fa-plus text-accent"></i></a>
   </div>

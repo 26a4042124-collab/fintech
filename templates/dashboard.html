@@ -20,27 +20,32 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <a href="{{ url_for('profile') }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
-      <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;box-shadow:0 4px 12px rgba(255,107,53,0.35);">
-        {{ user.full_name[0] if user.full_name else 'U' }}
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--text-muted);font-weight:600;">Xin chào 👋</div>
-        <div style="font-size:14px;font-weight:800;color:var(--text-primary);">{{ user.full_name }}</div>
-      </div>
-    </a>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="top-bar-action" onclick="toggleMobileDrawer()" title="Menu chức năng">
+        <i class="fa-solid fa-bars" style="font-size:14px;color:var(--text-secondary);"></i>
+      </button>
+      <a href="{{ url_for('profile') }}" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white;box-shadow:0 3px 10px rgba(255,107,53,0.35);">
+          {{ user.full_name[0] if user.full_name else 'U' }}
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:600;line-height:1.1;">Xin chào 👋</div>
+          <div style="font-size:13px;font-weight:800;color:var(--text-primary);line-height:1.2;">{{ user.full_name }}</div>
+        </div>
+      </a>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
       {% if user.role == 'admin' %}
       <a href="{{ url_for('admin_overview') }}" class="top-bar-action" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);text-decoration:none;" title="Cổng Quản trị Admin">
-        <i class="fa-solid fa-shield-halved" style="color:#6366f1;font-size:14px;"></i>
+        <i class="fa-solid fa-shield-halved" style="color:#6366f1;font-size:13px;"></i>
       </a>
       {% endif %}
       <a href="{{ url_for('notifications') }}" class="top-bar-action" style="position:relative;text-decoration:none;" title="Thông báo">
-        <i class="fa-solid fa-bell" style="color:var(--text-secondary);font-size:15px;"></i>
-        <span style="position:absolute;top:6px;right:7px;width:7px;height:7px;background:var(--accent);border-radius:50%;"></span>
+        <i class="fa-solid fa-bell" style="color:var(--text-secondary);font-size:14px;"></i>
+        <span style="position:absolute;top:5px;right:6px;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
       </a>
       <button class="top-bar-action" id="chatbot-fab-top" title="Trợ lý AI">
-        <i class="fa-solid fa-robot" style="color:var(--accent);"></i>
+        <i class="fa-solid fa-robot" style="color:var(--accent);font-size:14px;"></i>
       </button>
     </div>
   </div>

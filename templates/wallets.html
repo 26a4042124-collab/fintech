@@ -16,7 +16,10 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="{{ url_for('dashboard') }}" class="top-bar-back" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
+      <button class="top-bar-action" onclick="toggleMobileDrawer()" title="Menu chức năng"><i class="fa-solid fa-bars"></i></button>
+    </div>
     <div class="top-bar-title">Ví &amp; Tài khoản</div>
     <button class="top-bar-action" onclick="openAddWalletModal()" title="Thêm ví mới"><i class="fa-solid fa-plus text-accent"></i></button>
   </div>
@@ -24,24 +27,24 @@
   <div class="page-content">
     
     <!-- Net Worth Card -->
-    <div class="balance-card" style="background: linear-gradient(135deg, #1E2024 0%, #2A2D35 60%, #E8632A 100%);">
-      <div class="balance-label" style="color: rgba(255,255,255,0.7);">Tổng tài sản khả dụng</div>
-      <div class="balance-amount" style="font-size: 30px;">
+    <div class="balance-card" style="background: linear-gradient(135deg, #181B22 0%, #252932 60%, #E8632A 100%);">
+      <div class="balance-label" style="color: rgba(255,255,255,0.75);">Tổng tài sản khả dụng</div>
+      <div class="balance-amount" style="font-size: 24px; margin-bottom: 12px;">
         {{ "{:,.0f}".format(total_assets) }}
-        <span style="font-size:16px;">VNĐ</span>
+        <span style="font-size:13px;">VNĐ</span>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1;">
-        <div style="font-size:12px; color:rgba(255,255,255,0.75);">
-          <i class="fa-solid fa-shield-check" style="color:#4ADE80;"></i> {{ wallets|length }} nguồn tiền kết nối
+        <div style="font-size:11px; color:rgba(255,255,255,0.75);">
+          <i class="fa-solid fa-shield-halved" style="color:#4ADE80;"></i> {{ wallets|length }} nguồn tiền kết nối
         </div>
-        <button class="btn-ghost" onclick="openTransferModal()" style="color:#FFF; background:rgba(255,255,255,0.18); border-radius:20px; padding:6px 14px; font-size:12px;">
-          <i class="fa-solid fa-right-left"></i> Chuyển ví
+        <button class="btn-ghost" onclick="openTransferModal()" style="color:#FFF; background:rgba(255,255,255,0.18); border-radius:14px; padding:5px 12px; font-size:11px;">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i> Chuyển ví
         </button>
       </div>
     </div>
 
     <!-- Quick Actions Strip -->
-    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:14px;">
       <button class="wallet-action-chip" onclick="openAddWalletModal()">
         <i class="fa-solid fa-circle-plus text-accent"></i>
         <span>Thêm ví mới</span>
@@ -56,26 +59,32 @@
       </a>
     </div>
 
-    <!-- Wallets Cards Carousel / List -->
-    <div class="section-title">
-      <span>Danh sách ví &amp; thẻ</span>
-      <span style="font-size:12px;color:var(--text-muted);font-weight:600;">{{ wallets|length }} tài khoản</span>
+    <!-- Segmented Tab Filter -->
+    <div class="wallet-tab-pills">
+      <button class="wallet-tab-pill active" onclick="filterWallets('all', this)">Tất cả ({{ wallets|length }})</button>
+      <button class="wallet-tab-pill" onclick="filterWallets('bank', this)">Thẻ ngân hàng (3)</button>
+      <button class="wallet-tab-pill" onclick="filterWallets('ewallet', this)">Ví &amp; Tiền mặt (2)</button>
     </div>
 
+    <!-- Wallets Cards List -->
     <div class="wallets-card-list">
       {% for w in wallets %}
-      <div class="bank-card-item" style="background: {{ w.color }}; color: {{ w.text_color }};">
+      {% set cat = 'bank' if w.id in ['tcb', 'vcb', 'mbb'] else 'ewallet' %}
+      <div class="bank-card-item" data-cat="{{ cat }}" style="background: {{ w.color }}; color: {{ w.text_color }};">
         <div class="bci-header">
-          <div class="bci-brand">{{ w.brand }}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-microchip" style="font-size:16px;opacity:0.65;"></i>
+            <span class="bci-brand">{{ w.brand }}</span>
+          </div>
           <div class="bci-type"><i class="fa-solid {{ w.icon }}"></i></div>
         </div>
         <div class="bci-balance">
-          <small>Số dư hiện có</small>
-          <strong>{{ "{:,.0f}".format(w.balance) }} <span style="font-size:13px;font-weight:600;">đ</span></strong>
+          <small>{{ w.type }}</small>
+          <strong>{{ "{:,.0f}".format(w.balance) }} <span style="font-size:12px;font-weight:600;">đ</span></strong>
         </div>
         <div class="bci-footer">
           <span class="bci-accno">{{ w.account_no }}</span>
-          <span class="bci-status"><i class="fa-solid fa-circle" style="font-size:7px;color:#4ADE80;"></i> {{ w.status }}</span>
+          <span class="bci-status"><i class="fa-solid fa-circle" style="font-size:6px;color:#4ADE80;"></i> {{ w.status }}</span>
         </div>
       </div>
       {% endfor %}
@@ -87,19 +96,19 @@
       <a href="{{ url_for('transactions') }}">Xem tất cả</a>
     </div>
 
-    <div class="glass-card-solid" style="padding: 12px 16px;">
+    <div class="glass-card-solid" style="padding: 10px 14px;">
       {% for t in recent_txns %}
-      <div class="txn-item" style="padding: 10px 0;">
-        <div class="txn-icon" style="background: {% if t.type == 'INFLOW' %}rgba(34,197,94,0.12){% else %}rgba(232,99,42,0.12){% endif %}; color: {% if t.type == 'INFLOW' %}#16A34A{% else %}#E8632A{% endif %}; width:38px; height:38px; font-size:15px;">
+      <div class="txn-item" style="padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+        <div class="txn-icon" style="background: {% if t.type == 'INFLOW' %}rgba(34,197,94,0.12){% else %}rgba(232,99,42,0.12){% endif %}; color: {% if t.type == 'INFLOW' %}#16A34A{% else %}#E8632A{% endif %}; width:34px; height:34px; font-size:13px; border-radius:10px;">
           <i class="fa-solid {% if t.type == 'INFLOW' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
         </div>
         <div class="txn-info">
-          <div class="txn-name" style="font-size:13px;">{{ t.description }}</div>
-          <div class="txn-meta" style="font-size:11px;">
+          <div class="txn-name" style="font-size:12.5px; font-weight:700;">{{ t.description }}</div>
+          <div class="txn-meta" style="font-size:10.5px;">
             <span>{{ t.timestamp[:10] }}</span> &bull; <span>{{ t.bank }}</span>
           </div>
         </div>
-        <div class="txn-amount" style="font-size:14px; color: {% if t.type == 'INFLOW' %}var(--success){% else %}var(--text-primary){% endif %};">
+        <div class="txn-amount" style="font-size:13px; font-weight:700; color: {% if t.type == 'INFLOW' %}var(--success){% else %}var(--text-primary){% endif %};">
           {% if t.type == 'INFLOW' %}+{% else %}-{% endif %}{{ "{:,.0f}".format(t.amount) }}đ
         </div>
       </div>
@@ -108,7 +117,7 @@
 
   </div>
 
-  <!-- Modal Add Wallet (Static) -->
+  <!-- Modal Add Wallet (Popup Dialog) -->
   <div class="modal-overlay" id="modal-add-wallet">
     <div class="modal-box">
       <div class="modal-header">
@@ -116,38 +125,38 @@
         <button class="modal-close" onclick="closeAddWalletModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Loại tài sản</label>
-          <select class="form-input" id="new-wallet-type" style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Loại tài sản</label>
+          <select class="form-input" id="new-wallet-type" style="padding:10px;font-size:13px;background:#FFF;">
             <option>Tài khoản ngân hàng (ATM/Debit/Visa)</option>
             <option>Ví điện tử (MoMo / ZaloPay / ShopeePay)</option>
             <option>Ví tiền mặt cá nhân</option>
             <option>Sổ tiết kiệm / Tích lũy</option>
           </select>
         </div>
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Tên ngân hàng / Tên ví</label>
-          <input type="text" class="form-input" id="new-wallet-name" placeholder="Ví dụ: MB Bank Quân Đội" style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Tên ngân hàng / Tên ví</label>
+          <input type="text" class="form-input" id="new-wallet-name" placeholder="Ví dụ: MB Bank Quân Đội" style="padding:10px;font-size:13px;background:#FFF;">
         </div>
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Số tài khoản / Số thẻ (4 số cuối)</label>
-          <input type="text" class="form-input" id="new-wallet-acc" placeholder="Ví dụ: 8899" style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Số tài khoản / Số thẻ (4 số cuối)</label>
+          <input type="text" class="form-input" id="new-wallet-acc" placeholder="Ví dụ: 8899" style="padding:10px;font-size:13px;background:#FFF;">
         </div>
-        <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;">Số dư ban đầu (VNĐ)</label>
-          <input type="number" class="form-input" id="new-wallet-bal" placeholder="0" style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Số dư ban đầu (VNĐ)</label>
+          <input type="number" class="form-input" id="new-wallet-bal" placeholder="0" style="padding:10px;font-size:13px;background:#FFF;">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeAddWalletModal()">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveMockWallet()">
+        <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:12.5px;" onclick="closeAddWalletModal()">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:8px 18px;font-size:12.5px;" onclick="saveMockWallet()">
           <i class="fa-solid fa-check"></i> Hoàn tất
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Transfer Money (Static) -->
+  <!-- Modal Transfer Money (Popup Dialog) -->
   <div class="modal-overlay" id="modal-transfer">
     <div class="modal-box">
       <div class="modal-header">
@@ -155,30 +164,32 @@
         <button class="modal-close" onclick="closeTransferModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Từ ví chuyển đi</label>
-          <select class="form-input" style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Từ ví chuyển đi</label>
+          <select class="form-input" style="padding:10px;font-size:13px;background:#FFF;">
             <option>Techcombank Visa (Số dư: 28.500.000đ)</option>
             <option>Vietcombank Connect24 (Số dư: 18.200.000đ)</option>
-            <option>Tiền mặt trong ví (Số dư: 2.000.000đ)</option>
-          </select>
-        </div>
-        <div class="form-group mb-12">
-          <label class="form-label" style="font-size:13px;">Đến ví nhận tiền</label>
-          <select class="form-input" style="padding:12px;background:#FFF;">
+            <option>MB Bank (Số dư: 7.500.000đ)</option>
             <option>Ví điện tử MoMo (Số dư: 3.150.000đ)</option>
-            <option>MB Bank Tiết kiệm (Số dư: 7.500.000đ)</option>
-            <option>Tiền mặt trong ví (Số dư: 2.000.000đ)</option>
           </select>
         </div>
-        <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;">Số tiền muốn chuyển (VNĐ)</label>
-          <input type="number" class="form-input" placeholder="Nhập số tiền..." style="padding:12px;background:#FFF;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Đến ví nhận tiền</label>
+          <select class="form-input" style="padding:10px;font-size:13px;background:#FFF;">
+            <option>Ví điện tử MoMo (Số dư: 3.150.000đ)</option>
+            <option>Tiền mặt trong ví (Số dư: 2.000.000đ)</option>
+            <option>Techcombank Visa (Số dư: 28.500.000đ)</option>
+            <option>MB Bank (Số dư: 7.500.000đ)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Số tiền muốn chuyển (VNĐ)</label>
+          <input type="number" class="form-input" placeholder="Nhập số tiền..." style="padding:10px;font-size:13px;background:#FFF;">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeTransferModal()">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="executeMockTransfer()">
+        <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:12.5px;" onclick="closeTransferModal()">Hủy</button>
+        <button class="btn-primary" style="width:auto;padding:8px 18px;font-size:12.5px;" onclick="executeMockTransfer()">
           <i class="fa-solid fa-paper-plane"></i> Chuyển ngay
         </button>
       </div>
@@ -193,40 +204,70 @@
 .wallet-action-chip {
   background: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 6px;
+  border-radius: 12px;
+  padding: 10px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 5px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-primary);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
 }
-.wallet-action-chip i { font-size: 18px; }
+.wallet-action-chip i { font-size: 16px; }
 .wallet-action-chip:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
 
+.wallet-tab-pills {
+  display: flex;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 3px;
+  border-radius: 10px;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.wallet-tab-pill {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+.wallet-tab-pill.active {
+  background: #FFFFFF;
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
 .wallets-card-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 .bank-card-item {
-  border-radius: 20px;
-  padding: 18px 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease;
+  min-height: 110px;
 }
 .bank-card-item:hover { transform: translateY(-2px); }
 .bci-header {
@@ -235,22 +276,22 @@
   align-items: center;
 }
 .bci-brand {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 .bci-type {
-  font-size: 18px;
+  font-size: 16px;
   opacity: 0.85;
 }
 .bci-balance small {
-  font-size: 11px;
-  opacity: 0.75;
+  font-size: 10px;
+  opacity: 0.8;
   display: block;
   margin-bottom: 2px;
 }
 .bci-balance strong {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: -0.5px;
 }
@@ -258,26 +299,41 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   opacity: 0.9;
 }
 .bci-status {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  gap: 4px;
+  font-size: 10.5px;
 }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+function filterWallets(cat, btn) {
+  document.querySelectorAll('.wallet-tab-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const items = document.querySelectorAll('.bank-card-item');
+  items.forEach(item => {
+    if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
 function openAddWalletModal() {
-  document.getElementById('modal-add-wallet').classList.add('open');
+  const modal = document.getElementById('modal-add-wallet');
+  if (modal) modal.classList.add('open');
 }
 function closeAddWalletModal() {
-  document.getElementById('modal-add-wallet').classList.remove('open');
+  const modal = document.getElementById('modal-add-wallet');
+  if (modal) modal.classList.remove('open');
 }
 function saveMockWallet() {
   const name = document.getElementById('new-wallet-name').value.trim();
@@ -291,10 +347,12 @@ function saveMockWallet() {
 }
 
 function openTransferModal() {
-  document.getElementById('modal-transfer').classList.add('open');
+  const modal = document.getElementById('modal-transfer');
+  if (modal) modal.classList.add('open');
 }
 function closeTransferModal() {
-  document.getElementById('modal-transfer').classList.remove('open');
+  const modal = document.getElementById('modal-transfer');
+  if (modal) modal.classList.remove('open');
 }
 function executeMockTransfer() {
   closeTransferModal();

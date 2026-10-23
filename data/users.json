@@ -16,7 +16,10 @@
       "Techcombank",
       "MB Bank"
     ],
-    "goals": ["saving", "admin"],
+    "goals": [
+      "saving",
+      "admin"
+    ],
     "budget_ratio": {
       "needs": 50,
       "wants": 30,
@@ -96,7 +99,10 @@
       "Techcombank",
       "MB Bank"
     ],
-    "goals": ["saving", "emergency"],
+    "goals": [
+      "saving",
+      "emergency"
+    ],
     "budget_ratio": {
       "needs": 55,
       "wants": 25,
@@ -168,7 +174,7 @@
         "bank_name": "Vietcombank",
         "account_no": "1028475938",
         "status": "ACTIVE",
-        "granted_at": "2026-10-16",
+        "granted_at": "2026-10-23",
         "expires_at": "2026-12-31",
         "scopes": {
           "read_balance": true,
@@ -222,7 +228,9 @@
     "connected_banks": [
       "Vietcombank"
     ],
-    "goals": ["saving"],
+    "goals": [
+      "saving"
+    ],
     "budget_ratio": {
       "needs": 60,
       "wants": 20,
@@ -297,7 +305,12 @@
     "created_at": "2026-10-23",
     "occupation": "Cá nhân",
     "monthly_income": 18000000,
-    "connected_banks": ["Vietcombank", "Techcombank"],
-    "goals": ["saving"]
+    "connected_banks": [
+      "Vietcombank",
+      "Techcombank"
+    ],
+    "goals": [
+      "saving"
+    ]
   }
 ]
