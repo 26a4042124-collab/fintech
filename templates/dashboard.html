@@ -231,7 +231,7 @@
                 <div style="font-size:10.5px;color:var(--text-muted);">{{ bank.description }}</div>
               </div>
             </div>
-            <i class="fa-solid fa-circle-check bank-check-icon" style="color:var(--accent);font-size:16px;{% if not loop.first %}opacity:0.25;{% endif %}"></i>
+            <i class="fa-solid fa-circle-check bank-check-icon {% if not loop.first %}icon-dim{% endif %}" style="color:var(--accent);font-size:16px;"></i>
           </div>
           {% endfor %}
         </div>

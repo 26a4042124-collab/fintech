@@ -1156,6 +1156,7 @@ img { max-width: 100%; height: auto; }
 .bank-bg-vcb { background: #006837; }
 .bank-bg-tcb { background: #E31B23; }
 .bank-bg-mbb { background: #002060; }
+.bank-check-icon.icon-dim { opacity: 0.25; }
 .txn-info { flex: 1; min-width: 0; }
 .txn-name {
   font-size: 12px;
