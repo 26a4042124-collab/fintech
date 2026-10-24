@@ -9,7 +9,7 @@ def generate_chatbot_response(user_message, health_data):
     msg = user_message.strip().lower()
     
     # Lấy thông tin cơ bản
-    income = health_data.get("income", 18000000)
+    income = max(float(health_data.get("income", 18000000) or 18000000), 1)
     target_ratio = health_data.get("target_ratio", {"needs": 50, "wants": 30, "savings": 20})
     bench_needs = target_ratio.get("needs", 50)
     bench_wants = target_ratio.get("wants", 30)
@@ -35,6 +35,56 @@ def generate_chatbot_response(user_message, health_data):
             f"• **Số dư ròng còn lại**: **{rem:,.0f} VNĐ**\n\n"
             f"💡 Tốc độ tiêu dùng trung bình hiện tại: **{burn:,.0f} VNĐ/ngày**."
         )
+
+    # 0b. Câu hỏi về Khoản chi bất thường / Rò rỉ / Cảnh báo (Khớp với Chip '⚠️ Bất thường?')
+    elif any(k in msg for k in ["bất thường", "chi tiêu bất thường", "có gì lạ", "bất thường không", "cảnh báo"]):
+        sub_data = health_data.get("subscription_leaks", {})
+        sub_cnt = sub_data.get("count", 0)
+        sub_tot = sub_data.get("total_amount", 0)
+        imp_data = health_data.get("impulse_night_spending", {})
+        imp_cnt = imp_data.get("count", 0)
+        imp_tot = imp_data.get("total_amount", 0)
+        cat_budgets = health_data.get("category_budgets", [])
+        over_items = [c for c in cat_budgets if c.get("status") == "danger"]
+        
+        reply = "⚠️ **BÁO CÁO CÁC KHOẢN CHI BẤT THƯỜNG & RÒ RỈ:**\n\n"
+        has_issue = False
+        if sub_cnt > 0:
+            has_issue = True
+            reply += f"1. **Rò rỉ Subscription ngầm**: Phát hiện **{sub_cnt} dịch vụ định kỳ** tự động trừ thẻ (tổng cộng **{sub_tot:,.0f} VNĐ/tháng**).\n"
+        if imp_cnt > 0:
+            has_issue = True
+            reply += f"2. **Mua sắm đêm bốc đồng**: Ghi nhận **{imp_cnt} đơn sau 22h00** với tổng tiền **{imp_tot:,.0f} VNĐ**.\n"
+        if over_items:
+            has_issue = True
+            reply += f"3. **Vượt hạn mức ngân sách**: {len(over_items)} danh mục ({', '.join([it['category'] for it in over_items])}) đã vượt trần chi tiêu!\n"
+        if not has_issue:
+            reply += "🎉 Tuyệt vời! AI không phát hiện khoản chi tiêu nào bất thường hoặc vượt hạn mức trong kỳ này."
+        else:
+            reply += "\n👉 **Lời khuyên**: Bạn nên rà soát lại các gói dịch vụ định kỳ và áp dụng quy tắc chờ 24h trước khi chốt đơn đêm để tối ưu hóa ngân sách!"
+        return reply
+
+    # 0c. Câu hỏi về Ngân hàng & Tài khoản liên kết Open Banking
+    elif any(k in msg for k in ["ngân hàng liên kết", "tài khoản liên kết", "ví liên kết", "đã kết nối", "kết nối ngân hàng"]):
+        consents = health_data.get("consents", [])
+        active_c = [c for c in consents if c.get("status") == "ACTIVE"]
+        revoked_c = [c for c in consents if c.get("status") == "REVOKED"]
+        if not active_c and not revoked_c:
+            return (
+                "🏦 **Hiện tại bạn chưa liên kết tài khoản ngân hàng nào qua Open Banking.**\n\n"
+                "Bạn có thể vào mục **'Ví & Thẻ'** hoặc bấm **'Liên kết Open Banking'** trên Trang chủ để kết nối tài khoản an toàn theo Nghị định 13/2023/NĐ-CP!"
+            )
+        res = "🏦 **Trạng thái kết nối Open Banking của bạn:**\n\n"
+        for c in active_c:
+            scopes_txt = []
+            if c.get("scopes", {}).get("read_balance"): scopes_txt.append("Xem số dư")
+            if c.get("scopes", {}).get("read_transactions"): scopes_txt.append("Xem giao dịch")
+            if c.get("scopes", {}).get("analyze_ai"): scopes_txt.append("Phân tích AI")
+            res += f"• 🟢 **{c.get('bank_name')}** (STK: {c.get('account_no')}): **Đang hoạt động**\n  ↳ Quyền cấp: {', '.join(scopes_txt)}\n  ↳ Hết hạn: {c.get('expires_at')}\n"
+        for c in revoked_c:
+            res += f"• 🔴 **{c.get('bank_name')}**: **Đã thu hồi quyền (Revoked)**\n"
+        res += "\n💡 Bạn có thể bật/tắt từng quyền hoặc cấp lại quyền bất kỳ lúc nào trong **Hồ sơ & Quyền dữ liệu**!"
+        return res
 
     # 1. Câu hỏi về Dự báo Dòng tiền / Cạn ví / Cuối tháng / Burn rate
     elif any(k in msg for k in ["dự báo", "dòng tiền", "cạn ví", "hết tiền", "thâm hụt", "burn rate", "tốc độ tiêu", "cuối tháng"]):
@@ -171,8 +221,25 @@ def generate_chatbot_response(user_message, health_data):
             f"👉 Tổng cắt giảm tối ưu: **{gap:,.0f} VNĐ** ➔ Đạt chuẩn {bench_savings}% tiết kiệm ngay tháng sau!"
         )
 
-    # 10. Câu hỏi về Bảo mật / Quyền riêng tư / Nghị định 13 / Open Banking
-    elif any(k in msg for k in ["bảo mật", "nghị định 13", "an toàn", "quyền", "consent", "open banking"]):
+    # 10. Câu hỏi về Ngân hàng liên kết / Open Banking
+    elif any(k in msg for k in ["ngân hàng", "liên kết", "open banking", "ví liên kết", "ais"]):
+        consents = health_data.get("consents", [])
+        active_consents = [c for c in consents if c.get("status") == "ACTIVE"]
+        if active_consents:
+            bank_names = ", ".join([f"**{c.get('bank_name', 'Ngân hàng')}**" for c in active_consents])
+            return (
+                f"🏦 Bạn hiện đang liên kết thành công với: {bank_names}.\n\n"
+                f"• FinLab tự động đồng bộ dữ liệu giao dịch theo chuẩn Open API (Thông tư 64/2024/TT-NHNN) với thời hạn 90 ngày.\n"
+                f"• Bạn có toàn quyền quản lý từng phạm vi hoặc **Thu hồi quyền (Revoke Consent)** bất kỳ lúc nào tại mục **'Quyền Dữ liệu Open Banking'** trong trang Cá nhân!"
+            )
+        else:
+            return (
+                f"🏦 Bạn hiện chưa có ngân hàng nào kết nối ở trạng thái hoạt động.\n"
+                f"Hãy vào mục **Ví & Tài khoản** hoặc **Cá nhân** để liên kết tài khoản ngân hàng an toàn theo Nghị định 13/2023/NĐ-CP!"
+            )
+
+    # 11. Câu hỏi về Bảo mật / Quyền riêng tư / Nghị định 13
+    elif any(k in msg for k in ["bảo mật", "nghị định 13", "an toàn", "quyền", "consent"]):
         return (
             f"🛡️ **Cam kết Bảo mật & Tuân thủ Pháp lý của FinLab:**\n\n"
             f"• Tuân thủ nghiêm ngặt **Nghị định 13/2023/NĐ-CP** về Bảo vệ dữ liệu cá nhân.\n"

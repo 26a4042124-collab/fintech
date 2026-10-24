@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Cá nhân{% endblock %}
+{% block title %}Cá nhân &amp; Quản trị Dữ liệu{% endblock %}
 
 {% block body %}
 {% set active_page = 'profile' %}
 <div class="app-wrapper">
   <div class="blob blob-orange" style="opacity:0.12;"></div>
 
+  <!-- Status Bar -->
   <div class="status-bar">
     <span>12:00</span>
     <div class="status-bar-right">
@@ -13,44 +14,152 @@
     </div>
   </div>
 
+  <!-- Top Bar -->
   <div class="top-bar">
-    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
-    <div class="top-bar-title">Tài khoản</div>
-    <div class="top-bar-action"><i class="fa-solid fa-ellipsis"></i></div>
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
+    <div class="top-bar-title">Hồ sơ &amp; Quyền riêng tư</div>
+    <button class="top-bar-action" onclick="openProfileEditModal()" title="Chỉnh sửa hồ sơ"><i class="fa-solid fa-pen-to-square text-accent"></i></button>
   </div>
 
   <div class="page-content">
 
-    <!-- Profile Header -->
+    <!-- Profile Header Card -->
     <div class="profile-header-card">
-      <div class="profile-avatar">{{ user.full_name[0] }}</div>
-      <div class="profile-name">{{ user.full_name }}</div>
-      <div class="profile-meta">{{ user.email }} &bull; {{ user.occupation }}</div>
-      <div style="margin-top:12px;position:relative;z-index:1;">
-        <span style="background:var(--accent-light);border:1px solid var(--border-accent);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--accent);">
+      <div class="profile-avatar">{{ user.full_name[0] if user.full_name else 'U' }}</div>
+      <div class="profile-name" id="user-display-name">
+        {{ user.full_name }}
+        <i class="fa-solid fa-circle-check" style="color:#0284C7;background:#FFFFFF;border-radius:50%;font-size:17px;vertical-align:middle;margin-left:4px;box-shadow:0 2px 4px rgba(0,0,0,0.15);" title="Tài khoản đã xác thực eKYC & Open Banking"></i>
+      </div>
+      <div class="profile-meta" id="user-display-meta">{{ user.email }} &bull; {{ user.occupation }}</div>
+      <div style="margin-top:12px;position:relative;z-index:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+        <span style="background:var(--accent-light);border:1px solid var(--border-accent);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--accent);" id="user-display-income">
           💰 Thu nhập: {{ "{:,.0f}".format(user.monthly_income) }}đ/tháng
         </span>
+        <button onclick="openProfileEditModal()" class="btn-ghost" style="border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text-primary);background:rgba(255,255,255,0.8);border:1px solid var(--border);">
+          <i class="fa-solid fa-pen"></i> Sửa
+        </button>
       </div>
     </div>
 
-    <!-- Connected Banks -->
+    <!-- ===================================================================
+         TRUNG TÂM QUẢN TRỊ QUYỀN DỮ LIỆU & OPEN BANKING (AIS CONSENT)
+         Tuân thủ Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN
+         =================================================================== -->
     <div class="setting-group">
-      <div class="setting-group-title">Ngân hàng đã kết nối</div>
-      <div class="glass-card-solid" style="padding:16px;">
-        {% if user.connected_banks %}
-          {% for bank in user.connected_banks %}
-          <span class="bank-chip">
-            <i class="fa-solid fa-circle-check"></i> {{ bank }}
-          </span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="setting-group-title" style="margin-bottom:0;">
+          <i class="fa-solid fa-shield-halved" style="color:#6366F1;margin-right:4px;"></i> Quyền Dữ liệu Open Banking
+        </div>
+        <span style="font-size:9.5px;background:#EEF2FF;color:#4F46E5;font-weight:700;padding:2px 7px;border-radius:8px;">
+          Nghị định 13
+        </span>
+      </div>
+
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.4;margin-bottom:10px;">
+        Quản lý các ủy quyền chia sẻ dữ liệu tài khoản (Account Information Service). Bạn có toàn quyền bật/tắt phạm vi hoặc thu hồi ủy quyền bất kỳ lúc nào.
+      </div>
+
+      <div class="consent-cards-list">
+        {% if user.consents and user.consents|length > 0 %}
+          {% for c in user.consents %}
+          <div class="consent-card {% if c.status != 'ACTIVE' %}consent-revoked{% endif %}" id="consent-card-{{ c.consent_id }}">
+            <div class="consent-card-header">
+              <div class="consent-bank-info">
+                <div class="consent-bank-icon {% if 'VCB' in c.bank_id %}bank-bg-vcb{% elif 'TCB' in c.bank_id %}bank-bg-tcb{% elif 'MBB' in c.bank_id %}bank-bg-mbb{% elif 'MOMO' in c.bank_id %}bank-bg-momo{% else %}bank-bg-default{% endif %}">
+                  <i class="fa-solid {% if 'MOMO' in c.bank_id or 'ZALO' in c.bank_id %}fa-mobile-screen{% else %}fa-building-columns{% endif %}"></i>
+                </div>
+                <div>
+                  <div class="consent-bank-name">{{ c.bank_name }}</div>
+                  <div class="consent-acc-no">STK: •••• {{ c.account_no[-4:] if c.account_no else '9999' }}</div>
+                </div>
+              </div>
+              <div class="consent-status-badge {% if c.status == 'ACTIVE' %}status-active{% else %}status-revoked{% endif %}">
+                {% if c.status == 'ACTIVE' %}
+                  <span class="pulse-dot"></span> Đang hoạt động
+                {% else %}
+                  <i class="fa-solid fa-ban"></i> Đã thu hồi
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="consent-meta-row">
+              <span>Hiệu lực đến: <strong>{{ c.valid_until[:10] if c.valid_until else '90 ngày' }}</strong></span>
+              <span>ID: <code style="font-size:10px;">{{ c.consent_id[:12] }}...</code></span>
+            </div>
+
+            <!-- Scope Switches -->
+            <div class="consent-scopes-box">
+              <div style="font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">
+                Phạm vi dữ liệu cho phép (Scopes):
+              </div>
+
+              <div class="consent-scope-item">
+                <div class="cs-label">
+                  <strong>Truy vấn số dư</strong>
+                  <small>Cập nhật tổng tài sản tức thì</small>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" {% if 'read_balance' in (c.scopes or []) %}checked{% endif %}
+                    {% if c.status != 'ACTIVE' %}disabled{% endif %}
+                    onchange="toggleConsentScope('{{ c.consent_id }}', 'read_balance', this)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="consent-scope-item">
+                <div class="cs-label">
+                  <strong>Đọc lịch sử giao dịch</strong>
+                  <small>Tự động phân loại chi tiêu &amp; phát hiện rò rỉ</small>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" {% if 'read_transactions' in (c.scopes or []) %}checked{% endif %}
+                    {% if c.status != 'ACTIVE' %}disabled{% endif %}
+                    onchange="toggleConsentScope('{{ c.consent_id }}', 'read_transactions', this)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="consent-scope-item">
+                <div class="cs-label">
+                  <strong>Phân tích AI Advisor</strong>
+                  <small>Cảnh báo chi tiêu đêm &amp; rò rỉ dòng tiền</small>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" {% if 'analyze_ai' in (c.scopes or []) %}checked{% endif %}
+                    {% if c.status != 'ACTIVE' %}disabled{% endif %}
+                    onchange="toggleConsentScope('{{ c.consent_id }}', 'analyze_ai', this)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="consent-actions-row">
+              {% if c.status == 'ACTIVE' %}
+                <button type="button" class="btn-consent-danger" onclick="confirmRevokeConsent('{{ c.consent_id }}', '{{ c.bank_name }}')">
+                  <i class="fa-solid fa-lock"></i> Thu hồi quyền truy cập
+                </button>
+              {% else %}
+                <button type="button" class="btn-consent-success" onclick="reauthorizeConsent('{{ c.consent_id }}', '{{ c.bank_name }}')">
+                  <i class="fa-solid fa-rotate-right"></i> Cấp lại quyền 90 ngày
+                </button>
+              {% endif %}
+            </div>
+          </div>
           {% endfor %}
         {% else %}
-          <div style="font-size:13px;color:var(--text-muted);text-align:center;padding:8px;">
-            Chưa kết nối ngân hàng nào
+          <div class="glass-card-solid" style="padding:18px;text-align:center;">
+            <i class="fa-solid fa-link-slash" style="font-size:24px;color:var(--text-muted);margin-bottom:6px;"></i>
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Chưa có liên kết Open Banking nào</div>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">
+              Liên kết tài khoản ngân hàng hoặc ví để AI FinLab tự động quản lý dòng tiền.
+            </div>
           </div>
         {% endif %}
-        <div style="margin-top:12px;">
-          <a href="{{ url_for('dashboard') }}" style="font-size:13px;color:var(--accent);font-weight:700;">
-            <i class="fa-solid fa-plus"></i> Thêm ngân hàng
+
+        <div style="margin-top:10px;">
+          <a href="{{ url_for('wallets') }}" class="btn-add-connection">
+            <i class="fa-solid fa-circle-plus"></i> + Liên kết thêm Ngân hàng / Ví điện tử
           </a>
         </div>
       </div>
@@ -58,34 +167,37 @@
 
     <!-- Account Settings -->
     <div class="setting-group">
-      <div class="setting-group-title">Tài khoản</div>
-      <a href="#" class="setting-item">
+      <div class="setting-group-title">Tài khoản &amp; Kế hoạch</div>
+      
+      <a href="javascript:void(0)" onclick="openProfileEditModal()" class="setting-item">
         <div class="setting-item-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">
           <i class="fa-solid fa-user"></i>
         </div>
         <div class="setting-item-text">
           <div class="setting-item-title">Thông tin cá nhân</div>
-          <div class="setting-item-sub">Cập nhật tên, email, số điện thoại</div>
+          <div class="setting-item-sub">Họ tên, email, số điện thoại, nghề nghiệp</div>
         </div>
         <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
       </a>
-      <a href="#" class="setting-item">
+
+      <a href="javascript:void(0)" onclick="openSecurityModal()" class="setting-item">
         <div class="setting-item-icon" style="background:rgba(168,85,247,0.15);color:#a855f7;">
           <i class="fa-solid fa-lock"></i>
         </div>
         <div class="setting-item-text">
-          <div class="setting-item-title">Bảo mật & Mật khẩu</div>
-          <div class="setting-item-sub">Đổi mật khẩu, xác thực 2 lớp</div>
+          <div class="setting-item-title">Bảo mật &amp; Mật khẩu</div>
+          <div class="setting-item-sub">Đổi mật khẩu, mã hóa AES-256, Audit Log</div>
         </div>
         <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
       </a>
-      <a href="#" class="setting-item">
+
+      <a href="{{ url_for('goals') }}" class="setting-item">
         <div class="setting-item-icon" style="background:rgba(255,107,53,0.15);color:var(--accent);">
           <i class="fa-solid fa-bullseye"></i>
         </div>
         <div class="setting-item-text">
           <div class="setting-item-title">Mục tiêu tài chính</div>
-          <div class="setting-item-sub">Cập nhật mục tiêu & thu nhập</div>
+          <div class="setting-item-sub">Tích lũy mua nhà, xe máy, quỹ khẩn cấp</div>
         </div>
         <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
       </a>
@@ -93,24 +205,26 @@
 
     <!-- App Settings -->
     <div class="setting-group">
-      <div class="setting-group-title">Ứng dụng</div>
-      <a href="#" class="setting-item">
+      <div class="setting-group-title">Ứng dụng &amp; Pháp lý</div>
+      
+      <a href="{{ url_for('notifications') }}" class="setting-item">
         <div class="setting-item-icon" style="background:rgba(34,197,94,0.15);color:#22c55e;">
           <i class="fa-solid fa-bell"></i>
         </div>
         <div class="setting-item-text">
-          <div class="setting-item-title">Thông báo</div>
-          <div class="setting-item-sub">Cảnh báo rò rỉ, mục tiêu, báo cáo</div>
+          <div class="setting-item-title">Trung tâm thông báo</div>
+          <div class="setting-item-sub">Cảnh báo rò rỉ, phân tích đêm, biến động số dư</div>
         </div>
         <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
       </a>
-      <a href="#" class="setting-item">
+
+      <a href="javascript:void(0)" onclick="openAboutModal()" class="setting-item">
         <div class="setting-item-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
           <i class="fa-solid fa-circle-info"></i>
         </div>
         <div class="setting-item-text">
-          <div class="setting-item-title">Về FinLab</div>
-          <div class="setting-item-sub">Phiên bản 2.0 · Đồ án CNDVTC 2026</div>
+          <div class="setting-item-title">Về FinLab &amp; Pháp lý</div>
+          <div class="setting-item-sub">Phiên bản 2.0 · Đồ án CNDVTC 2026 · Nghị định 13</div>
         </div>
         <i class="fa-solid fa-chevron-right setting-item-arrow"></i>
       </a>
@@ -130,11 +244,541 @@
 
     <!-- Footer -->
     <div style="text-align:center;padding:24px 0 8px;color:var(--text-muted);font-size:12px;line-height:1.8;">
-      <div>🎓 Học viện Ngân hàng — Khoa CNTT & Kinh tế số</div>
+      <div>🎓 Học viện Ngân hàng — Khoa CNTT &amp; Kinh tế số</div>
       <div>Đồ án <strong style="color:var(--text-secondary);">Công nghệ Dịch vụ Tài chính</strong> © 2026</div>
     </div>
   </div>
 
   {% include "nav_bottom.html" %}
-</div>
+
+  <!-- ===================================================================
+       MODAL 1: CẬP NHẬT THÔNG TIN CÁ NHÂN
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-profile-edit">
+    <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-user-pen text-accent"></i> Chỉnh sửa thông tin cá nhân
+        </div>
+        <button class="modal-close" onclick="closeProfileEditModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-12">
+          <label class="form-label">Họ và tên <span class="required">*</span></label>
+          <input type="text" class="form-input" id="edit-profile-fullname" value="{{ user.full_name }}" placeholder="Nhập họ và tên...">
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Email <span class="required">*</span></label>
+          <input type="email" class="form-input" id="edit-profile-email" value="{{ user.email }}" placeholder="email@example.com">
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Số điện thoại</label>
+          <input type="tel" class="form-input" id="edit-profile-phone" value="{{ user.phone }}" placeholder="0912345678">
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Nghề nghiệp / Lĩnh vực</label>
+          <input type="text" class="form-input" id="edit-profile-occupation" value="{{ user.occupation }}" placeholder="Ví dụ: Lập trình viên, Giáo viên...">
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Thu nhập hàng tháng (VNĐ)</label>
+          <div class="balance-input-wrapper">
+            <input type="number" class="form-input" id="edit-profile-income" value="{{ user.monthly_income }}" placeholder="18000000" style="padding-right:44px;">
+            <span class="currency-label">đ</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeProfileEditModal()">Hủy</button>
+        <button type="button" class="btn-primary" style="width:auto;padding:10px 22px;" id="btn-save-profile" onclick="saveProfileChanges()">
+          <i class="fa-solid fa-check"></i> Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       MODAL 2: BẢO MẬT & MẬT KHẨU
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-security">
+    <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-lock text-accent"></i> Bảo mật tài khoản &amp; Mật khẩu
+        </div>
+        <button class="modal-close" onclick="closeSecurityModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#166534;line-height:1.4;">
+          <i class="fa-solid fa-shield-check"></i> Tài khoản của bạn được bảo vệ bởi phiên làm việc mã hóa và hệ thống Audit Log tuân thủ ISO/IEC 27001.
+        </div>
+        <div class="form-group mb-10">
+          <label class="form-label">Mật khẩu hiện tại</label>
+          <input type="password" class="form-input" id="sec-old-pass" placeholder="••••••••">
+        </div>
+        <div class="form-group mb-10">
+          <label class="form-label">Mật khẩu mới <span class="required">*</span></label>
+          <input type="password" class="form-input" id="sec-new-pass" placeholder="Tối thiểu 4 ký tự">
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Xác nhận mật khẩu mới <span class="required">*</span></label>
+          <input type="password" class="form-input" id="sec-confirm-pass" placeholder="Nhập lại mật khẩu mới">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeSecurityModal()">Đóng</button>
+        <button type="button" class="btn-primary" style="width:auto;padding:10px 22px;" id="btn-change-pass" onclick="savePasswordChange()">
+          <i class="fa-solid fa-key"></i> Đổi mật khẩu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       MODAL 3: VỀ FINLAB & PHÁP LÝ
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-about">
+    <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-circle-info text-accent"></i> Về FinLab 2.0
+        </div>
+        <button class="modal-close" onclick="closeAboutModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="font-size:12px;line-height:1.6;color:var(--text-primary);">
+        <div style="text-align:center;margin-bottom:14px;">
+          <div style="font-size:28px;">🚀</div>
+          <strong style="font-size:16px;display:block;">FinLab Personal Finance Manager</strong>
+          <span style="font-size:11px;color:var(--text-muted);">Phiên bản 2.0 (Open Banking Edition)</span>
+        </div>
+        <p><strong>Cơ sở đào tạo:</strong> Học viện Ngân hàng — Khoa Công nghệ Thông tin &amp; Kinh tế số.</p>
+        <p><strong>Học phần:</strong> Công nghệ Dịch vụ Tài chính (CNDVTC 2026).</p>
+        <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px;margin:10px 0;">
+          <strong>Khung pháp lý áp dụng:</strong>
+          <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;color:var(--text-muted);">
+            <li><strong>Nghị định 13/2023/NĐ-CP:</strong> Bảo vệ dữ liệu cá nhân &amp; cơ chế xin chấp thuận (Consent Management).</li>
+            <li><strong>Thông tư 64/2024/TT-NHNN:</strong> Quy định về kết nối giao diện lập trình ứng dụng mở (Open API / Open Banking) trong ngành ngân hàng.</li>
+          </ul>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:0;">
+          * Tất cả giao dịch, số dư và ngân hàng kết nối trong ứng dụng đều được vận hành ở chế độ mô phỏng Sandbox an toàn nhằm phục vụ mục đích nghiên cứu &amp; thuyết trình đồ án.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" style="width:100%;padding:10px 20px;" onclick="closeAboutModal()">
+          Đã hiểu &amp; Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-wrapper -->
+
+<style>
+/* Consent Cards & Scope Toggles Styles */
+.consent-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.consent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.consent-card.consent-revoked {
+  opacity: 0.72;
+  background: #F8FAFC;
+  border-style: dashed;
+}
+.consent-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.consent-bank-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.consent-bank-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  font-size: 15px;
+}
+.bank-bg-vcb { background: #006837 !important; }
+.bank-bg-tcb { background: #ED1C24 !important; }
+.bank-bg-mbb { background: #0B1D4F !important; }
+.bank-bg-momo { background: #A50064 !important; }
+.bank-bg-default { background: #3B82F6 !important; }
+.consent-bank-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.consent-acc-no {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+.consent-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.status-active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16A34A;
+}
+.status-revoked {
+  background: rgba(239, 68, 68, 0.12);
+  color: #DC2626;
+}
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16A34A;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.3);
+}
+
+.consent-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 8px;
+}
+
+.consent-scopes-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.consent-scope-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+.cs-label strong {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-primary);
+}
+.cs-label small {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Switch Toggle UI */
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #CBD5E1;
+  transition: .3s;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--accent);
+}
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.consent-actions-row {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+.btn-consent-danger {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #DC2626;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-consent-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+.btn-consent-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #16A34A;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-consent-success:hover {
+  background: rgba(34, 197, 94, 0.18);
+}
+.btn-add-connection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  color: #4F46E5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-add-connection:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* =========================================================================
+   Profile Modals & Consent Controller
+   ========================================================================= */
+
+function openProfileEditModal() {
+  document.getElementById('modal-profile-edit').classList.add('open');
+}
+function closeProfileEditModal() {
+  document.getElementById('modal-profile-edit').classList.remove('open');
+}
+
+function openSecurityModal() {
+  document.getElementById('modal-security').classList.add('open');
+}
+function closeSecurityModal() {
+  document.getElementById('modal-security').classList.remove('open');
+}
+
+function openAboutModal() {
+  document.getElementById('modal-about').classList.add('open');
+}
+function closeAboutModal() {
+  document.getElementById('modal-about').classList.remove('open');
+}
+
+/* Lưu thay đổi thông tin cá nhân */
+async function saveProfileChanges() {
+  const fullName = document.getElementById('edit-profile-fullname').value.trim();
+  const email = document.getElementById('edit-profile-email').value.trim();
+  const phone = document.getElementById('edit-profile-phone').value.trim();
+  const occupation = document.getElementById('edit-profile-occupation').value.trim();
+  const income = parseFloat(document.getElementById('edit-profile-income').value) || 0;
+
+  if (!fullName || !email) {
+    if (window.showToast) window.showToast('Vui lòng nhập họ tên và email!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-save-profile');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu...'; }
+
+  try {
+    const res = await fetch('/api/profile/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: fullName,
+        email: email,
+        phone: phone,
+        occupation: occupation,
+        monthly_income: income
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      if (window.showToast) window.showToast('Cập nhật thông tin thành công!', 'success');
+      document.getElementById('user-display-name').textContent = fullName;
+      document.getElementById('user-display-meta').textContent = `${email} • ${occupation}`;
+      document.getElementById('user-display-income').textContent = `💰 Thu nhập: ${income.toLocaleString('vi-VN')}đ/tháng`;
+      closeProfileEditModal();
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Lỗi cập nhật hồ sơ!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> Lưu thay đổi'; }
+  }
+}
+
+/* Đổi mật khẩu */
+async function savePasswordChange() {
+  const oldPass = document.getElementById('sec-old-pass').value;
+  const newPass = document.getElementById('sec-new-pass').value;
+  const confirmPass = document.getElementById('sec-confirm-pass').value;
+
+  if (!newPass || newPass.length < 4) {
+    if (window.showToast) window.showToast('Mật khẩu mới phải từ 4 ký tự trở lên!', 'error');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    if (window.showToast) window.showToast('Xác nhận mật khẩu không khớp!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-change-pass');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang xử lý...'; }
+
+  try {
+    const res = await fetch('/api/profile/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ old_password: oldPass, new_password: newPass })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      if (window.showToast) window.showToast('Đã đổi mật khẩu thành công!', 'success');
+      document.getElementById('sec-old-pass').value = '';
+      document.getElementById('sec-new-pass').value = '';
+      document.getElementById('sec-confirm-pass').value = '';
+      closeSecurityModal();
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Lỗi đổi mật khẩu!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-key"></i> Đổi mật khẩu'; }
+  }
+}
+
+/* Bật / Tắt Data Scope cho Consent */
+async function toggleConsentScope(consentId, scope, checkbox) {
+  const enabled = checkbox.checked;
+  try {
+    const res = await fetch('/api/consent/toggle-scope', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ consent_id: consentId, scope: scope, enabled: enabled })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (window.showToast) window.showToast(`Đã ${enabled ? 'cấp quyền' : 'tắt quyền'} "${scope}"!`, 'info');
+    } else {
+      checkbox.checked = !enabled;
+      if (window.showToast) window.showToast(data.message || 'Không thể cập nhật quyền!', 'error');
+    }
+  } catch(e) {
+    checkbox.checked = !enabled;
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+}
+
+/* Thu hồi quyền truy cập (Revoke Consent) */
+function confirmRevokeConsent(consentId, bankName) {
+  if (!confirm(`Bạn có chắc muốn THU HỒI toàn bộ quyền truy cập dữ liệu của ${bankName} theo Nghị định 13?\n\nLịch sử giao dịch và số dư từ ngân hàng này sẽ ngay lập tức bị ẩn trên FinLab.`)) {
+    return;
+  }
+
+  fetch('/api/consent/revoke', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ consent_id: consentId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      if (window.showToast) window.showToast(`Đã thu hồi ủy quyền dữ liệu của ${bankName}!`, 'info');
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Không thể thu hồi quyền!', 'error');
+    }
+  })
+  .catch(() => {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  });
+}
+
+/* Cấp lại quyền 90 ngày (Re-authorize) */
+function reauthorizeConsent(consentId, bankName) {
+  if (!confirm(`Xác nhận cấp lại quyền truy vấn dữ liệu cho ${bankName} thêm 90 ngày theo Nghị định 13/2023/NĐ-CP?`)) {
+    return;
+  }
+
+  fetch('/api/consent/reauthorize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ consent_id: consentId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      if (window.showToast) window.showToast(`Đã cấp lại quyền 90 ngày cho ${bankName}!`, 'success');
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Không thể cấp lại quyền!', 'error');
+    }
+  })
+  .catch(() => {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  });
+}
+
+/* Backdrop dismiss */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+</script>
 {% endblock %}

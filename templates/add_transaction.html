@@ -59,6 +59,60 @@
         </div>
       </div>
 
+      <!-- Smart AI Note & Real-time Auto-Categorization Card -->
+      <div class="ai-smart-card mt-16">
+        <div class="ai-smart-header">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span class="ai-sparkle-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            <span style="font-size:12.5px;font-weight:800;color:var(--text-primary);">AI Tự động phân loại chi tiêu</span>
+          </div>
+          <span class="ai-status-pill"><span class="user-status-dot"></span> Sẵn sàng phân tích</span>
+        </div>
+
+        <div style="position:relative;margin-top:10px;">
+          <input type="text" name="note" id="input-txn-note" class="form-input ai-note-input" 
+                 placeholder="Nhập nội dung (vd: Cà phê Highlands 45k, Phở bò, Đổ xăng...)" 
+                 autocomplete="off" style="padding:11px 36px 11px 12px;font-size:13px;background:#FFF;border-radius:12px;border:1.5px solid var(--border);">
+          <span id="ai-typing-spinner" style="display:none;position:absolute;right:12px;top:11px;font-size:13px;color:var(--accent);">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+          </span>
+        </div>
+
+        <!-- Quick Demo Chips -->
+        <div class="ai-demo-chips-wrap">
+          <div style="font-size:10.5px;color:var(--text-muted);font-weight:700;margin-bottom:5px;">⚡ Chạm để demo nhanh nhận diện AI:</div>
+          <div class="ai-demo-chips-row">
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('☕ Cà phê Highlands 45k', 45000, 'OUTFLOW')">☕ Highlands 45k</button>
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('🍜 Ăn trưa phở bò tái nạm 55k', 55000, 'OUTFLOW')">🍜 Phở bò 55k</button>
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('⛽ Đổ xăng xe Petrolimex 80k', 80000, 'OUTFLOW')">⛽ Xăng xe 80k</button>
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('🛍️ Mua áo thun Shopee 199k', 199000, 'OUTFLOW')">🛍️ Shopee 199k</button>
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('💡 Hóa đơn tiền điện EVN 850k', 850000, 'OUTFLOW')">💡 Điện EVN 850k</button>
+            <button type="button" class="ai-demo-chip" onclick="applyDemoPrompt('💼 Lương công ty chuyển khoản 25tr', 25000000, 'INFLOW')">💼 Lương 25tr</button>
+          </div>
+        </div>
+
+        <!-- AI Real-Time Result Box (Reveals with smooth slide-down) -->
+        <div class="ai-result-panel" id="ai-result-panel" style="display:none;">
+          <div class="ai-result-top">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="ai-glow-dot"></span>
+              <span style="font-size:11px;font-weight:800;color:#1E293B;">Kết quả nhận diện tự động FinLab AI</span>
+            </div>
+            <span class="ai-confidence-pill" id="ai-confidence-pill">Độ tin cậy: 98%</span>
+          </div>
+          <div class="ai-result-body">
+            <div class="ai-cat-icon-badge" id="ai-preview-emoji">☕</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span class="ai-cat-detected-name" id="ai-detected-cat">Cà phê</span>
+                <span class="ai-bucket-badge" id="ai-detected-bucket">30% Nhu cầu linh hoạt</span>
+              </div>
+              <div class="ai-explanation-text" id="ai-detected-explanation">Phát hiện từ khóa thương hiệu đồ uống &amp; cà phê</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Category Picker -->
       <div class="section-title mt-16 mb-8">
         <span>Chọn danh mục</span>
@@ -125,7 +179,7 @@
         </div>
       </div>
 
-      <!-- Details Card (Account / Date / Note) -->
+      <!-- Details Card (Account / Date) -->
       <div class="glass-card-solid mt-16" style="padding:16px;">
         <!-- Account / Wallet select -->
         <div class="form-group mb-12">
@@ -140,15 +194,9 @@
         </div>
 
         <!-- Date select -->
-        <div class="form-group mb-12">
+        <div class="form-group mb-4">
           <label class="form-label" style="font-size:13px;"><i class="fa-solid fa-calendar-day text-accent"></i> Ngày giao dịch</label>
           <input type="date" name="date" class="form-input" value="{{ today }}" style="padding:12px 14px;font-size:14px;background:#FFF;">
-        </div>
-
-        <!-- Note / Memo -->
-        <div class="form-group mb-4">
-          <label class="form-label" style="font-size:13px;"><i class="fa-solid fa-pen-to-square text-accent"></i> Ghi chú / Diễn giải</label>
-          <input type="text" name="note" class="form-input" placeholder="Ví dụ: Ăn trưa với team dự án..." style="padding:12px 14px;font-size:14px;background:#FFF;">
         </div>
       </div>
 
@@ -282,6 +330,7 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
 }
 .cat-card:hover {
   border-color: var(--accent);
@@ -291,6 +340,17 @@
   border-color: var(--accent);
   background: var(--accent-light);
   box-shadow: 0 4px 12px rgba(232, 99, 42, 0.18);
+}
+.cat-card.ai-highlighted {
+  border-color: #6366F1 !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35) !important;
+  animation: aiCardPulse 0.8s ease;
+}
+@keyframes aiCardPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 .cat-icon {
   width: 40px;
@@ -316,28 +376,184 @@
   background: var(--accent-light);
   color: var(--accent);
 }
+
+/* =========================================================================
+   AI Smart Card Styles
+   ========================================================================= */
+.ai-smart-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 245, 240, 0.95) 100%);
+  border: 1.5px solid rgba(232, 99, 42, 0.22);
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 4px 20px rgba(232, 99, 42, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+.ai-smart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-sparkle-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #FF6B35, #E8632A);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+.ai-status-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: #16A34A;
+  background: rgba(34, 197, 94, 0.12);
+  padding: 2px 7px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ai-demo-chips-wrap {
+  margin-top: 10px;
+}
+.ai-demo-chips-row {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.ai-demo-chips-row::-webkit-scrollbar {
+  display: none;
+}
+.ai-demo-chip {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 4px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.ai-demo-chip:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+.ai-demo-chip:active {
+  transform: scale(0.96);
+}
+
+/* AI Real-time Result Panel */
+.ai-result-panel {
+  margin-top: 10px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(99, 102, 241, 0.35);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
+  animation: slideDownFade 0.25s ease forwards;
+}
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ai-result-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed rgba(99, 102, 241, 0.2);
+}
+.ai-glow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6366F1;
+  box-shadow: 0 0 8px #6366F1;
+  animation: pulseDot 1.5s infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.ai-confidence-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #4F46E5;
+  background: rgba(99, 102, 241, 0.12);
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+.ai-result-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ai-cat-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.ai-cat-detected-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1E293B;
+}
+.ai-bucket-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  background: rgba(232, 99, 42, 0.12);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+.ai-explanation-text {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Format currency input with commas/dots
 const amountInput = document.getElementById('amount-input');
+const noteInput = document.getElementById('input-txn-note');
+let aiDebounceTimer = null;
 
 function formatNumberVND(numStr) {
-  const clean = numStr.replace(/\D/g, '');
+  const clean = String(numStr).replace(/\D/g, '');
   if (!clean) return '';
   return new Intl.NumberFormat('vi-VN').format(clean);
 }
 
-amountInput.addEventListener('input', (e) => {
-  const cursor = e.target.selectionStart;
-  const raw = e.target.value.replace(/\D/g, '');
-  e.target.value = formatNumberVND(raw);
-});
+if (amountInput) {
+  amountInput.addEventListener('input', (e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    e.target.value = formatNumberVND(raw);
+  });
+}
 
 function addAmount(val) {
-  let curr = parseInt(amountInput.value.replace(/\D/g, '') || '0', 10);
+  let curr = parseInt((amountInput.value || '').replace(/\D/g, '') || '0', 10);
   curr += val;
   amountInput.value = formatNumberVND(String(curr));
 }
@@ -349,7 +565,7 @@ function clearAmount() {
 
 function switchType(type, btn) {
   document.querySelectorAll('.type-tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   document.getElementById('input-txn-type').value = type;
 
   const expCats = document.getElementById('expense-categories');
@@ -359,18 +575,23 @@ function switchType(type, btn) {
   if (type === 'INFLOW') {
     expCats.style.display = 'none';
     incCats.style.display = 'grid';
-    label.textContent = 'Số tiền thu vào';
+    if (label) label.textContent = 'Số tiền thu vào';
     selectCategory('Tiền lương', incCats.querySelector('.cat-card'), '💼');
   } else if (type === 'TRANSFER') {
     expCats.style.display = 'grid';
     incCats.style.display = 'none';
-    label.textContent = 'Số tiền chuyển khoản';
-    selectCategory('Chuyển khoản', expCats.querySelector('.cat-card'), '🔄');
+    if (label) label.textContent = 'Số tiền chuyển khoản';
+    selectCategory('Khác', expCats.querySelector('.cat-card:last-child'), '🔄');
   } else {
     expCats.style.display = 'grid';
     incCats.style.display = 'none';
-    label.textContent = 'Số tiền chi ra';
+    if (label) label.textContent = 'Số tiền chi ra';
     selectCategory('Ăn uống', expCats.querySelector('.cat-card'), '🍜');
+  }
+
+  // Re-evaluate note with new transaction type if note has content
+  if (noteInput && noteInput.value.trim()) {
+    fetchAiCategorization(noteInput.value.trim());
   }
 }
 
@@ -378,7 +599,123 @@ function selectCategory(catName, cardEl, icon) {
   document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
   if (cardEl) cardEl.classList.add('selected');
   document.getElementById('input-txn-category').value = catName;
-  document.getElementById('selected-category-badge').textContent = `${icon || ''} ${catName}`;
+  const badge = document.getElementById('selected-category-badge');
+  if (badge) badge.textContent = `${icon || ''} ${catName}`;
+}
+
+// =========================================================================
+// Real-time AI Categorization Handler
+// =========================================================================
+if (noteInput) {
+  noteInput.addEventListener('input', function() {
+    clearTimeout(aiDebounceTimer);
+    const text = this.value.trim();
+    if (!text) {
+      const panel = document.getElementById('ai-result-panel');
+      if (panel) panel.style.display = 'none';
+      return;
+    }
+    const spinner = document.getElementById('ai-typing-spinner');
+    if (spinner) spinner.style.display = 'inline-block';
+    
+    aiDebounceTimer = setTimeout(() => {
+      fetchAiCategorization(text);
+    }, 200);
+  });
+}
+
+function fetchAiCategorization(text) {
+  const currentType = document.getElementById('input-txn-type').value;
+  fetch('/api/ai/categorize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description: text, type: currentType })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const spinner = document.getElementById('ai-typing-spinner');
+    if (spinner) spinner.style.display = 'none';
+    if (data.success) {
+      renderAiPrediction(data);
+    }
+  })
+  .catch(() => {
+    const spinner = document.getElementById('ai-typing-spinner');
+    if (spinner) spinner.style.display = 'none';
+  });
+}
+
+function renderAiPrediction(data) {
+  const panel = document.getElementById('ai-result-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  const confEl = document.getElementById('ai-confidence-pill');
+  if (confEl) confEl.textContent = `Độ tin cậy: ${data.confidence_pct}%`;
+
+  const emojiEl = document.getElementById('ai-preview-emoji');
+  if (emojiEl) emojiEl.textContent = data.emoji || '✨';
+
+  const catEl = document.getElementById('ai-detected-cat');
+  if (catEl) catEl.textContent = data.category;
+
+  const bucketEl = document.getElementById('ai-detected-bucket');
+  if (bucketEl) bucketEl.textContent = data.bucket_label;
+
+  const expEl = document.getElementById('ai-detected-explanation');
+  if (expEl) expEl.textContent = data.explanation;
+
+  // Auto-select category card in active grid
+  autoSelectCategoryByName(data.category, data.emoji);
+
+  // If amount was extracted from memo (e.g. 45k) and input is empty/0, auto-fill it!
+  if (data.suggested_amount && (!amountInput.value || amountInput.value === '0')) {
+    amountInput.value = formatNumberVND(String(data.suggested_amount));
+  }
+}
+
+function autoSelectCategoryByName(categoryName, emoji) {
+  const currentType = document.getElementById('input-txn-type').value;
+  const gridId = currentType === 'INFLOW' ? 'income-categories' : 'expense-categories';
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+
+  let foundCard = null;
+  grid.querySelectorAll('.cat-card').forEach(card => {
+    const nameEl = card.querySelector('.cat-name');
+    if (nameEl && nameEl.textContent.trim().toLowerCase() === categoryName.trim().toLowerCase()) {
+      foundCard = card;
+    }
+  });
+
+  if (!foundCard) {
+    grid.querySelectorAll('.cat-card').forEach(card => {
+      const nameEl = card.querySelector('.cat-name');
+      if (nameEl && (nameEl.textContent.includes(categoryName) || categoryName.includes(nameEl.textContent))) {
+        foundCard = card;
+      }
+    });
+  }
+
+  if (foundCard) {
+    selectCategory(categoryName, foundCard, emoji);
+    foundCard.classList.add('ai-highlighted');
+    setTimeout(() => foundCard.classList.remove('ai-highlighted'), 1200);
+  }
+}
+
+function applyDemoPrompt(promptText, amountNum, typeOverride) {
+  if (typeOverride && typeOverride !== document.getElementById('input-txn-type').value) {
+    const tabBtn = document.querySelector(`.type-tab-btn[data-type="${typeOverride}"]`);
+    if (tabBtn) switchType(typeOverride, tabBtn);
+  }
+  if (noteInput) {
+    noteInput.value = promptText;
+  }
+  if (amountNum && amountInput) {
+    amountInput.value = formatNumberVND(String(amountNum));
+  }
+  fetchAiCategorization(promptText);
 }
 </script>
 {% endblock %}

@@ -49,10 +49,39 @@
         <!-- Phone Outer Bezel -->
         <div class="phone-device-bezel">
           
-          <!-- Dynamic Island Cutout (Micro & Sleek, never overlaps text) -->
-          <div class="dynamic-island-cutout">
-            <div class="di-camera"></div>
-            <div class="di-sensor"></div>
+          <!-- Hardware Top Speaker Slit (Integrated into bezel, never covers screen text) -->
+          <div class="phone-top-speaker" title="Loa thoại & Cảm biến"></div>
+
+          <!-- Realistic In-App Bank Push Notification Banner (Chuông báo biến động số dư ngân hàng) -->
+          <div class="bank-push-notification" id="bank-push-banner" onclick="dismissBankPushBanner()" title="Chạm để ẩn thông báo">
+            <div class="bpn-accent-glow" id="bpn-accent-glow"></div>
+            <div class="bpn-header">
+              <div class="bpn-bank-badge">
+                <span class="bpn-bank-icon" id="bpn-bank-icon"><i class="fa-solid fa-building-columns"></i></span>
+                <span class="bpn-bank-name" id="bpn-bank-name">MB BANK</span>
+                <span class="bpn-tag">BIẾN ĐỘNG SỐ DƯ</span>
+              </div>
+              <div class="bpn-meta">
+                <i class="fa-solid fa-bell fa-shake" style="color:#F59E0B;font-size:11px;"></i>
+                <span class="bpn-time">Vừa xong</span>
+              </div>
+            </div>
+            <div class="bpn-content">
+              <div class="bpn-amount-row">
+                <span class="bpn-account" id="bpn-account">TK: •••• 4321</span>
+                <span class="bpn-amount outflow" id="bpn-amount">-45.000 VND</span>
+              </div>
+              <div class="bpn-details" id="bpn-details">
+                Lúc vừa xong. Số dư: <strong>7.455.000 VND</strong>. ND: Highlands Coffee
+              </div>
+            </div>
+            <div class="bpn-footer">
+              <div class="bpn-ai-pill" id="bpn-ai-pill">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span id="bpn-ai-text">FinLab AI: Cà phê &amp; Đồ uống &bull; 30% Wants</span>
+              </div>
+              <span class="bpn-dismiss-hint"><i class="fa-solid fa-chevron-up"></i> Chạm để ẩn</span>
+            </div>
           </div>
 
           <!-- Phone Inner Viewport (Contains all app pages) -->
@@ -77,7 +106,10 @@
                 {{ session.user.full_name[0] if session.user.full_name else 'U' }}
               </div>
               <div class="drawer-user-info">
-                <div class="drawer-user-name">{{ session.user.full_name }}</div>
+                <div class="drawer-user-name" style="display:flex;align-items:center;gap:4px;">
+                  <span>{{ session.user.full_name }}</span>
+                  <i class="fa-solid fa-circle-check" style="color:#0284C7;font-size:12px;" title="Tài khoản đã xác thực"></i>
+                </div>
                 <div class="drawer-user-role">
                   <span class="user-status-dot"></span>
                   {{ 'Quản trị viên' if session.user.role == 'admin' else 'Tài khoản cá nhân' }}
@@ -107,10 +139,16 @@
                 <i class="fa-solid fa-bullseye"></i> <span>Mục tiêu tài chính</span>
               </a>
 
+              <div class="drawer-group-title">TRỢ LÝ TÀI CHÍNH</div>
+              <button type="button" class="drawer-nav-item" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;font-family:inherit;" onclick="toggleInAppDrawer();toggleInAppChat();">
+                <i class="fa-solid fa-robot" style="color:var(--accent);"></i> <span>Trợ lý AI FinLab</span>
+                <span style="margin-left:auto;font-size:9.5px;background:rgba(232,99,42,0.12);color:var(--accent);padding:2px 6px;border-radius:6px;font-weight:700;">Hỏi đáp</span>
+              </button>
+
               <div class="drawer-group-title">HỆ THỐNG</div>
               <a href="{{ url_for('notifications') }}" class="drawer-nav-item {% if active_page == 'notifications' %}active{% endif %}" onclick="toggleInAppDrawer()">
                 <i class="fa-solid fa-bell"></i> <span>Thông báo</span>
-                <span class="drawer-badge-count">4</span>
+                <span class="drawer-badge-count">3</span>
               </a>
               <a href="{{ url_for('profile') }}" class="drawer-nav-item {% if active_page == 'profile' %}active{% endif %}" onclick="toggleInAppDrawer()">
                 <i class="fa-solid fa-user-gear"></i> <span>Hồ sơ &amp; Quyền dữ liệu</span>
@@ -126,6 +164,12 @@
             </nav>
           </aside>
 
+          <!-- Floating In-App Chatbot Button (Accessible on any page inside phone frame) -->
+          <button class="in-app-chatbot-fab" id="chatbot-global-fab" onclick="toggleInAppChat()" title="Trợ lý AI FinLab">
+            <i class="fa-solid fa-robot"></i>
+            <span class="fab-badge">AI</span>
+          </button>
+
           <!-- In-App Chatbot Window (CONTAINED INSIDE THE MOBILE PHONE) -->
           <div class="in-app-chat-window" id="in-app-chat-window">
             <div class="chat-header">
@@ -140,12 +184,13 @@
             </div>
             <div class="chat-messages" id="in-app-chat-messages">
               <div class="msg msg-bot">
-                Xin chào <strong>{{ session.user.full_name if session.user else 'bạn' }}</strong>! Tôi là trợ lý AI tài chính của bạn. Bạn muốn tôi phân tích hoặc giải đáp điều gì hôm nay? 💰
+                Xin chào <strong>{{ session.user.full_name if session.user else 'bạn' }}</strong>! Tôi là trợ lý AI tài chính của bạn. Tôi đã phân tích toàn bộ dữ liệu dòng tiền và quyền Open Banking của bạn. Bạn muốn tôi giải đáp điều gì? 💰
               </div>
             </div>
             <div class="chat-chips">
               <button class="chip" onclick="askAiPrompt('Tháng này tôi tiêu bao nhiêu?')">💸 Chi tiêu tháng?</button>
               <button class="chip" onclick="askAiPrompt('Có khoản chi nào bất thường không?')">⚠️ Bất thường?</button>
+              <button class="chip" onclick="askAiPrompt('Tài khoản ngân hàng liên kết thế nào?')">🏦 Ngân hàng liên kết</button>
               <button class="chip" onclick="askAiPrompt('Làm sao để tiết kiệm thêm?')">💡 Tiết kiệm?</button>
             </div>
             <div class="chat-input-row">
@@ -154,11 +199,269 @@
             </div>
           </div>
 
+          <!-- ===================================================================
+               MODAL: GIẢ LẬP GIAO DỊCH MỚI (DEMO WEBHOOK & AI PHÂN LOẠI)
+               =================================================================== -->
+          <div class="modal-overlay" id="modal-simulate-txn">
+            <div class="modal-box" style="max-height:92vh;display:flex;flex-direction:column;">
+              <div class="bottom-sheet-handle"></div>
+              <div class="modal-header" style="border-bottom:1px solid var(--border);padding:14px 18px;">
+                <div class="modal-title" style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#E8632A,#FF8C42);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;">
+                    <i class="fa-solid fa-bolt"></i>
+                  </div>
+                  <div>
+                    <div style="font-size:14px;font-weight:800;color:var(--text-primary);line-height:1.2;">Demo Webhook &amp; AI Phân Loại</div>
+                    <div style="font-size:10.5px;color:var(--text-muted);font-weight:500;">Phát sinh biến động số dư từ ngân hàng</div>
+                  </div>
+                </div>
+                <button class="modal-close" onclick="closeSimulateTxnModal()">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <div class="modal-body" style="overflow-y:auto;padding:14px 18px 20px;">
+                <!-- Giới thiệu luồng demo -->
+                <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;">
+                  <i class="fa-solid fa-circle-check" style="color:#16A34A;font-size:15px;margin-top:2px;flex-shrink:0;"></i>
+                  <div style="font-size:11.5px;color:#166534;line-height:1.4;">
+                    <strong>Luồng hoạt động chuẩn Open Banking:</strong>
+                    Khi phát sinh giao dịch tại ngân hàng, Webhook bắn sự kiện về FinLab. AI tự động phân tích ngữ nghĩa, gắn thẻ danh mục &amp; rổ 50/30/20, cập nhật số dư thẻ ví thời gian thực!
+                  </div>
+                </div>
+
+                <!-- 1-Click Quick Demo Presets -->
+                <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:8px;">
+                  ⚡ Kịch bản mẫu (Bấm để chọn nhanh):
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('MB Bank', 'Highlands Coffee', 45000, 'OUTFLOW')">
+                    <span class="sim-preset-icon" style="background:#FFF0EB;color:#E8632A;">☕</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">Highlands Coffee</div>
+                      <div class="sim-preset-sub">MB Bank &bull; -45.000đ</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('Techcombank', 'Cơm trưa GrabFood', 68000, 'OUTFLOW')">
+                    <span class="sim-preset-icon" style="background:#EFF6FF;color:#2563EB;">🍜</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">GrabFood Trưa</div>
+                      <div class="sim-preset-sub">TCB &bull; -68.000đ</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('Vietcombank', 'Đổ xăng Petrolimex', 80000, 'OUTFLOW')">
+                    <span class="sim-preset-icon" style="background:#F0FDF4;color:#16A34A;">⛽</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">Xăng Petrolimex</div>
+                      <div class="sim-preset-sub">VCB &bull; -80.000đ</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('Vietcombank', 'Shopee đơn đêm 23:45', 350000, 'OUTFLOW')">
+                    <span class="sim-preset-icon" style="background:#FDF2F8;color:#DB2777;">🛍️</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">Shopee Đơn Đêm</div>
+                      <div class="sim-preset-sub">Cảnh báo chi đêm!</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('Techcombank', 'Hóa đơn tiền điện EVN', 850000, 'OUTFLOW')">
+                    <span class="sim-preset-icon" style="background:#FEF3C7;color:#D97706;">💡</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">Tiền điện EVN</div>
+                      <div class="sim-preset-sub">TCB &bull; -850.000đ</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="sim-preset-btn" onclick="applySimPreset('Vietcombank', 'Nhận lương Tech Corp', 25000000, 'INFLOW')">
+                    <span class="sim-preset-icon" style="background:#ECFDF5;color:#059669;">💼</span>
+                    <div class="sim-preset-text">
+                      <div class="sim-preset-title">Nhận lương tháng</div>
+                      <div class="sim-preset-sub">VCB &bull; +25.000.000đ</div>
+                    </div>
+                  </button>
+                </div>
+
+                <!-- Chi tiết thông số GD tùy chỉnh -->
+                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
+                  <div style="font-size:10.5px;font-weight:800;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">
+                    Thông số Webhook Event:
+                  </div>
+
+                  <div class="form-group mb-8">
+                    <label class="form-label" style="font-size:11px;">Ngân hàng phát sinh:</label>
+                    <select class="form-input" id="sim-bank-select" style="font-size:12px;padding:8px 10px;">
+                      <option value="Vietcombank">Vietcombank (VCB)</option>
+                      <option value="Techcombank">Techcombank (TCB)</option>
+                      <option value="MB Bank" selected>MB Bank (MBB)</option>
+                    </select>
+                  </div>
+
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="mb-8">
+                    <div class="form-group" style="margin-bottom:0;">
+                      <label class="form-label" style="font-size:11px;">Loại giao dịch:</label>
+                      <select class="form-input" id="sim-type-select" style="font-size:12px;padding:8px 10px;">
+                        <option value="OUTFLOW">Chi tiền (-)</option>
+                        <option value="INFLOW">Thu tiền (+)</option>
+                      </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                      <label class="form-label" style="font-size:11px;">Số tiền (VNĐ):</label>
+                      <input type="text" class="form-input" id="sim-amount-input" value="45.000" style="font-size:12px;padding:8px 10px;font-weight:700;">
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:11px;">Nội dung giao dịch:</label>
+                    <input type="text" class="form-input" id="sim-desc-input" value="Highlands Coffee" placeholder="Ví dụ: Cơm gà bà Buội, Grab..." style="font-size:12px;padding:8px 10px;">
+                  </div>
+                </div>
+
+                <!-- Result Box (Hiển thị khi webhook bắn thành công) -->
+                <div id="sim-result-box" style="display:none;margin-top:12px;border-radius:14px;background:#FFFFFF;border:1.5px solid #10B981;box-shadow:0 8px 24px rgba(16,185,129,0.15);overflow:hidden;animation:slideDown 0.3s ease;">
+                  <div style="background:linear-gradient(135deg,#059669,#10B981);color:white;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px;">
+                      <i class="fa-solid fa-circle-check"></i> Webhook Event Thành Công!
+                    </div>
+                    <span style="font-size:10px;background:rgba(255,255,255,0.25);padding:2px 8px;border-radius:10px;font-weight:700;" id="sim-res-ref">MBB.20261024</span>
+                  </div>
+                  <div style="padding:12px 14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                      <div>
+                        <div style="font-size:13px;font-weight:800;color:var(--text-primary);" id="sim-res-desc">Highlands Coffee</div>
+                        <div style="font-size:11px;color:var(--text-muted);" id="sim-res-meta">MB Bank &bull; Vừa xong</div>
+                      </div>
+                      <div style="font-size:15px;font-weight:900;" id="sim-res-amount">-45.000đ</div>
+                    </div>
+
+                    <!-- AI Classification Badge -->
+                    <div style="background:#F8FAFC;border-radius:10px;padding:10px;border:1px dashed #CBD5E1;">
+                      <div style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color:#6366F1;"></i> Kết Quả AI Phân Loại Tự Động:
+                      </div>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;">
+                        <span id="sim-res-cat-badge" style="background:#E0E7FF;color:#4338CA;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;">
+                          ☕ Cà phê &amp; Đồ uống
+                        </span>
+                        <span id="sim-res-bucket-badge" style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;">
+                          30% Nhu cầu linh hoạt
+                        </span>
+                        <span id="sim-res-conf-badge" style="background:#ECFDF5;color:#065F46;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;">
+                          🎯 Tin cậy: 98%
+                        </span>
+                      </div>
+                      <div id="sim-res-alert-box" style="display:none;background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px;padding:6px 10px;font-size:11px;color:#BE123C;margin-top:6px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> <strong>Cảnh báo AI:</strong> Chi tiêu bốc đồng ban đêm (23:00 - 05:00)!
+                      </div>
+                      <div style="font-size:11px;color:#059669;margin-top:6px;font-weight:600;">
+                        <i class="fa-solid fa-check"></i> Đã tự động cập nhật số dư thẻ ví &amp; hạn mức ngân sách tháng!
+                      </div>
+                    </div>
+
+                    <!-- Action buttons in result -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+                      <a href="{{ url_for('transactions') }}" class="btn-secondary" style="font-size:11.5px;padding:8px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;">
+                        <i class="fa-solid fa-list-check"></i> Xem Sổ GD
+                      </a>
+                      <a href="{{ url_for('budgets') }}" class="btn-secondary" style="font-size:11.5px;padding:8px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;">
+                        <i class="fa-solid fa-chart-pie"></i> Xem Ngân Sách
+                      </a>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="replayPushFromSimResult()" style="width:100%;font-size:11.5px;padding:9px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;background:#F8FAFC;border:1px solid #CBD5E1;font-weight:700;color:#1E293B;margin-top:8px;border-radius:10px;">
+                      <i class="fa-solid fa-bell fa-shake" style="color:#F59E0B;"></i> Bấm phát lại chuông báo Push Notification
+                    </button>
+                  </div>
+                </div>
+
+              </div><!-- /modal-body -->
+
+              <div class="modal-footer" style="padding:10px 18px;background:#F8FAFC;border-top:1px solid var(--border);">
+                <button type="button" class="btn-secondary" onclick="closeSimulateTxnModal()" style="width:auto;padding:9px 16px;font-size:12px;">
+                  Đóng
+                </button>
+                <button type="button" class="btn-primary" id="btn-trigger-simulate" onclick="submitSimulateTxn()" style="flex:1;padding:9px 16px;font-size:12.5px;background:linear-gradient(135deg,#E8632A,#FF7A3D);">
+                  <i class="fa-solid fa-bolt"></i> Bắn Webhook &amp; Phân Loại AI
+                </button>
+              </div>
+            </div>
+          </div><!-- /modal-simulate-txn -->
+
           <!-- iOS Home Indicator bar at the bottom -->
           <div class="phone-home-indicator"></div>
 
         </div>
       </div>
+
+      <!-- Desktop Studio Right Widget: Demo Webhook & AI Phân loại (Placed outside in the black area on the right) -->
+      <aside class="desktop-demo-panel" id="desktop-demo-panel">
+        <div class="ddp-card">
+          <div class="ddp-glow-bar"></div>
+          
+          <div class="ddp-header">
+            <div class="ddp-icon">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="ddp-title-group">
+              <div class="ddp-title">Demo Webhook &amp; AI Phân loại</div>
+              <div class="ddp-subtitle">Giả lập biến động số dư từ ngân hàng liên kết</div>
+            </div>
+            <button type="button" class="ddp-minimize-btn" onclick="toggleDesktopDemoPanel()" title="Thu nhỏ / Ẩn bảng demo">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="ddp-actions">
+            <button type="button" class="ddp-btn ddp-btn-chime" onclick="triggerBankPushNotification({bank:'MB Bank', type:'OUTFLOW', amount:45000, description:'Highlands Coffee', balance:7455000, aiCategory:'Cà phê &amp; Đồ uống', aiBucket:'30% Nhu cầu linh hoạt'})" title="Xem thử chuông báo và banner Push Notification">
+              <i class="fa-solid fa-bell fa-shake" style="color:#F59E0B;"></i> <span>Thử chuông</span>
+            </button>
+            <button type="button" class="ddp-btn ddp-btn-sim" onclick="openSimulateTxnModal()" title="Mở bảng cấu hình mô phỏng giao dịch">
+              <span>Giả lập</span> <i class="fa-solid fa-bolt"></i>
+            </button>
+          </div>
+
+          <!-- Quick 1-Click Scenarios -->
+          <div class="ddp-quick-section">
+            <div class="ddp-quick-label">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:#E8632A;"></i> <span>Kịch bản bắn nhanh (1-Click):</span>
+            </div>
+            <div class="ddp-presets-grid">
+              <button type="button" class="ddp-preset-chip" onclick="quickFireWebhookPreset('MB Bank', 'Highlands Coffee', 45000, 'OUTFLOW')">
+                <span class="ddp-chip-title">☕ Highlands</span>
+                <span class="ddp-chip-meta">MBB &bull; <strong style="color:#FF7A3D;">-45.000đ</strong></span>
+              </button>
+              <button type="button" class="ddp-preset-chip" onclick="quickFireWebhookPreset('Techcombank', 'Cơm trưa GrabFood', 68000, 'OUTFLOW')">
+                <span class="ddp-chip-title">🍜 GrabFood</span>
+                <span class="ddp-chip-meta">TCB &bull; <strong style="color:#FF7A3D;">-68.000đ</strong></span>
+              </button>
+              <button type="button" class="ddp-preset-chip" onclick="quickFireWebhookPreset('Vietcombank', 'Shopee đơn đêm 23:45', 350000, 'OUTFLOW')">
+                <span class="ddp-chip-title">🛍️ Shopee đêm</span>
+                <span class="ddp-chip-meta">VCB &bull; <strong style="color:#FF7A3D;">-350.000đ</strong></span>
+              </button>
+              <button type="button" class="ddp-preset-chip" onclick="quickFireWebhookPreset('Vietcombank', 'Nhận lương Tech Corp', 25000000, 'INFLOW')">
+                <span class="ddp-chip-title">💼 Lương tháng</span>
+                <span class="ddp-chip-meta">VCB &bull; <strong style="color:#10B981;">+25.000.000đ</strong></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Realtime status / last event feedback -->
+          <div class="ddp-last-event" id="ddp-last-event"></div>
+
+          <div class="ddp-footer-hint">
+            <span class="ddp-status-dot"></span>
+            <span>Open Banking Webhook Simulation Live</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Toggle Button for Collapsed State or Small Screens -->
+      <button type="button" class="desktop-demo-toggle-btn" id="desktop-demo-toggle-btn" onclick="toggleDesktopDemoPanel()" title="Mở bảng Demo Webhook & AI">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Demo Webhook &amp; AI</span>
+      </button>
+
     </div>
   </div>
 
@@ -195,6 +498,21 @@
         sendInAppChatMessage();
       }
     }
+
+    function formatAiMarkdown(text) {
+      if (!text) return '';
+      let escaped = String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      escaped = escaped.replace(/^[•\-] (.*$)/gim, '<div class="bot-bullet">• $1</div>');
+      escaped = escaped.replace(/\n\n/g, '<div style="height:6px;"></div>');
+      escaped = escaped.replace(/\n/g, '<br>');
+      return escaped;
+    }
+
     function sendInAppChatMessage() {
       const inp = document.getElementById('in-app-chat-input');
       const box = document.getElementById('in-app-chat-messages');
@@ -211,7 +529,7 @@
 
       const loadDiv = document.createElement('div');
       loadDiv.className = 'msg msg-bot';
-      loadDiv.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> FinLab AI đang tính toán...';
+      loadDiv.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> FinLab AI đang phân tích dữ liệu...';
       box.appendChild(loadDiv);
       box.scrollTop = box.scrollHeight;
 
@@ -222,11 +540,12 @@
       })
       .then(r => r.json())
       .then(data => {
-        loadDiv.innerHTML = data.reply || 'Xin lỗi, tôi chưa nhận diện được yêu cầu này!';
+        loadDiv.innerHTML = formatAiMarkdown(data.reply || 'Xin lỗi, tôi chưa nhận diện được yêu cầu này!');
         box.scrollTop = box.scrollHeight;
       })
       .catch(() => {
-        loadDiv.innerHTML = 'Lỗi kết nối máy chủ AI. Vui lòng thử lại sau!';
+        loadDiv.innerHTML = '<span style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối máy chủ AI. Vui lòng thử lại sau!</span>';
+        box.scrollTop = box.scrollHeight;
       });
     }
 
@@ -279,6 +598,8 @@
     }
   </script>
 
+  <!-- Global App Scripts (Toast, Bank Push Notifications & Audio Chime, Modals) -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

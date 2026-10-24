@@ -1,5 +1,1695 @@
 [
   {
+    "id": "LOG_2254749",
+    "timestamp": "2026-10-25 00:17:34",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "MB Bank (MBB.20261025001734.254)",
+    "result": "Success",
+    "details": "Highlands Coffee (-45,000đ). AI tự động phân loại: Ăn uống & Cà phê ngoài (Rổ: WANTS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_2254589",
+    "timestamp": "2026-10-25 00:17:34",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_2254569",
+    "timestamp": "2026-10-25 00:17:34",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_2094714",
+    "timestamp": "2026-10-25 00:14:54",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "MB Bank (MBB.20261025001454.94)",
+    "result": "Success",
+    "details": "Highlands Coffee (-45,000đ). AI tự động phân loại: Ăn uống & Cà phê ngoài (Rổ: WANTS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_2094594",
+    "timestamp": "2026-10-25 00:14:54",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_2094570",
+    "timestamp": "2026-10-25 00:14:54",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1910336",
+    "timestamp": "2026-10-25 00:11:50",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1910312",
+    "timestamp": "2026-10-25 00:11:50",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1901164",
+    "timestamp": "2026-10-25 00:11:41",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1901134",
+    "timestamp": "2026-10-25 00:11:41",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9999342",
+    "timestamp": "2026-10-24 23:39:59",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9999275",
+    "timestamp": "2026-10-24 23:39:59",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_3864910",
+    "timestamp": "2026-10-24 19:11:04",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_3864881",
+    "timestamp": "2026-10-24 19:11:04",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1311195",
+    "timestamp": "2026-10-24 18:28:31",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "MB Bank (MBB.20261024182831.311)",
+    "result": "Success",
+    "details": "Highlands Coffee (-45,000đ). AI tự động phân loại: Ăn uống & Cà phê ngoài (Rổ: WANTS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1300331",
+    "timestamp": "2026-10-24 18:28:20",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking AIS",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất qua Open API v2.1 (Thông tư 64/2024/TT-NHNN). Số dư: 18,150,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1271352",
+    "timestamp": "2026-10-24 18:27:51",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Techcombank (TCB.20261024182751.271)",
+    "result": "Success",
+    "details": "Cơm trưa GrabFood (-68,000đ). AI tự động phân loại: Đi lại & Xăng xe (Rổ: NEEDS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1268239",
+    "timestamp": "2026-10-24 18:27:48",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Techcombank (TCB.20261024182748.268)",
+    "result": "Success",
+    "details": "Cơm trưa GrabFood (-68,000đ). AI tự động phân loại: Đi lại & Xăng xe (Rổ: NEEDS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1226230",
+    "timestamp": "2026-10-24 18:27:06",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1226199",
+    "timestamp": "2026-10-24 18:27:06",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1139257",
+    "timestamp": "2026-10-24 18:25:39",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Vietcombank (MBB.20261024182539.139)",
+    "result": "Success",
+    "details": "Shopee đơn đêm 23:45 (-350,000đ). AI tự động phân loại: Mua sắm cá nhân (Rổ: WANTS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1139183",
+    "timestamp": "2026-10-24 18:25:39",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "MB Bank (MBB.20261024182539.139)",
+    "result": "Success",
+    "details": "Highlands Coffee (-45,000đ). AI tự động phân loại: Ăn uống & Cà phê ngoài (Rổ: WANTS, Tin cậy: 95%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1139090",
+    "timestamp": "2026-10-24 18:25:39",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking AIS",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất qua Open API v2.1 (Thông tư 64/2024/TT-NHNN). Số dư: 7,500,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1138934",
+    "timestamp": "2026-10-24 18:25:38",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_1138906",
+    "timestamp": "2026-10-24 18:25:38",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9765427",
+    "timestamp": "2026-10-24 18:02:45",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking API",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9765237",
+    "timestamp": "2026-10-24 18:02:45",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking API",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9764712",
+    "timestamp": "2026-10-24 18:02:44",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking API",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9763261",
+    "timestamp": "2026-10-24 18:02:43",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking API",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9741940",
+    "timestamp": "2026-10-24 18:02:21",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "VietinBank (10982736451)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_CTG_1792839741",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9699658",
+    "timestamp": "2026-10-24 18:01:39",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9699609",
+    "timestamp": "2026-10-24 18:01:39",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9648726",
+    "timestamp": "2026-10-24 18:00:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9648702",
+    "timestamp": "2026-10-24 18:00:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9314459",
+    "timestamp": "2026-10-24 17:55:14",
+    "actor": "nguyen_van_a",
+    "action": "Đổi mật khẩu tài khoản",
+    "target": "Bảo mật",
+    "result": "Success",
+    "details": "Mật khẩu tài khoản đã được thay đổi thành công",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9314392",
+    "timestamp": "2026-10-24 17:55:14",
+    "actor": "nguyen_van_a",
+    "action": "Cập nhật thông tin cá nhân",
+    "target": "Hồ sơ người dùng",
+    "result": "Success",
+    "details": "Cập nhật: ['full_name', 'email', 'phone', 'occupation', 'monthly_income']",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9314314",
+    "timestamp": "2026-10-24 17:55:14",
+    "actor": "nguyen_van_a",
+    "action": "Xóa mục tiêu tài chính",
+    "target": "goal_314029",
+    "result": "Success",
+    "details": "Xóa bỏ mục tiêu tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9314253",
+    "timestamp": "2026-10-24 17:55:14",
+    "actor": "nguyen_van_a",
+    "action": "Nạp tiền vào mục tiêu",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Nạp 2,000,000 VNĐ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9314178",
+    "timestamp": "2026-10-24 17:55:14",
+    "actor": "nguyen_van_a",
+    "action": "Tạo mục tiêu tài chính",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Mục tiêu 50,000,000 VNĐ, hạn chót 2026-12",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313904",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313839",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313674",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313521",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792839313",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313406",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_9313393",
+    "timestamp": "2026-10-24 17:55:13",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7861638",
+    "timestamp": "2026-10-24 17:31:01",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7861598",
+    "timestamp": "2026-10-24 17:31:01",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7791260",
+    "timestamp": "2026-10-24 17:29:51",
+    "actor": "nguyen_van_a",
+    "action": "Đổi mật khẩu tài khoản",
+    "target": "Bảo mật",
+    "result": "Success",
+    "details": "Mật khẩu tài khoản đã được thay đổi thành công",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7791196",
+    "timestamp": "2026-10-24 17:29:51",
+    "actor": "nguyen_van_a",
+    "action": "Cập nhật thông tin cá nhân",
+    "target": "Hồ sơ người dùng",
+    "result": "Success",
+    "details": "Cập nhật: ['full_name', 'email', 'phone', 'occupation', 'monthly_income']",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7791132",
+    "timestamp": "2026-10-24 17:29:51",
+    "actor": "nguyen_van_a",
+    "action": "Xóa mục tiêu tài chính",
+    "target": "goal_791003",
+    "result": "Success",
+    "details": "Xóa bỏ mục tiêu tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7791081",
+    "timestamp": "2026-10-24 17:29:51",
+    "actor": "nguyen_van_a",
+    "action": "Nạp tiền vào mục tiêu",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Nạp 2,000,000 VNĐ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7791029",
+    "timestamp": "2026-10-24 17:29:51",
+    "actor": "nguyen_van_a",
+    "action": "Tạo mục tiêu tài chính",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Mục tiêu 50,000,000 VNĐ, hạn chót 2026-12",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790953",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790899",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790831",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790757",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837790",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790655",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7790625",
+    "timestamp": "2026-10-24 17:29:50",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658865",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Đổi mật khẩu tài khoản",
+    "target": "Bảo mật",
+    "result": "Success",
+    "details": "Mật khẩu tài khoản đã được thay đổi thành công",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658797",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Cập nhật thông tin cá nhân",
+    "target": "Hồ sơ người dùng",
+    "result": "Success",
+    "details": "Cập nhật: ['full_name', 'email', 'phone', 'occupation', 'monthly_income']",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658733",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Xóa mục tiêu tài chính",
+    "target": "goal_658623",
+    "result": "Success",
+    "details": "Xóa bỏ mục tiêu tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658685",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Nạp tiền vào mục tiêu",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Nạp 2,000,000 VNĐ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658640",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Tạo mục tiêu tài chính",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Mục tiêu 50,000,000 VNĐ, hạn chót 2026-12",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658585",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658532",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658475",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658398",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837658",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658270",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7658204",
+    "timestamp": "2026-10-24 17:27:38",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7310367",
+    "timestamp": "2026-10-24 17:21:50",
+    "actor": "nguyen_van_a",
+    "action": "Đồng bộ Open Banking API",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cập nhật số dư và lịch sử giao dịch mới nhất",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7272086",
+    "timestamp": "2026-10-24 17:21:12",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7272039",
+    "timestamp": "2026-10-24 17:21:12",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7258835",
+    "timestamp": "2026-10-24 17:20:58",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7258775",
+    "timestamp": "2026-10-24 17:20:58",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184991",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Đổi mật khẩu tài khoản",
+    "target": "Bảo mật",
+    "result": "Success",
+    "details": "Mật khẩu tài khoản đã được thay đổi thành công",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184926",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Cập nhật thông tin cá nhân",
+    "target": "Hồ sơ người dùng",
+    "result": "Success",
+    "details": "Cập nhật: ['full_name', 'email', 'phone', 'occupation', 'monthly_income']",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184853",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Xóa mục tiêu tài chính",
+    "target": "goal_184689",
+    "result": "Success",
+    "details": "Xóa bỏ mục tiêu tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184792",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Nạp tiền vào mục tiêu",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Nạp 2,000,000 VNĐ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184721",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Tạo mục tiêu tài chính",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Mục tiêu 50,000,000 VNĐ, hạn chót 2026-12",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184647",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184586",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184526",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184437",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837184",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184326",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7184304",
+    "timestamp": "2026-10-24 17:19:44",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168397",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Cập nhật thông tin cá nhân",
+    "target": "Hồ sơ người dùng",
+    "result": "Success",
+    "details": "Cập nhật: ['full_name', 'email', 'phone', 'occupation', 'monthly_income']",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168360",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Xóa mục tiêu tài chính",
+    "target": "goal_168208",
+    "result": "Success",
+    "details": "Xóa bỏ mục tiêu tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168286",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Nạp tiền vào mục tiêu",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Nạp 2,000,000 VNĐ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168235",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Tạo mục tiêu tài chính",
+    "target": "Quỹ đầu tư chứng khoán",
+    "result": "Success",
+    "details": "Mục tiêu 50,000,000 VNĐ, hạn chót 2026-12",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168164",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168096",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7168030",
+    "timestamp": "2026-10-24 17:19:28",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7167942",
+    "timestamp": "2026-10-24 17:19:27",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837167",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7167835",
+    "timestamp": "2026-10-24 17:19:27",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7167816",
+    "timestamp": "2026-10-24 17:19:27",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7148343",
+    "timestamp": "2026-10-24 17:19:08",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7148210",
+    "timestamp": "2026-10-24 17:19:08",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119799",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày (Nghị định 13/2023/NĐ-CP)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119744",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119690",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi phạm vi quyền dữ liệu",
+    "target": "MB Bank",
+    "result": "Success",
+    "details": "Tắt quyền 'Xem lịch sử giao dịch' (Nghị định 13)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119611",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837119",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119510",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7119478",
+    "timestamp": "2026-10-24 17:18:39",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7085887",
+    "timestamp": "2026-10-24 17:18:05",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837085",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7085778",
+    "timestamp": "2026-10-24 17:18:05",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7085737",
+    "timestamp": "2026-10-24 17:18:05",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7072078",
+    "timestamp": "2026-10-24 17:17:52",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837072",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7071963",
+    "timestamp": "2026-10-24 17:17:51",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7071931",
+    "timestamp": "2026-10-24 17:17:51",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7045403",
+    "timestamp": "2026-10-24 17:17:25",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792837045",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7045294",
+    "timestamp": "2026-10-24 17:17:25",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_7045264",
+    "timestamp": "2026-10-24 17:17:25",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6985115",
+    "timestamp": "2026-10-24 17:16:25",
+    "actor": "nguyen_van_a",
+    "action": "Liên kết Open Banking thành công",
+    "target": "MB Bank (0987654321)",
+    "result": "Success",
+    "details": "Cấp quyền AIS 90 ngày theo Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN. ID: CONSENT_MBB_1792836985",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6985000",
+    "timestamp": "2026-10-24 17:16:25",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6984982",
+    "timestamp": "2026-10-24 17:16:24",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6947140",
+    "timestamp": "2026-10-24 17:15:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6947124",
+    "timestamp": "2026-10-24 17:15:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6906045",
+    "timestamp": "2026-10-24 17:15:06",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6906019",
+    "timestamp": "2026-10-24 17:15:06",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_3736124",
+    "timestamp": "2026-10-24 16:22:16",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_3736069",
+    "timestamp": "2026-10-24 16:22:16",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6818250",
+    "timestamp": "2026-10-23 21:46:58",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6818204",
+    "timestamp": "2026-10-23 21:46:58",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6806668",
+    "timestamp": "2026-10-23 21:46:46",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6806609",
+    "timestamp": "2026-10-23 21:46:46",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6780352",
+    "timestamp": "2026-10-23 21:46:20",
+    "actor": "nguyen_van_a",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6662029",
+    "timestamp": "2026-10-23 21:44:22",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6662004",
+    "timestamp": "2026-10-23 21:44:22",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6661981",
+    "timestamp": "2026-10-23 21:44:21",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6661949",
+    "timestamp": "2026-10-23 21:44:21",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628471",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628420",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628375",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628345",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628299",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628270",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6628244",
+    "timestamp": "2026-10-23 21:43:48",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627765",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627740",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627598",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627578",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627331",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6627297",
+    "timestamp": "2026-10-23 21:43:47",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5855016",
+    "timestamp": "2026-10-23 21:30:55",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5854975",
+    "timestamp": "2026-10-23 21:30:54",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5830682",
+    "timestamp": "2026-10-23 21:30:30",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5830644",
+    "timestamp": "2026-10-23 21:30:30",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5679654",
+    "timestamp": "2026-10-23 21:27:59",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5679628",
+    "timestamp": "2026-10-23 21:27:59",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5679602",
+    "timestamp": "2026-10-23 21:27:59",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5679575",
+    "timestamp": "2026-10-23 21:27:59",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5644237",
+    "timestamp": "2026-10-23 21:27:24",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5644203",
+    "timestamp": "2026-10-23 21:27:24",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5644176",
+    "timestamp": "2026-10-23 21:27:24",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5644141",
+    "timestamp": "2026-10-23 21:27:24",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627594",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Cấp lại quyền Open Banking",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Cấp lại ủy quyền OAuth 2.0 hiệu lực 90 ngày",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627534",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Thu hồi quyền truy cập (Revoke Consent)",
+    "target": "Vietcombank",
+    "result": "Success",
+    "details": "Tạm ngừng chia sẻ dữ liệu Open Banking tuân thủ Nghị định 13/2023/NĐ-CP",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627479",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627460",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627429",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Thay đổi tỷ lệ ngân sách",
+    "target": "PFM Profile",
+    "result": "Success",
+    "details": "Thiết lập: 55% Thiết yếu - 25% Mong muốn - 20% Tiết kiệm",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627357",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627322",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627228",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "admin",
+    "action": "Đăng nhập Admin",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò ADMIN",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627194",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "admin",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'admin'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627137",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627108",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5627014",
+    "timestamp": "2026-10-23 21:27:07",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5626998",
+    "timestamp": "2026-10-23 21:27:06",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_3271477",
+    "timestamp": "2026-10-23 20:47:51",
+    "actor": "nguyen_van_a",
+    "action": "Đăng xuất",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng xuất khỏi phiên làm việc",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": "LOG_2933675",
     "timestamp": "2026-10-23 20:42:13",
     "actor": "nguyen_van_a",

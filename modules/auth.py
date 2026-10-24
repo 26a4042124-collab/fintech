@@ -29,7 +29,7 @@ def sanitize_user(user):
     """
     Chuẩn hóa dữ liệu trả về cho session và frontend, tuyệt đối không lộ mật khẩu.
     """
-    full_name = user.get("full_name", "")
+    full_name = user.get("full_name", "").replace("(Verified)", "").strip()
     avatar_initial = full_name[0].upper() if full_name else "U"
     return {
         "id": user["id"],
@@ -42,7 +42,7 @@ def sanitize_user(user):
         "created_at": user.get("created_at", "2026-01-01"),
         "occupation": user.get("occupation", "Cá nhân"),
         "monthly_income": user.get("monthly_income", 18000000),
-        "connected_banks": user.get("connected_banks", []),
+        "connected_banks": [c.get("bank_name") for c in user.get("consents", []) if c.get("status") == "ACTIVE" and c.get("bank_name")] or user.get("connected_banks", []),
         "goals": user.get("goals", []),
         "avatar_initial": avatar_initial,
         "budget_ratio": user.get("budget_ratio", {"needs": 50, "wants": 30, "savings": 20}),
@@ -52,7 +52,9 @@ def sanitize_user(user):
         "category_limits": user.get("category_limits", user.get("category_budgets", {})),
         "category_budgets": user.get("category_budgets", user.get("category_limits", {})),
         "open_banking_consent": user.get("open_banking_consent", {"view_balance": True, "view_history": True, "ai_analytics": True}),
-        "consents": user.get("consents", [])
+        "consents": user.get("consents", []),
+        "wallets": user.get("wallets", []),
+        "custom_transactions": user.get("custom_transactions", [])
     }
 
 def authenticate_user(username, password):

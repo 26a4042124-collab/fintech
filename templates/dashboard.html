@@ -28,9 +28,12 @@
         <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#FF6B35,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white;box-shadow:0 3px 10px rgba(255,107,53,0.35);">
           {{ user.full_name[0] if user.full_name else 'U' }}
         </div>
-        <div>
+        <div style="max-width:145px;overflow:hidden;">
           <div style="font-size:10px;color:var(--text-muted);font-weight:600;line-height:1.1;">Xin chào 👋</div>
-          <div style="font-size:13px;font-weight:800;color:var(--text-primary);line-height:1.2;">{{ user.full_name }}</div>
+          <div style="font-size:13px;font-weight:800;color:var(--text-primary);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;">
+            <span>{{ user.full_name }}</span>
+            <i class="fa-solid fa-circle-check" style="color:#0284C7;font-size:11px;" title="Tài khoản đã xác thực"></i>
+          </div>
         </div>
       </a>
     </div>
@@ -44,7 +47,7 @@
         <i class="fa-solid fa-bell" style="color:var(--text-secondary);font-size:14px;"></i>
         <span style="position:absolute;top:5px;right:6px;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
       </a>
-      <button class="top-bar-action" id="chatbot-fab-top" title="Trợ lý AI">
+      <button class="top-bar-action" id="chatbot-fab-top" onclick="toggleInAppChat()" title="Trợ lý AI">
         <i class="fa-solid fa-robot" style="color:var(--accent);font-size:14px;"></i>
       </button>
     </div>
@@ -55,7 +58,7 @@
 
     <!-- Balance Card -->
     <div class="balance-card">
-      <div class="balance-label">Số dư khả dụng tháng 10/2026</div>
+      <div class="balance-label">Số dư khả dụng {{ current_month_str if current_month_str else 'tháng 10/2026' }}</div>
       <div class="balance-amount">
         {{ "{:,.0f}".format(balance) }}
         <span>VNĐ</span>
@@ -306,14 +309,49 @@
       }
     }
 
-    function executeOpenBankingSync() {
+    async function executeOpenBankingSync() {
+      const cb = document.getElementById('ob-consent-checkbox');
+      if (!cb || !cb.checked) {
+        if (window.showToast) window.showToast('Vui lòng đánh dấu đồng ý cam kết chia sẻ dữ liệu!', 'error');
+        return;
+      }
       const selected = document.querySelector('.bank-choice.selected');
-      const bankName = selected ? selected.querySelector('strong, .bank-name, div[style*="font-weight:800"]')?.textContent.trim() : 'Ngân hàng';
-      document.getElementById('modal-bank').classList.remove('open');
-      if (window.showToast) {
-        window.showToast(`Đã cấp quyền và kết nối Open Banking API thành công với ${bankName}!`, 'success');
-      } else {
-        alert(`Đã cấp quyền và kết nối Open Banking API thành công với ${bankName}!`);
+      const bankId = selected ? selected.dataset.bank : 'VCB';
+      const btn = document.getElementById('btn-sync');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kết nối bảo mật OAuth 2.0...';
+      }
+
+      try {
+        const res = await fetch('/api/open-banking/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bank_id: bankId,
+            consent_confirmed: true,
+            scopes: { read_balance: true, read_transactions: true, analyze_ai: true }
+          })
+        });
+        const data = await res.json();
+        document.getElementById('modal-bank').classList.remove('open');
+        if (data.success) {
+          if (window.showToast) {
+            window.showToast(data.message || 'Liên kết Open Banking thành công!', 'success');
+          }
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          if (window.showToast) {
+            window.showToast(data.error || 'Lỗi khi liên kết ngân hàng!', 'error');
+          }
+        }
+      } catch (err) {
+        if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-link"></i> Liên kết Open Banking ngay';
+        }
       }
     }
   </script>
@@ -323,6 +361,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 {% endblock %}

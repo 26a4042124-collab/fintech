@@ -46,19 +46,23 @@
       </div>
     </div>
 
-    <!-- Quick Actions Strip -->
-    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin-bottom:14px;">
+    <!-- Quick Actions Strip (4 items) -->
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; margin-bottom:14px;">
+      <button class="wallet-action-chip" onclick="openOpenBankingConnectModal()" style="border-color:rgba(99,102,241,0.35);background:#F5F7FF;">
+        <i class="fa-solid fa-link" style="color:#4F46E5;"></i>
+        <span>Liên kết API</span>
+      </button>
       <button class="wallet-action-chip" onclick="openAddWalletModal()">
         <i class="fa-solid fa-circle-plus text-accent"></i>
-        <span>Thêm ví mới</span>
+        <span>Ví thủ công</span>
       </button>
       <button class="wallet-action-chip" onclick="openTransferModal()">
         <i class="fa-solid fa-arrow-right-arrow-left" style="color:#3B82F6;"></i>
-        <span>Chuyển tiền</span>
+        <span>Chuyển ví</span>
       </button>
       <a href="{{ url_for('transactions') }}" class="wallet-action-chip" style="text-decoration:none;">
         <i class="fa-solid fa-clock-rotate-left" style="color:#10B981;"></i>
-        <span>Sổ giao dịch</span>
+        <span>Sổ GD</span>
       </a>
     </div>
 
@@ -99,7 +103,7 @@
     <div class="glass-card-solid" style="padding: 10px 14px;">
       {% for t in recent_txns %}
       <div class="txn-item" style="padding: 8px 0; border-bottom: 1px solid var(--border-light);">
-        <div class="txn-icon" style="background: {% if t.type == 'INFLOW' %}rgba(34,197,94,0.12){% else %}rgba(232,99,42,0.12){% endif %}; color: {% if t.type == 'INFLOW' %}#16A34A{% else %}#E8632A{% endif %}; width:34px; height:34px; font-size:13px; border-radius:10px;">
+        <div class="txn-icon {% if t.type == 'INFLOW' %}txn-icon-inflow{% else %}txn-icon-outflow{% endif %}" style="width:34px; height:34px; font-size:13px; border-radius:10px;">
           <i class="fa-solid {% if t.type == 'INFLOW' %}fa-arrow-down{% else %}fa-arrow-up{% endif %}"></i>
         </div>
         <div class="txn-info">
@@ -108,7 +112,7 @@
             <span>{{ t.timestamp[:10] }}</span> &bull; <span>{{ t.bank }}</span>
           </div>
         </div>
-        <div class="txn-amount" style="font-size:13px; font-weight:700; color: {% if t.type == 'INFLOW' %}var(--success){% else %}var(--text-primary){% endif %};">
+        <div class="txn-amount {% if t.type == 'INFLOW' %}txn-amount-inflow{% else %}txn-amount-outflow{% endif %}" style="font-size:13px; font-weight:700;">
           {% if t.type == 'INFLOW' %}+{% else %}-{% endif %}{{ "{:,.0f}".format(t.amount) }}đ
         </div>
       </div>
@@ -235,11 +239,12 @@
               <i class="fa-solid fa-pencil" style="color:#E8632A;"></i>
               Quản lý thủ công
             </div>
-            <div class="mgmt-mode-option disabled-opt" data-mode="connect"
-              title="Tính năng kết nối ngân hàng sẽ sớm được hỗ trợ">
-              <i class="fa-solid fa-link" style="color:#6B7280;"></i>
-              Kết nối tài khoản
-              <span class="badge-soon">Sắp ra mắt</span>
+            <div class="mgmt-mode-option" data-mode="connect"
+              onclick="closeAddWalletModal(); openOpenBankingConnectModal();"
+              title="Kết nối trực tiếp qua Open Banking API">
+              <i class="fa-solid fa-link" style="color:#4F46E5;"></i>
+              Kết nối Open API
+              <span class="badge-active" style="font-size:8.5px;background:#EEF2FF;color:#4F46E5;padding:1px 5px;border-radius:6px;font-weight:700;">AIS 90d</span>
             </div>
           </div>
         </div>
@@ -428,12 +433,173 @@
     </div>
   </div><!-- /modal-transfer -->
 
+  <!-- ===================================================================
+       MODAL: LIÊN KẾT OPEN BANKING API & VÍ ĐIỆN TỬ (AIS)
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-open-banking-connect">
+    <div class="modal-box" style="max-height:86vh;display:flex;flex-direction:column;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-link text-accent"></i> Liên kết Open Banking API
+          <span style="font-size:9.5px;background:#EEF2FF;color:#4F46E5;padding:2px 6px;border-radius:6px;font-weight:700;">Nghị định 13</span>
+        </div>
+        <button class="modal-close" onclick="closeOpenBankingConnectModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Stepper Indicator -->
+      <div class="ob-stepper-header">
+        <div class="ob-step active" id="ob-step-indicator-1"><span>1</span> Chọn đơn vị</div>
+        <div class="ob-step-line" id="ob-step-line-1"></div>
+        <div class="ob-step" id="ob-step-indicator-2"><span>2</span> Xác thực</div>
+        <div class="ob-step-line" id="ob-step-line-2"></div>
+        <div class="ob-step" id="ob-step-indicator-3"><span>3</span> Cấp quyền</div>
+      </div>
+
+      <div class="modal-body" style="overflow-y:auto;flex:1;padding:10px 16px;">
+        
+        <!-- STEP 1: CHỌN NHÀ CUNG CẤP -->
+        <div id="ob-step-1">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+            Chọn tổ chức tín dụng hoặc ví điện tử bạn muốn đồng bộ dữ liệu:
+          </div>
+          <div class="ob-filter-pills">
+            <button type="button" class="ob-filter-pill active" onclick="filterObProviders('all', this)">Tất cả (<span id="ob-p-all">0</span>)</button>
+            <button type="button" class="ob-filter-pill" onclick="filterObProviders('bank', this)">Ngân hàng (<span id="ob-p-bank">0</span>)</button>
+            <button type="button" class="ob-filter-pill" onclick="filterObProviders('ewallet', this)">Ví điện tử (<span id="ob-p-ewallet">0</span>)</button>
+          </div>
+          <div class="ob-providers-grid" id="ob-providers-grid">
+            <!-- Dynamic render from JS -->
+          </div>
+        </div>
+
+        <!-- STEP 2: CỔNG XÁC THỰC NGÂN HÀNG (SANDBOX GATEWAY) -->
+        <div id="ob-step-2" style="display:none;">
+          <div class="ob-gateway-banner" id="ob-gateway-banner">
+            <div class="ob-gw-logo" id="ob-gw-logo"><i class="fa-solid fa-building-columns"></i></div>
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:#FFF;" id="ob-gw-name">Vietcombank Digibank</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.85);" id="ob-gw-sub">Cổng Ủy quyền Open Banking Sandbox</div>
+            </div>
+            <span style="margin-left:auto;font-size:9px;background:rgba(255,255,255,0.22);color:#FFF;padding:2px 7px;border-radius:10px;font-weight:700;">ISO 20022</span>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+            <button type="button" class="btn-ghost" onclick="quickFillObAuth()" style="font-size:11px;padding:3px 8px;color:var(--accent);background:rgba(232,99,42,0.08);border-radius:8px;">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Tự điền thông tin mẫu
+            </button>
+          </div>
+
+          <div class="form-group mb-8">
+            <label class="form-label" style="font-size:11px;">Tên đăng nhập / Số điện thoại <span class="required">*</span></label>
+            <input type="text" class="form-input" id="ob-auth-username" placeholder="Nhập tên đăng nhập..." value="0912345678" style="padding:9px 12px;font-size:12.5px;">
+          </div>
+          <div class="form-group mb-8">
+            <label class="form-label" style="font-size:11px;">Mật khẩu Internet Banking <span class="required">*</span></label>
+            <input type="password" class="form-input" id="ob-auth-password" placeholder="••••••••" value="demoPass@2026" style="padding:9px 12px;font-size:12.5px;">
+          </div>
+
+          <!-- OTP Simulation Box -->
+          <div class="ob-otp-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:11px;font-weight:700;color:var(--text-primary);"><i class="fa-solid fa-mobile-screen"></i> Mã xác thực SmartOTP / SMS</span>
+              <span style="font-size:10.5px;color:var(--accent);font-weight:700;" id="ob-otp-hint">Mã mẫu: <strong>888999</strong></span>
+            </div>
+            <input type="text" class="form-input" id="ob-auth-otp" placeholder="Nhập 6 số OTP" maxlength="6" value="888999" style="text-align:center;letter-spacing:4px;font-weight:800;font-size:14px;padding:8px;">
+            <div style="font-size:10px;color:var(--text-muted);margin-top:3px;display:flex;justify-content:space-between;">
+              <span>Mã có hiệu lực trong: <strong id="ob-otp-timer">59s</strong></span>
+              <a href="javascript:void(0)" onclick="resendObOtp()" style="color:var(--accent);text-decoration:none;font-weight:600;">Gửi lại mã OTP</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: PHẠM VI & CAM KẾT NGHỊ ĐỊNH 13 -->
+        <div id="ob-step-3" style="display:none;">
+          <div class="ob-account-preview" id="ob-account-preview">
+            <div style="font-size:10.5px;color:var(--text-muted);">Tài khoản được kết nối:</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+              <div>
+                <strong id="ob-preview-acc-name" style="font-size:12.5px;">Vietcombank Thanh toán</strong>
+                <div style="font-size:11px;color:var(--text-muted);" id="ob-preview-acc-no">STK: •••• 5938</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:10px;color:var(--text-muted);">Số dư khởi tạo</div>
+                <strong style="color:var(--success);font-size:13.5px;" id="ob-preview-balance">18,200,000đ</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin:10px 0 6px;">
+            Phạm vi chia sẻ dữ liệu (Data Scopes):
+          </div>
+          <div class="ob-scopes-list">
+            <label class="ob-scope-item">
+              <input type="checkbox" id="ob-scope-bal" checked>
+              <div>
+                <strong>Truy vấn số dư khả dụng (read_balance)</strong>
+                <small>Tự động cập nhật tổng tài sản trên FinLab</small>
+              </div>
+            </label>
+            <label class="ob-scope-item">
+              <input type="checkbox" id="ob-scope-txns" checked>
+              <div>
+                <strong>Đọc lịch sử giao dịch 90 ngày (read_transactions)</strong>
+                <small>AI tự động gắn thẻ và phát hiện rò rỉ dòng tiền</small>
+              </div>
+            </label>
+            <label class="ob-scope-item">
+              <input type="checkbox" id="ob-scope-ai" checked>
+              <div>
+                <strong>Phân tích AI PFM (analyze_ai)</strong>
+                <small>Đánh giá sức khỏe tài chính &amp; cảnh báo chi tiêu đêm</small>
+              </div>
+            </label>
+          </div>
+
+          <!-- Mandatory Legal Commitment Box (Nghị định 13) -->
+          <div class="ob-legal-box">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;line-height:1.4;">
+              <i class="fa-solid fa-shield-halved" style="color:#6366F1;"></i> Kết nối tuân thủ <strong>Nghị định 13/2023/NĐ-CP</strong> và <strong>Thông tư 64/2024/TT-NHNN</strong>. FinLab tuyệt đối không có quyền chuyển tiền hay trích nợ tài khoản. Quyền có hiệu lực 90 ngày và có thể thu hồi bất cứ lúc nào.
+            </div>
+            <label class="ob-commitment-label">
+              <input type="checkbox" id="ob-mandatory-checkbox" onchange="toggleObConfirmBtn(this)">
+              <span><strong>Tôi xác nhận, hiểu rõ và đồng ý</strong> chia sẻ dữ liệu tài khoản và giao dịch cho FinLab theo quy định của Nghị định 13/2023/NĐ-CP.</span>
+            </label>
+          </div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer" id="ob-modal-footer">
+        <button type="button" class="btn-secondary" id="ob-btn-back" onclick="prevObStep()" style="display:none;width:auto;padding:9px 14px;font-size:12px;">
+          <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </button>
+        <button type="button" class="btn-secondary" id="ob-btn-cancel" onclick="closeOpenBankingConnectModal()" style="width:auto;padding:9px 14px;font-size:12px;">
+          Hủy
+        </button>
+        <button type="button" class="btn-primary" id="ob-btn-next" onclick="nextObStep()" style="flex:1;padding:9px 16px;font-size:12.5px;">
+          Tiếp tục <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <button type="button" class="btn-primary" id="ob-btn-confirm" onclick="submitOpenBankingConnect()" style="display:none;flex:1;padding:9px 16px;font-size:12.5px;opacity:0.4;pointer-events:none;">
+          <i class="fa-solid fa-check-double"></i> Xác nhận &amp; Cấp quyền
+        </button>
+      </div>
+    </div>
+  </div><!-- /modal-open-banking-connect -->
+
   <!-- Bottom Nav -->
   {% include "nav_bottom.html" %}
 </div><!-- /app-wrapper -->
 
 <style>
 /* Page-scoped overrides */
+.txn-icon-inflow { background: rgba(34,197,94,0.12) !important; color: #16A34A !important; }
+.txn-icon-outflow { background: rgba(232,99,42,0.12) !important; color: #E8632A !important; }
+.txn-amount-inflow { color: var(--success) !important; }
+.txn-amount-outflow { color: var(--text-primary) !important; }
+
 .wallet-action-chip {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -543,10 +709,307 @@
   font-size: 10.5px;
 }
 .text-accent { color: var(--accent); }
+
+/* Open Banking Modal & Stepper Styles */
+.ob-stepper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  gap: 6px;
+}
+.ob-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.ob-step span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+.ob-step.active {
+  color: var(--accent);
+  font-weight: 700;
+}
+.ob-step.active span {
+  background: var(--accent);
+  color: #FFF;
+}
+.ob-step.completed {
+  color: var(--success);
+}
+.ob-step.completed span {
+  background: var(--success);
+  color: #FFF;
+}
+.ob-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+}
+.ob-step-line.active {
+  background: var(--accent);
+}
+
+.ob-filter-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.ob-filter-pill {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #FFF;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ob-filter-pill.active {
+  background: var(--accent);
+  color: #FFF;
+  border-color: var(--accent);
+}
+
+.ob-providers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.ob-provider-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.ob-provider-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.ob-provider-card.selected {
+  border-color: var(--accent);
+  background: rgba(232, 99, 42, 0.05);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+.ob-provider-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ob-provider-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #FFF;
+  flex-shrink: 0;
+}
+.ob-provider-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.ob-provider-cat {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+.ob-provider-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  align-self: flex-start;
+}
+.ob-badge-connected {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+}
+.ob-badge-available {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4F46E5;
+}
+
+.ob-gateway-banner {
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #FFF;
+}
+.ob-gw-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.ob-otp-box {
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 8px;
+}
+.ob-account-preview {
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.ob-scopes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ob-scope-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+.ob-scope-item input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.ob-scope-item strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.ob-scope-item small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.ob-legal-box {
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.ob-commitment-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+}
+.ob-commitment-label input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: #D97706;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ob-commitment-label span {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #92400E;
+}
+
+.sim-preset-btn {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+.sim-preset-btn:hover {
+  border-color: var(--accent);
+  background: rgba(232,99,42,0.04);
+  transform: translateY(-1px);
+}
+.sim-preset-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.sim-preset-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.sim-preset-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 {% endblock %}
 
 {% block scripts %}
+<!-- Embedded Server Data (Placed before script execution) -->
+<script id="server-providers-data" type="application/json">
+{{ (providers or []) | tojson }}
+</script>
+<script id="server-wallets-data" type="application/json">
+{{ (server_wallets or []) | tojson }}
+</script>
+
 <script>
 /* Tab lọc ví (giữ từ bản local, chuyển sang render động) */
 const BANK_LIKE_TYPES = ['bank', 'savings', 'investment'];
@@ -687,8 +1150,8 @@ function renderWallets() {
   /* Render cards — Fix #9: dùng data-id thay vì encode ID vào onclick string */
   list.innerHTML = wallets.map((w, idx) => {
     const cfg      = WALLET_TYPE_CONFIG[w.type] || WALLET_TYPE_CONFIG.other;
-    const gradient = getWalletGradient(w.type, idx);
-    const brand    = formatBrandName(w.provider, w.type);  /* Fix #6 */
+    const gradient = w.color || getWalletGradient(w.type, idx);
+    const brand    = w.provider ? w.provider.toUpperCase() : (BRAND_DISPLAY[w.type] || 'VÍ KHÁC');
     const typeLbl  = WALLET_TYPE_CONFIG[w.type]?.label || 'Ví khác';
     const statusDot = w.managementMode === 'connect'
       ? '<i class="fa-solid fa-circle" style="font-size:7px;color:#4ADE80;"></i> Đã kết nối'
@@ -710,6 +1173,14 @@ function renderWallets() {
         </div>
         ${w.note ? `<div style="font-size:11px;opacity:0.65;margin-top:-2px;">${escapeHtml(w.note)}</div>` : ''}
         <div class="bci-actions">
+          ${w.managementMode === 'connect' ? `
+            <button class="bci-action-btn" data-bank="${escapeHtml(w.provider || w.name)}" onclick="openSimulateTxnModal(this.dataset.bank)" title="Giả lập phát sinh giao dịch mới" style="background:rgba(255,255,255,0.22);font-weight:700;">
+              <i class="fa-solid fa-bolt" style="color:#FBBF24;"></i> + GD Demo
+            </button>
+            <button class="bci-action-btn" data-bank="${escapeHtml(w.bankId || w.provider || w.name)}" onclick="syncConnectedWallet(this.dataset.bank)" title="Đồng bộ giao dịch">
+              <i class="fa-solid fa-rotate"></i> Đồng bộ
+            </button>
+          ` : ''}
           <button class="bci-action-btn" data-id="${escapeHtml(w.id)}" onclick="openEditWalletModal(this.dataset.id)">
             <i class="fa-solid fa-pen"></i> Sửa
           </button>
@@ -1130,13 +1601,401 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 });
 
 /* =========================================================================
+   Open Banking Wizard & Sandbox Gateway Script (Nghị định 13)
+   ========================================================================= */
+const DEFAULT_FALLBACK_PROVIDERS = [
+  { id: "VCB", name: "Ngân hàng TMCP Ngoại thương (Vietcombank)", short_name: "Vietcombank", category: "bank", category_label: "Ngân hàng", icon: "fa-building-columns", color: "#00563F", status: "NOT_CONNECTED", connected: false },
+  { id: "TCB", name: "Ngân hàng TMCP Kỹ thương (Techcombank)", short_name: "Techcombank", category: "bank", category_label: "Ngân hàng", icon: "fa-credit-card", color: "#E30613", status: "NOT_CONNECTED", connected: false },
+  { id: "MBB", name: "Ngân hàng TMCP Quân đội (MB Bank)", short_name: "MB Bank", category: "bank", category_label: "Ngân hàng", icon: "fa-shield-halved", color: "#1B365D", status: "NOT_CONNECTED", connected: false },
+  { id: "CTG", name: "Ngân hàng TMCP Công thương (VietinBank)", short_name: "VietinBank", category: "bank", category_label: "Ngân hàng", icon: "fa-landmark", color: "#0066B3", status: "NOT_CONNECTED", connected: false },
+  { id: "BIDV", name: "Ngân hàng Đầu tư & Phát triển VN (BIDV)", short_name: "BIDV", category: "bank", category_label: "Ngân hàng", icon: "fa-money-bill-transfer", color: "#00529C", status: "NOT_CONNECTED", connected: false },
+  { id: "ACB", name: "Ngân hàng TMCP Á Châu (ACB)", short_name: "ACB", category: "bank", category_label: "Ngân hàng", icon: "fa-vault", color: "#004B91", status: "NOT_CONNECTED", connected: false },
+  { id: "MOMO", name: "Ví điện tử MoMo", short_name: "MoMo", category: "ewallet", category_label: "Ví điện tử", icon: "fa-mobile-screen-button", color: "#A50064", status: "NOT_CONNECTED", connected: false },
+  { id: "ZALOPAY", name: "Ví điện tử ZaloPay", short_name: "ZaloPay", category: "ewallet", category_label: "Ví điện tử", icon: "fa-comments-dollar", color: "#008FE5", status: "NOT_CONNECTED", connected: false },
+  { id: "SHOPEEPAY", name: "Ví điện tử ShopeePay", short_name: "ShopeePay", category: "ewallet", category_label: "Ví điện tử", icon: "fa-bag-shopping", color: "#EE4D2D", status: "NOT_CONNECTED", connected: false }
+];
+
+let obProviders = [];
+function initObProviders() {
+  try {
+    const pData = document.getElementById('server-providers-data');
+    if (pData && pData.textContent.trim()) {
+      const parsed = JSON.parse(pData.textContent);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        obProviders = parsed;
+      }
+    }
+  } catch(e) { console.warn('Lỗi đọc danh sách providers:', e); }
+
+  if (!obProviders || obProviders.length === 0) {
+    obProviders = JSON.parse(JSON.stringify(DEFAULT_FALLBACK_PROVIDERS));
+  }
+}
+initObProviders();
+
+let currentObStep = 1;
+let selectedObProvider = null;
+let obFilterCat = 'all';
+let obOtpCountdown = 59;
+let obOtpTimerInterval = null;
+
+function renderObProviders() {
+  const container = document.getElementById('ob-providers-grid');
+  if (!container) return;
+
+  if (!obProviders || obProviders.length === 0) {
+    initObProviders();
+  }
+  
+  const filtered = obProviders.filter(p => {
+    if (obFilterCat === 'all') return true;
+    return p.category === obFilterCat;
+  });
+
+  const allCount = obProviders.length;
+  const bankCount = obProviders.filter(p => p.category === 'bank').length;
+  const ewalletCount = obProviders.filter(p => p.category === 'ewallet').length;
+  
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('ob-p-all', allCount);
+  setEl('ob-p-bank', bankCount);
+  setEl('ob-p-ewallet', ewalletCount);
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Không có nhà cung cấp phù hợp</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(p => {
+    const isSelected = selectedObProvider && selectedObProvider.id === p.id;
+    const isConnected = p.connected || p.status === 'CONNECTED';
+    return `
+      <div class="ob-provider-card ${isSelected ? 'selected' : ''}" onclick="selectObProvider('${escapeHtml(p.id)}')">
+        <div class="ob-provider-card-top">
+          <div class="ob-provider-icon" style="background:${p.color || '#3B82F6'};">
+            <i class="fa-solid ${p.icon || 'fa-building-columns'}"></i>
+          </div>
+          <div>
+            <div class="ob-provider-name">${escapeHtml(p.name)}</div>
+            <div class="ob-provider-cat">${escapeHtml(p.category_label || (p.category === 'bank' ? 'Ngân hàng' : 'Ví điện tử'))}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+          <span class="ob-provider-badge ${isConnected ? 'ob-badge-connected' : 'ob-badge-available'}">
+            ${isConnected ? '<i class="fa-solid fa-circle-check"></i> Đã liên kết' : '<i class="fa-solid fa-bolt"></i> Sandbox API'}
+          </span>
+          <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--text-muted);"></i>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterObProviders(cat, btn) {
+  obFilterCat = cat;
+  document.querySelectorAll('.ob-filter-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderObProviders();
+}
+
+function selectObProvider(id) {
+  selectedObProvider = obProviders.find(p => p.id === id);
+  renderObProviders();
+  if (selectedObProvider) {
+    const gwName = document.getElementById('ob-gw-name');
+    const gwSub = document.getElementById('ob-gw-sub');
+    const gwLogo = document.getElementById('ob-gw-logo');
+    const gwBanner = document.getElementById('ob-gateway-banner');
+    if (gwName) gwName.textContent = selectedObProvider.name + (selectedObProvider.category === 'bank' ? ' Digital Banking' : ' Open API');
+    if (gwSub) gwSub.textContent = `Cổng Ủy quyền ${selectedObProvider.name} Sandbox (Nghị định 13)`;
+    if (gwLogo) {
+      gwLogo.style.background = selectedObProvider.color || 'rgba(255,255,255,0.2)';
+      gwLogo.innerHTML = `<i class="fa-solid ${selectedObProvider.icon || 'fa-building-columns'}"></i>`;
+    }
+    if (gwBanner && selectedObProvider.color) {
+      gwBanner.style.background = `linear-gradient(135deg, #1E1B4B 0%, ${selectedObProvider.color} 100%)`;
+    }
+
+    const prevName = document.getElementById('ob-preview-acc-name');
+    const prevNo = document.getElementById('ob-preview-acc-no');
+    const prevBal = document.getElementById('ob-preview-balance');
+    if (prevName) prevName.textContent = `${selectedObProvider.name} - Thanh toán`;
+    if (prevNo) prevNo.textContent = `STK: •••• ${Math.floor(1000 + Math.random() * 9000)}`;
+    if (prevBal) prevBal.textContent = formatVND(selectedObProvider.default_balance || 15000000) + 'đ';
+  }
+}
+
+function openOpenBankingConnectModal() {
+  currentObStep = 1;
+  const cb = document.getElementById('ob-mandatory-checkbox');
+  if (cb) cb.checked = false;
+  toggleObConfirmBtn(cb);
+
+  if (!selectedObProvider && obProviders.length > 0) {
+    selectObProvider(obProviders[0].id);
+  }
+  updateObStepUI();
+  renderObProviders();
+
+  const modal = document.getElementById('modal-open-banking-connect');
+  if (modal) modal.classList.add('open');
+}
+
+function closeOpenBankingConnectModal() {
+  if (obOtpTimerInterval) clearInterval(obOtpTimerInterval);
+  const modal = document.getElementById('modal-open-banking-connect');
+  if (modal) modal.classList.remove('open');
+}
+
+function quickFillObAuth() {
+  const u = document.getElementById('ob-auth-username');
+  const p = document.getElementById('ob-auth-password');
+  const o = document.getElementById('ob-auth-otp');
+  if (u) u.value = '0988776655';
+  if (p) p.value = 'DemoPass@2026';
+  if (o) o.value = '888999';
+  if (window.showToast) window.showToast('Đã tự điền thông tin xác thực mẫu!', 'info');
+}
+
+function startObOtpTimer() {
+  if (obOtpTimerInterval) clearInterval(obOtpTimerInterval);
+  obOtpCountdown = 59;
+  const timerEl = document.getElementById('ob-otp-timer');
+  if (timerEl) timerEl.textContent = `${obOtpCountdown}s`;
+
+  obOtpTimerInterval = setInterval(() => {
+    obOtpCountdown--;
+    if (obOtpCountdown <= 0) {
+      clearInterval(obOtpTimerInterval);
+      if (timerEl) timerEl.textContent = 'Hết hạn';
+    } else {
+      if (timerEl) timerEl.textContent = `${obOtpCountdown}s`;
+    }
+  }, 1000);
+}
+
+function resendObOtp() {
+  const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const hintEl = document.getElementById('ob-otp-hint');
+  const otpInput = document.getElementById('ob-auth-otp');
+  if (hintEl) hintEl.innerHTML = `Mã mẫu mới: <strong>${newOtp}</strong>`;
+  if (otpInput) otpInput.value = newOtp;
+  startObOtpTimer();
+  if (window.showToast) window.showToast(`Mã OTP mới đã gửi: ${newOtp}`, 'info');
+}
+
+function updateObStepUI() {
+  [1, 2, 3].forEach(s => {
+    const el = document.getElementById(`ob-step-${s}`);
+    const ind = document.getElementById(`ob-step-indicator-${s}`);
+    const line = document.getElementById(`ob-step-line-${s}`);
+    if (el) el.style.display = (s === currentObStep) ? 'block' : 'none';
+    if (ind) {
+      ind.classList.toggle('active', s === currentObStep);
+      ind.classList.toggle('completed', s < currentObStep);
+    }
+    if (line) {
+      line.classList.toggle('active', s < currentObStep);
+    }
+  });
+
+  const btnBack = document.getElementById('ob-btn-back');
+  const btnCancel = document.getElementById('ob-btn-cancel');
+  const btnNext = document.getElementById('ob-btn-next');
+  const btnConfirm = document.getElementById('ob-btn-confirm');
+
+  if (btnBack) btnBack.style.display = (currentObStep > 1) ? 'inline-block' : 'none';
+  if (btnCancel) btnCancel.style.display = (currentObStep === 1) ? 'inline-block' : 'none';
+  if (btnNext) btnNext.style.display = (currentObStep < 3) ? 'inline-block' : 'none';
+  if (btnConfirm) btnConfirm.style.display = (currentObStep === 3) ? 'inline-block' : 'none';
+
+  if (currentObStep === 2) {
+    startObOtpTimer();
+  }
+}
+
+function nextObStep() {
+  if (currentObStep === 1) {
+    if (!selectedObProvider) {
+      if (window.showToast) window.showToast('Vui lòng chọn một ngân hàng hoặc ví!', 'error');
+      return;
+    }
+    currentObStep = 2;
+    updateObStepUI();
+  } else if (currentObStep === 2) {
+    const username = document.getElementById('ob-auth-username')?.value.trim();
+    const pass = document.getElementById('ob-auth-password')?.value.trim();
+    const otp = document.getElementById('ob-auth-otp')?.value.trim();
+
+    if (!username || !pass) {
+      if (window.showToast) window.showToast('Vui lòng nhập tên đăng nhập và mật khẩu!', 'error');
+      return;
+    }
+    if (!otp || otp.length !== 6) {
+      if (window.showToast) window.showToast('Vui lòng nhập mã OTP gồm 6 chữ số!', 'error');
+      return;
+    }
+    currentObStep = 3;
+    updateObStepUI();
+  }
+}
+
+function prevObStep() {
+  if (currentObStep > 1) {
+    currentObStep--;
+    updateObStepUI();
+  }
+}
+
+function toggleObConfirmBtn(checkbox) {
+  const btn = document.getElementById('ob-btn-confirm');
+  if (!btn) return;
+  const isChecked = checkbox && checkbox.checked;
+  if (isChecked) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+async function submitOpenBankingConnect() {
+  const cb = document.getElementById('ob-mandatory-checkbox');
+  if (!cb || !cb.checked) {
+    if (window.showToast) window.showToast('Bạn phải xác nhận cam kết Nghị định 13 để tiếp tục!', 'error');
+    return;
+  }
+  if (!selectedObProvider) return;
+
+  const btn = document.getElementById('ob-btn-confirm');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kích hoạt kết nối Open API...';
+  }
+
+  const scopes = [];
+  if (document.getElementById('ob-scope-bal')?.checked) scopes.push('read_balance');
+  if (document.getElementById('ob-scope-txns')?.checked) scopes.push('read_transactions');
+  if (document.getElementById('ob-scope-ai')?.checked) scopes.push('analyze_ai');
+
+  try {
+    const res = await fetch('/api/open-banking/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bank_id: selectedObProvider.id,
+        scopes: scopes,
+        consent_confirmed: true
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      if (window.showToast) {
+        window.showToast(`Liên kết thành công với ${selectedObProvider.name}! Quyền hiệu lực 90 ngày.`, 'success');
+      }
+      if (data.wallet) {
+        const wallets = loadWallets();
+        const existingIdx = wallets.findIndex(w => w.id === data.wallet.id || (w.bankId && w.bankId === selectedObProvider.id));
+        if (existingIdx >= 0) {
+          wallets[existingIdx] = data.wallet;
+        } else {
+          wallets.unshift(data.wallet);
+        }
+        saveWallets(wallets);
+      }
+      closeOpenBankingConnectModal();
+      renderWallets();
+      setTimeout(() => window.location.reload(), 1200);
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Lỗi liên kết Open Banking!', 'error');
+    }
+  } catch(e) {
+    console.error(e);
+    if (window.showToast) window.showToast('Không thể kết nối máy chủ FinLab!', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Xác nhận &amp; Cấp quyền';
+    }
+  }
+}
+
+async function syncConnectedWallet(bankId) {
+  if (window.showToast) window.showToast(`Đang đồng bộ giao dịch từ ${bankId}...`, 'info');
+  try {
+    const res = await fetch('/api/sync-bank', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bank: bankId })
+    });
+    const d = await res.json();
+    if (d.status === 'success') {
+      if (window.showToast) window.showToast(`Đồng bộ thành công! +${d.new_transactions || 0} giao dịch mới.`, 'success');
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (window.showToast) window.showToast(d.message || 'Lỗi đồng bộ!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi mạng khi đồng bộ!', 'error');
+  }
+}
+
+function syncServerWalletsWithLocal() {
+  try {
+    const sWalletsEl = document.getElementById('server-wallets-data');
+    if (!sWalletsEl) return;
+    const serverWallets = JSON.parse(sWalletsEl.textContent || '[]');
+    if (!Array.isArray(serverWallets) || !serverWallets.length) return;
+
+    // Lấy dữ liệu local
+    const localWallets = loadWallets();
+
+    // Map chuẩn hóa theo ngân hàng
+    const getBankKey = w => {
+      const prov = (w.provider || '').toLowerCase().trim();
+      const bId = (w.bank_id || w.bankId || '').toLowerCase().trim();
+      const nm = (w.name || '').toLowerCase().trim();
+      if (prov.includes('vietcom') || bId === 'vcb' || nm.includes('vietcom')) return 'VCB';
+      if (prov.includes('techcom') || bId === 'tcb' || nm.includes('techcom')) return 'TCB';
+      if (prov.includes('mb') || bId === 'mbb' || nm.includes('mb')) return 'MBB';
+      if (prov.includes('vietin') || bId === 'ctg' || nm.includes('vietin')) return 'CTG';
+      if (prov.includes('momo') || bId === 'momo' || nm.includes('momo')) return 'MOMO';
+      return (w.id || prov || nm);
+    };
+
+    // Tạo bản đồ các ví server chuẩn (Single Source of Truth)
+    const serverBankMap = new Map();
+    serverWallets.forEach(sw => {
+      serverBankMap.set(getBankKey(sw), sw);
+    });
+
+    // Giữ lại các ví thủ công không trùng lặp
+    const manualWallets = localWallets.filter(lw => {
+      if (lw.managementMode === 'connect') return false; // Dọn sạch các bản sao connect cũ trong localStorage
+      return !serverBankMap.has(getBankKey(lw));
+    });
+
+    // Hợp nhất: Server là nguồn chuẩn tuyệt đối
+    const unified = [...serverWallets, ...manualWallets];
+    saveWallets(unified);
+    return unified;
+  } catch(e) {
+    console.warn('Lỗi đồng bộ ví từ server:', e);
+  }
+}
+
+/* =========================================================================
    Khởi tạo
    ========================================================================= */
 document.addEventListener('DOMContentLoaded', function() {
   formatBalanceInput('new-wallet-balance');
   formatBalanceInput('edit-wallet-balance');
   formatBalanceInput('transfer-amount');
+  formatBalanceInput('sim-amount-input');
+  syncServerWalletsWithLocal();
   renderWallets();
+  renderObProviders();
 });
 </script>
 {% endblock %}

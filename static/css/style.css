@@ -1712,7 +1712,7 @@ img { max-width: 100%; height: auto; }
    ========================================================================== */
 .modal-overlay, .bottom-sheet-overlay {
   display: none !important;
-  position: absolute !important;
+  position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
@@ -2285,38 +2285,199 @@ body.phone-mockup-body {
   position: relative;
   display: flex;
   flex-direction: column;
+  transform: translateZ(0); /* Contains all position: fixed bottom sheets and modals strictly inside phone screen */
 }
 
-/* Dynamic Island — Compact micro cutout so it NEVER overlaps text */
-.dynamic-island-cutout {
+/* Integrated Hardware Speaker Slit (Never covers or overlaps screen text) */
+.phone-top-speaker {
   position: absolute;
-  top: 6px;
+  top: 3.5px;
   left: 50%;
   transform: translateX(-50%);
-  width: 70px;
-  height: 15px;
-  background: #000000;
+  width: 48px;
+  height: 3.5px;
+  background: #2B303C;
+  border-radius: 4px;
+  z-index: 10005;
+  pointer-events: none;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.6);
+}
+
+/* Dynamic Island hidden so it never obscures any user text or titles */
+.dynamic-island-cutout {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Realistic Bank Push Notification Banner (Chuông báo biến động số dư)
+   ========================================================================== */
+.bank-push-notification {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 10020;
+  background: rgba(20, 24, 33, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 20px;
-  z-index: 10001;
+  padding: 12px 14px 10px;
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  cursor: pointer;
+  transform: translateY(-135%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  overflow: hidden;
+  user-select: none;
+}
+
+.bank-push-notification.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+  animation: bpnPulse 2s infinite ease-in-out;
+}
+
+@keyframes bpnPulse {
+  0%, 100% { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.15); }
+  50% { box-shadow: 0 18px 45px rgba(232, 99, 42, 0.25), 0 0 0 1.5px rgba(232, 99, 42, 0.4); }
+}
+
+.bpn-accent-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1D4ED8, #3B82F6, #60A5FA);
+  opacity: 0.95;
+}
+
+.bpn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.bpn-bank-badge {
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.bpn-bank-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #FFF;
+  flex-shrink: 0;
+}
+
+.bpn-bank-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #F8FAFC;
+}
+
+.bpn-tag {
+  font-size: 8.5px;
+  font-weight: 800;
+  background: rgba(232, 99, 42, 0.25);
+  border: 1px solid rgba(232, 99, 42, 0.45);
+  color: #FF8A50;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.bpn-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.bpn-amount-row {
+  display: flex;
   justify-content: space-between;
-  padding: 0 7px;
-  pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  align-items: baseline;
+  margin-bottom: 2px;
 }
-.di-camera {
-  width: 5.5px;
-  height: 5.5px;
-  border-radius: 50%;
-  background: #111418;
-  border: 1px solid #232730;
+
+.bpn-account {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
 }
-.di-sensor {
-  width: 3.5px;
-  height: 3.5px;
-  border-radius: 50%;
-  background: #181B22;
+
+.bpn-amount {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+.bpn-amount.outflow {
+  color: #FB7185;
+}
+
+.bpn-amount.inflow {
+  color: #34D399;
+}
+
+.bpn-details {
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 8px;
+}
+
+.bpn-details strong {
+  color: #FFFFFF;
+}
+
+.bpn-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bpn-ai-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(99, 102, 241, 0.22);
+  border: 1px solid rgba(129, 140, 248, 0.35);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #A5B4FC;
+}
+
+.bpn-ai-pill i {
+  color: #C7D2FE;
+  font-size: 10px;
+}
+
+.bpn-dismiss-hint {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 /* App Viewport Top Bar & Status Bar */
@@ -2654,6 +2815,70 @@ body.phone-mockup-body {
   justify-content: center;
   font-size: 13px;
   cursor: pointer;
+}
+
+/* In-App Floating Chatbot Button (Inside phone frame) */
+.in-app-chatbot-fab {
+  position: absolute;
+  bottom: 90px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35 0%, #E8632A 100%);
+  color: #FFFFFF;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 6px 18px rgba(232, 99, 42, 0.45);
+  cursor: pointer;
+  z-index: 998;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.in-app-chatbot-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(232, 99, 42, 0.6);
+}
+.in-app-chatbot-fab:active {
+  transform: scale(0.94);
+}
+.in-app-chatbot-fab .fab-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #10B981;
+  color: white;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 6px;
+  border: 1.5px solid white;
+}
+/* Auto-hide FAB when any modal, drawer or active chatbot is open */
+.modal-overlay.open ~ .in-app-chatbot-fab,
+.bottom-sheet-overlay.open ~ .in-app-chatbot-fab,
+body:has(.modal-overlay.open) .in-app-chatbot-fab,
+body:has(.in-app-drawer.open) .in-app-chatbot-fab,
+body:has(.in-app-chat-window.active) .in-app-chatbot-fab,
+.in-app-chat-window.active ~ .in-app-chatbot-fab {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.5) !important;
+}
+.in-app-chat-window .msg-bot {
+  line-height: 1.45;
+  word-break: break-word;
+}
+.in-app-chat-window .msg-bot strong {
+  color: #1E2024;
+  font-weight: 700;
+}
+.in-app-chat-window .bot-bullet {
+  padding-left: 4px;
+  margin: 3px 0;
+  display: block;
 }
 
 /* Home Indicator Bar */
@@ -3149,3 +3374,314 @@ body.phone-mockup-body {
   color: var(--text-muted);
   pointer-events: none;
 }
+
+/* ==========================================================================
+   Desktop Studio Right Panel: Demo Webhook & AI Phân Loại
+   (Placed outside the phone frame, in the dark desktop workspace area)
+   ========================================================================== */
+.desktop-demo-panel {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 320px;
+  max-width: calc((100vw - 440px) / 2);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  z-index: 9999;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.desktop-demo-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.desktop-demo-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.ddp-card {
+  background: rgba(18, 22, 31, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+  color: #FFFFFF;
+}
+
+.ddp-glow-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366F1, #E8632A, #FF8A50);
+}
+
+.ddp-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ddp-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.ddp-title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.ddp-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.2px;
+  line-height: 1.3;
+}
+
+.ddp-subtitle {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.ddp-minimize-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ddp-minimize-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+}
+
+.ddp-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ddp-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.ddp-btn-chime {
+  background: rgba(255, 255, 255, 0.95);
+  color: #E8632A;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.ddp-btn-chime:hover {
+  background: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(232, 99, 42, 0.25);
+}
+
+.ddp-btn-sim {
+  background: linear-gradient(135deg, #E8632A, #FF7A3D);
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(232, 99, 42, 0.35);
+}
+.ddp-btn-sim:hover {
+  background: linear-gradient(135deg, #FF7A3D, #E8632A);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(232, 99, 42, 0.45);
+}
+
+/* Quick Scenarios Section */
+.ddp-quick-section {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+}
+
+.ddp-quick-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ddp-presets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ddp-preset-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.ddp-preset-chip:hover {
+  background: rgba(232, 99, 42, 0.16);
+  border-color: rgba(232, 99, 42, 0.4);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+.ddp-chip-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.ddp-chip-meta {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+/* Live Event Box */
+.ddp-last-event {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 10.5px;
+  color: #6EE7B7;
+  line-height: 1.4;
+  margin-top: 8px;
+  display: none;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Footer Hint */
+.ddp-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ddp-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+  display: inline-block;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Toggle Button for Mobile / Small Screens */
+.desktop-demo-toggle-btn {
+  display: none;
+  position: absolute;
+  right: 14px;
+  bottom: 24px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #6366F1, #E8632A);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive Handling */
+@media (max-width: 1080px) {
+  .desktop-demo-panel {
+    transform: translateX(120%);
+    opacity: 0;
+    pointer-events: none;
+    right: 14px;
+    bottom: 70px;
+    top: auto;
+    width: 290px;
+  }
+  .desktop-demo-panel.active {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .desktop-demo-toggle-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-demo-panel {
+    display: none !important;
+  }
+  .desktop-demo-toggle-btn {
+    display: none !important;
+  }
+}
+

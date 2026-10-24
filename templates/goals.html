@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Mục tiêu{% endblock %}
+{% block title %}Mục tiêu tài chính{% endblock %}
 
 {% block body %}
+{% set active_page = 'goals' %}
 <div class="app-wrapper">
   <div class="blob blob-orange" style="opacity:0.10;"></div>
   <div class="blob blob-gold" style="opacity:0.08;"></div>
@@ -14,65 +15,89 @@
   </div>
 
   <div class="top-bar">
-    <a href="{{ url_for('dashboard') }}" class="top-bar-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="{{ url_for('dashboard') }}" class="top-bar-back" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
     <div class="top-bar-title">Mục tiêu tài chính</div>
     <button class="top-bar-action" id="btn-add-goal" title="Thêm mục tiêu">
-      <i class="fa-solid fa-plus"></i>
+      <i class="fa-solid fa-plus text-accent"></i>
     </button>
   </div>
 
   <div class="page-content">
 
     <!-- Overview banner -->
-    <div class="balance-card" style="margin-bottom:20px;">
+    <div class="balance-card" style="margin-bottom:16px;">
       <div class="balance-label">Tổng tiết kiệm đang tích lũy</div>
       <div class="balance-amount">
         {% set total_current = goals | sum(attribute='current') %}
         {{ "{:,.0f}".format(total_current) }}<span>VNĐ</span>
       </div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.55);margin-top:8px;position:relative;z-index:1;">
-        🎯 {{ goals | length }} mục tiêu đang theo dõi
+      <div style="font-size:12.5px;color:rgba(255,255,255,0.75);margin-top:8px;position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;">
+        <span>🎯 {{ goals | length }} mục tiêu đang thực hiện</span>
+        <button class="btn-ghost" onclick="openAddGoalModal()" style="color:#FFF;background:rgba(255,255,255,0.18);border-radius:14px;padding:4px 10px;font-size:11px;">
+          <i class="fa-solid fa-plus"></i> Tạo mới
+        </button>
       </div>
     </div>
 
     <!-- Goals list -->
-    {% for g in goals %}
-    {% set pct = ((g.current / g.target) * 100) | round(1) %}
-    <div class="goal-progress-card">
-      <div class="gpc-header">
-        <div class="gpc-icon" style="background:{{ g.color }}22; color:{{ g.color }}; font-size:22px;">
-          <i class="fa-solid fa-{{ g.icon }}"></i>
+    <div class="goals-list" style="display:flex;flex-direction:column;gap:12px;">
+      {% for g in goals %}
+      {% set target_amt = g.target if g.target > 0 else 1 %}
+      {% set pct = [((g.current / target_amt) * 100) | round(1), 100.0] | min %}
+      <div class="goal-progress-card" id="goal-card-{{ g.id }}">
+        <div class="gpc-header">
+          <div class="gpc-icon" data-color="{{ g.color }}" data-bg="{{ g.color }}22" style="font-size:20px;">
+            <i class="fa-solid fa-{{ g.icon }}"></i>
+          </div>
+          <div class="gpc-info">
+            <div class="gpc-name">{{ g.name }}</div>
+            <div class="gpc-meta">Hạn: {{ g.deadline or 'Tự do' }} &bull; Mục tiêu: {{ "{:,.0f}".format(g.target) }}đ</div>
+          </div>
+          <div class="gpc-percent" data-color="{{ g.color }}">{{ pct }}%</div>
         </div>
-        <div class="gpc-info">
-          <div class="gpc-name">{{ g.name }}</div>
-          <div class="gpc-meta">Mục tiêu: {{ "{:,.0f}".format(g.target) }}đ</div>
-        </div>
-        <div class="gpc-percent" style="color:{{ g.color }};">{{ pct }}%</div>
-      </div>
-      <div class="gpc-progress">
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:{{ pct }}%;background:{{ g.color }};"></div>
-        </div>
-      </div>
-      <div class="gpc-amounts">
-        <span>Đã có: <strong>{{ "{:,.0f}".format(g.current) }}đ</strong></span>
-        <span>Còn thiếu: <strong style="color:var(--text-secondary);">{{ "{:,.0f}".format(g.target - g.current) }}đ</strong></span>
-      </div>
-    </div>
-    {% endfor %}
 
-    <!-- Add goal tip -->
-    <div style="background:var(--accent-light);border:1px dashed var(--border-accent);border-radius:16px;padding:18px;text-align:center;margin-top:8px;cursor:pointer;" id="add-goal-card">
-      <div style="font-size:28px;margin-bottom:8px;">➕</div>
-      <div style="font-size:14px;font-weight:700;color:var(--accent);">Thêm mục tiêu mới</div>
-      <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Mua nhà, du lịch, quỹ khẩn cấp...</div>
+        <div class="gpc-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" data-pct="{{ pct }}" data-color="{{ g.color }}"></div>
+          </div>
+        </div>
+
+        <div class="gpc-amounts" style="margin-bottom:8px;">
+          <span>Đã có: <strong style="color:var(--text-primary);">{{ "{:,.0f}".format(g.current) }}đ</strong></span>
+          <span>Còn thiếu: <strong style="color:var(--text-secondary);">{{ "{:,.0f}".format([g.target - g.current, 0] | max) }}đ</strong></span>
+        </div>
+
+        {% if g.ai_forecast %}
+        <div style="font-size:10.5px;color:var(--text-muted);background:rgba(0,0,0,0.03);padding:6px 10px;border-radius:8px;margin-bottom:8px;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);"></i> {{ g.ai_forecast }}
+        </div>
+        {% endif %}
+
+        <!-- Goal Actions -->
+        <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border-light);padding-top:8px;">
+          <button class="btn-ghost" style="font-size:11px;padding:4px 10px;border-radius:10px;background:rgba(16,185,129,0.1);color:#10B981;border:1px solid rgba(16,185,129,0.25);" onclick="openDepositGoalModal('{{ g.id }}', '{{ g.name }}')">
+            <i class="fa-solid fa-plus"></i> Nạp thêm
+          </button>
+          <button class="btn-ghost" style="font-size:11px;padding:4px 8px;border-radius:10px;background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);" onclick="deleteGoal('{{ g.id }}', '{{ g.name }}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Add goal tip card -->
+    <div style="background:var(--accent-light);border:1px dashed var(--border-accent);border-radius:16px;padding:16px;text-align:center;margin-top:12px;cursor:pointer;" id="add-goal-card" onclick="openAddGoalModal()">
+      <div style="font-size:24px;margin-bottom:4px;">➕</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--accent);">Thêm mục tiêu tài chính mới</div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">Mua nhà, đổi xe, tích lũy quỹ khẩn cấp...</div>
     </div>
 
     <!-- Tips section -->
     <div class="chart-card" style="margin-top:16px;">
       <div class="chart-card-title">
         <i class="fa-solid fa-lightbulb" style="color:var(--gold);"></i>
-        Mẹo tiết kiệm từ AI
+        Mẹo tích lũy thông minh từ AI FinBot
       </div>
       <div class="rec-item" style="margin-top:12px;">
         <i class="fa-solid fa-circle-check"></i>
@@ -80,71 +105,259 @@
       </div>
       <div class="rec-item">
         <i class="fa-solid fa-circle-check"></i>
-        <div>Hủy các gói subscription ít dùng (Netflix, iCloud) để tiết kiệm thêm <strong>{{ "{:,.0f}".format(609000) }}đ/tháng</strong>.</div>
+        <div>Bật tính năng <strong>Round-up</strong> để làm tròn mỗi hóa đơn cà phê/mua sắm và tự động gửi tiền lẻ vào mục tiêu.</div>
       </div>
       <div class="rec-item">
         <i class="fa-solid fa-circle-check"></i>
-        <div>Giảm chi tiêu đêm xuống còn 200,000đ/tháng — giúp tiết kiệm thêm <strong>~1,800,000đ</strong> mỗi tháng.</div>
+        <div>Giảm chi tiêu đêm xuống còn 200,000đ/tháng — giúp bạn rút ngắn thời gian đạt mục tiêu thêm <strong>2 tháng</strong>.</div>
       </div>
     </div>
   </div>
 
   {% include "nav_bottom.html" %}
 
-  <!-- Add Goal Modal -->
+  <!-- ===================================================================
+       MODAL 1: THÊM MỤC TIÊU
+       =================================================================== -->
   <div class="modal-overlay" id="modal-add-goal">
     <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-bullseye" style="color:var(--accent);"></i> Thêm mục tiêu</div>
-        <button class="modal-close" onclick="document.getElementById('modal-add-goal').classList.remove('open')">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div class="modal-title"><i class="fa-solid fa-bullseye text-accent"></i> Thêm mục tiêu tài chính</div>
+        <button class="modal-close" onclick="closeAddGoalModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Tên mục tiêu</label>
-          <input type="text" class="form-input" placeholder="Ví dụ: Mua xe máy">
+        <div class="form-group mb-12">
+          <label class="form-label">Tên mục tiêu <span class="required">*</span></label>
+          <input type="text" class="form-input" id="new-goal-name" placeholder="Ví dụ: Mua iPhone 16 Pro, Quỹ du lịch...">
         </div>
-        <div class="form-group">
-          <label class="form-label">Số tiền mục tiêu (VNĐ)</label>
-          <input type="number" class="form-input" placeholder="30,000,000">
+        <div class="form-group mb-12">
+          <label class="form-label">Số tiền mục tiêu (VNĐ) <span class="required">*</span></label>
+          <input type="number" class="form-input" id="new-goal-target" placeholder="30000000">
         </div>
-        <div class="form-group">
-          <label class="form-label">Thời hạn</label>
-          <input type="month" class="form-input">
+        <div class="form-group mb-12">
+          <label class="form-label">Số tiền đã có sẵn (VNĐ)</label>
+          <input type="number" class="form-input" id="new-goal-current" placeholder="0" value="0">
+        </div>
+        <div class="form-group mb-12">
+          <label class="form-label">Thời hạn hoàn thành</label>
+          <input type="month" class="form-input" id="new-goal-deadline" value="2026-12">
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Biểu tượng &amp; Màu sắc</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="form-input" id="new-goal-icon" style="flex:1;">
+              <option value="bullseye">🎯 Mục tiêu chung</option>
+              <option value="shield-halved">🛡️ Quỹ khẩn cấp</option>
+              <option value="piggy-bank">🐷 Tiết kiệm tích lũy</option>
+              <option value="plane">✈️ Du lịch / Nghỉ dưỡng</option>
+              <option value="laptop">💻 Công nghệ / Đồ gia dụng</option>
+              <option value="car">🚗 Mua xe</option>
+              <option value="house">🏠 Mua nhà</option>
+              <option value="graduation-cap">🎓 Học tập &amp; Phát triển</option>
+            </select>
+            <input type="color" id="new-goal-color" value="#E8632A" style="width:42px;height:40px;border-radius:10px;border:1px solid var(--border);cursor:pointer;padding:2px;">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" style="width:auto;padding:12px 20px;" onclick="document.getElementById('modal-add-goal').classList.remove('open')">Hủy</button>
-        <button class="btn-primary" style="width:auto;padding:12px 24px;" onclick="showToast('Tính năng sắp ra mắt! 🚀','info');document.getElementById('modal-add-goal').classList.remove('open');">
-          <i class="fa-solid fa-plus"></i> Thêm
+        <button type="button" class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeAddGoalModal()">Hủy</button>
+        <button type="button" class="btn-primary" style="width:auto;padding:10px 22px;" id="btn-submit-goal" onclick="submitCreateGoal()">
+          <i class="fa-solid fa-plus"></i> Tạo mục tiêu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       MODAL 2: NẠP TIỀN VÀO MỤC TIÊU
+       =================================================================== -->
+  <div class="modal-overlay" id="modal-deposit-goal">
+    <div class="modal-box">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-piggy-bank text-accent"></i> Nạp tiền vào hũ</div>
+        <button class="modal-close" onclick="closeDepositGoalModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px;">
+          Mục tiêu: <strong id="deposit-goal-name" style="color:var(--text-primary);">...</strong>
+        </div>
+        <div class="form-group mb-10">
+          <label class="form-label">Số tiền nạp (VNĐ) <span class="required">*</span></label>
+          <input type="number" class="form-input" id="deposit-goal-amount" placeholder="500000" style="font-size:16px;font-weight:700;">
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+          <button type="button" class="btn-ghost" style="font-size:11px;padding:6px;border-radius:8px;background:#F1F5F9;border:1px solid #CBD5E1;" onclick="setDepositAmount(100000)">+100k</button>
+          <button type="button" class="btn-ghost" style="font-size:11px;padding:6px;border-radius:8px;background:#F1F5F9;border:1px solid #CBD5E1;" onclick="setDepositAmount(500000)">+500k</button>
+          <button type="button" class="btn-ghost" style="font-size:11px;padding:6px;border-radius:8px;background:#F1F5F9;border:1px solid #CBD5E1;" onclick="setDepositAmount(1000000)">+1M</button>
+          <button type="button" class="btn-ghost" style="font-size:11px;padding:6px;border-radius:8px;background:#F1F5F9;border:1px solid #CBD5E1;" onclick="setDepositAmount(2000000)">+2M</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeDepositGoalModal()">Hủy</button>
+        <button type="button" class="btn-primary" style="width:auto;padding:10px 22px;" id="btn-submit-deposit" onclick="submitDepositGoal()">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i> Nạp ngay
         </button>
       </div>
     </div>
   </div>
 
   <style>
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:all 0.3s ease;}
-    .modal-overlay.open{opacity:1;pointer-events:all;}
-    .modal-box{background:var(--bg-surface);border:1px solid var(--border);border-radius:28px 28px 0 0;width:100%;max-width:430px;overflow:hidden;transform:translateY(40px);transition:transform 0.3s ease;}
-    .modal-overlay.open .modal-box{transform:translateY(0);}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0;}
-    .modal-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .modal-close{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;}
-    .modal-body{padding:16px 20px;}
-    .modal-footer{padding:16px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);}
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;z-index:2000;opacity:0;pointer-events:none;transition:all 0.3s ease; }
+    .modal-overlay.open { opacity:1;pointer-events:all; }
+    .modal-box { background:var(--bg-surface);border:1px solid var(--border);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:85vh;overflow:hidden;transform:translateY(40px);transition:transform 0.3s ease;display:flex;flex-direction:column; }
+    .modal-overlay.open .modal-box { transform:translateY(0); }
+    .modal-header { display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0; }
+    .modal-title { font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px; }
+    .modal-close { background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px; }
+    .modal-body { padding:14px 18px;overflow-y:auto;flex:1; }
+    .modal-footer { padding:14px 18px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border); }
+    .goal-progress-card { background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm); }
   </style>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-document.getElementById('btn-add-goal').addEventListener('click', () => {
+let currentDepositGoalId = null;
+
+function openAddGoalModal() {
   document.getElementById('modal-add-goal').classList.add('open');
+}
+function closeAddGoalModal() {
+  document.getElementById('modal-add-goal').classList.remove('open');
+}
+
+function openDepositGoalModal(goalId, goalName) {
+  currentDepositGoalId = goalId;
+  document.getElementById('deposit-goal-name').textContent = goalName;
+  document.getElementById('deposit-goal-amount').value = '';
+  document.getElementById('modal-deposit-goal').classList.add('open');
+}
+function closeDepositGoalModal() {
+  document.getElementById('modal-deposit-goal').classList.remove('open');
+}
+
+function setDepositAmount(amt) {
+  document.getElementById('deposit-goal-amount').value = amt;
+}
+
+async function submitCreateGoal() {
+  const name = document.getElementById('new-goal-name').value.trim();
+  const target = parseFloat(document.getElementById('new-goal-target').value) || 0;
+  const current = parseFloat(document.getElementById('new-goal-current').value) || 0;
+  const deadline = document.getElementById('new-goal-deadline').value;
+  const icon = document.getElementById('new-goal-icon').value;
+  const color = document.getElementById('new-goal-color').value;
+
+  if (!name || target <= 0) {
+    if (window.showToast) window.showToast('Vui lòng nhập tên mục tiêu và số tiền lớn hơn 0!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-goal');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu...'; }
+
+  try {
+    const res = await fetch('/api/goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        target: target,
+        current: current,
+        deadline: deadline,
+        icon: icon,
+        color: color
+      })
+    });
+    const d = await res.json();
+    if (d.success) {
+      if (window.showToast) window.showToast(`Đã tạo mục tiêu "${name}" thành công!`, 'success');
+      closeAddGoalModal();
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      if (window.showToast) window.showToast(d.message || 'Lỗi tạo mục tiêu!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tạo mục tiêu'; }
+  }
+}
+
+async function submitDepositGoal() {
+  const amt = parseFloat(document.getElementById('deposit-goal-amount').value) || 0;
+  if (!amt || amt <= 0) {
+    if (window.showToast) window.showToast('Số tiền nạp phải lớn hơn 0!', 'error');
+    return;
+  }
+  if (!currentDepositGoalId) return;
+
+  const btn = document.getElementById('btn-submit-deposit');
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang nạp...'; }
+
+  try {
+    const res = await fetch(`/api/goals/${currentDepositGoalId}/deposit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amt })
+    });
+    const d = await res.json();
+    if (d.success) {
+      if (window.showToast) window.showToast(d.message || 'Nạp tiền thành công!', 'success');
+      closeDepositGoalModal();
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      if (window.showToast) window.showToast(d.message || 'Lỗi nạp tiền!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket"></i> Nạp ngay'; }
+  }
+}
+
+async function deleteGoal(goalId, goalName) {
+  if (!confirm(`Bạn có chắc muốn xóa mục tiêu "${goalName}"?`)) return;
+
+  try {
+    const res = await fetch(`/api/goals/${goalId}`, { method: 'DELETE' });
+    const d = await res.json();
+    if (d.success) {
+      if (window.showToast) window.showToast(`Đã xóa mục tiêu "${goalName}"!`, 'info');
+      const card = document.getElementById(`goal-card-${goalId}`);
+      if (card) card.remove();
+      setTimeout(() => window.location.reload(), 600);
+    } else {
+      if (window.showToast) window.showToast(d.message || 'Lỗi xóa mục tiêu!', 'error');
+    }
+  } catch(e) {
+    if (window.showToast) window.showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
 });
-document.getElementById('add-goal-card').addEventListener('click', () => {
-  document.getElementById('modal-add-goal').classList.add('open');
-});
+
+function applyDynamicGoalColors() {
+  document.querySelectorAll('.gpc-icon[data-color]').forEach(el => {
+    el.style.color = el.dataset.color;
+    el.style.backgroundColor = el.dataset.bg;
+  });
+  document.querySelectorAll('.gpc-percent[data-color]').forEach(el => {
+    el.style.color = el.dataset.color;
+  });
+  document.querySelectorAll('.progress-fill[data-pct]').forEach(el => {
+    el.style.width = el.dataset.pct + '%';
+    el.style.backgroundColor = el.dataset.color;
+  });
+}
+document.addEventListener('DOMContentLoaded', applyDynamicGoalColors);
+document.getElementById('btn-add-goal')?.addEventListener('click', openAddGoalModal);
 </script>
 {% endblock %}
