@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLab - QR Code Truy Cập Điện Thoại</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .qr-box {
+            background: #f8f9fa;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qr-box img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: #999;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+            font-size: 14px;
+        }
+        
+        .manual-link {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .manual-link p {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .manual-link a {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .manual-link a:hover {
+            background: #764ba2;
+        }
+        
+        .url-display {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            word-break: break-all;
+            user-select: all;
+        }
+        
+        .instructions {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+            color: #2e7d32;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .copy-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .copy-button:hover {
+            background: #764ba2;
+        }
+        
+        .copy-button.copied {
+            background: #4caf50;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .qr-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📱</div>
+        
+        <h1>🚀 FinLab Mobile Access</h1>
+        <p class="subtitle">Scan QR code để truy cập từ điện thoại</p>
+        
+        <!-- QR Code -->
+        <div class="qr-box">
+            <img src="/qr" alt="QR Code">
+        </div>
+        
+        <!-- Divider -->
+        <div class="divider">
+            <span>HOẶC</span>
+        </div>
+        
+        <!-- Manual Link -->
+        <div class="manual-link">
+            <p>📋 Nhập đường link thủ công:</p>
+            <a href="{{ mobile_url }}" target="_blank">Mở trên điện thoại</a>
+            <div class="url-display">{{ mobile_url }}</div>
+            <button class="copy-button" onclick="copyToClipboard('{{ mobile_url }}')">📋 Copy URL</button>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3>📲 Cách sử dụng:</h3>
+            <ol>
+                <li><strong>Trên điện thoại:</strong> Mở ứng dụng Camera hoặc QR Scanner</li>
+                <li><strong>Scan QR code</strong> hiển thị ở trên</li>
+                <li><strong>Tự động mở</strong> FinLab trên trình duyệt</li>
+                <li><strong>Đăng nhập</strong> với tài khoản của bạn</li>
+            </ol>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>ℹ️ Lưu ý:</strong>
+            Đảm bảo máy tính và điện thoại <strong>đang cùng mạng WiFi</strong> để kết nối thành công.
+        </div>
+        
+        <!-- Server Info -->
+        <div class="url-display" style="margin-top: 20px; background: #fff3e0; border-color: #ffb74d; color: #e65100; font-size: 12px;">
+            <strong>🖥️ Thông tin Server:</strong><br>
+            IP: <strong>{{ ip_address }}</strong><br>
+            Port: <strong>{{ port }}</strong><br>
+            URL: <strong>{{ mobile_url }}</strong>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Đã copy!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                alert('Không thể copy, vui lòng thử lại');
+            });
+        }
+    </script>
+</body>
+</html>
