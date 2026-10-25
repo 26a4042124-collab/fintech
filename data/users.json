@@ -92,8 +92,8 @@
     "role": "user",
     "status": "active",
     "created_at": "2026-01-15",
-    "occupation": "Kỹ sư AI & Fintech",
-    "monthly_income": 22000000.0,
+    "occupation": "Nhân viên Marketing",
+    "monthly_income": 18000000,
     "connected_banks": [
       "Vietcombank",
       "Techcombank",
@@ -104,8 +104,8 @@
       "emergency"
     ],
     "budget_ratio": {
-      "needs": 55,
-      "wants": 25,
+      "needs": 50,
+      "wants": 30,
       "savings": 20
     },
     "savings_goals": [
@@ -144,7 +144,7 @@
     "round_up": {
       "enabled": true,
       "step": 10000,
-      "accumulated_total": 142000,
+      "accumulated_total": 31000,
       "target_goal_id": "goal_1"
     },
     "category_limits": {
@@ -170,13 +170,13 @@
     },
     "consents": [
       {
-        "consent_id": "CONSENT_CTG_1792839741",
-        "bank_id": "CTG",
-        "bank_name": "VietinBank",
-        "account_no": "10982736451",
+        "consent_id": "CONSENT_VCB_01",
+        "bank_id": "VCB",
+        "bank_name": "Vietcombank",
+        "account_no": "1028475938",
         "status": "ACTIVE",
-        "granted_at": "2026-10-24",
-        "expires_at": "2027-01-22",
+        "granted_at": "2026-10-01",
+        "expires_at": "2026-12-30",
         "scopes": {
           "read_balance": true,
           "read_transactions": true,
@@ -186,49 +186,36 @@
         "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
       },
       {
-        "consent_id": "CONSENT_MBB_1792839313",
-        "bank_id": "MBB",
-        "bank_name": "MB Bank",
-        "account_no": "0987654321",
-        "status": "ACTIVE",
-        "granted_at": "2026-10-24",
-        "expires_at": "2027-01-22",
-        "scopes": [
-          "read_balance",
-          "read_transactions",
-          "analyze_ai"
-        ],
-        "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
-        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
-        "valid_until": "2027-01-22"
-      },
-      {
-        "bank_id": "VCB",
-        "bank_name": "Vietcombank",
-        "account_no": "1028475938",
-        "status": "ACTIVE",
-        "granted_at": "2026-10-23",
-        "expires_at": "2026-12-31",
-        "scopes": {
-          "read_balance": true,
-          "read_transactions": true,
-          "analyze_ai": true
-        },
-        "consent_id": "CONSENT_VCB_20260901_01"
-      },
-      {
+        "consent_id": "CONSENT_TCB_01",
         "bank_id": "TCB",
         "bank_name": "Techcombank",
         "account_no": "19038475920",
         "status": "ACTIVE",
-        "granted_at": "2026-09-15",
-        "expires_at": "2026-12-15",
+        "granted_at": "2026-10-01",
+        "expires_at": "2026-12-30",
         "scopes": {
           "read_balance": true,
           "read_transactions": true,
           "analyze_ai": true
         },
-        "consent_id": "CONSENT_TCB_20260915_02"
+        "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
+        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
+      },
+      {
+        "consent_id": "CONSENT_MBB_01",
+        "bank_id": "MBB",
+        "bank_name": "MB Bank",
+        "account_no": "0987654321",
+        "status": "ACTIVE",
+        "granted_at": "2026-10-01",
+        "expires_at": "2026-12-30",
+        "scopes": {
+          "read_balance": true,
+          "read_transactions": true,
+          "analyze_ai": true
+        },
+        "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
+        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
       }
     ],
     "wallets": [
@@ -239,16 +226,16 @@
         "provider": "Vietcombank",
         "bank_id": "VCB",
         "account_no": "•••• 5938",
-        "initialBalance": 18500000,
-        "currentBalance": 18150000.0,
+        "initialBalance": 11500000,
+        "currentBalance": 2180000,
         "managementMode": "connect",
         "connectionStatus": "connected",
-        "consentId": "CONSENT_VCB_20260901_01",
-        "note": "Liên kết Open Banking (Open API v2.1 (Thông tư 64/2024/TT-NHNN))",
+        "consentId": "CONSENT_VCB_01",
+        "note": "Liên kết Open Banking (Open API v2.1 - Thông tư 64/2024/TT-NHNN)",
         "color": "linear-gradient(135deg, #0A4D2E 0%, #006837 60%, #15803D 100%)",
-        "createdAt": "2026-10-20T08:00:00",
-        "updatedAt": "2026-10-24T18:28:20",
-        "lastSyncedAt": "2026-10-24 18:28"
+        "createdAt": "2026-10-01T08:00:00",
+        "updatedAt": "2026-10-26T08:00:00",
+        "lastSyncedAt": "2026-10-26 08:00"
       },
       {
         "id": "W_OB_TCB_19038475920",
@@ -257,16 +244,16 @@
         "provider": "Techcombank",
         "bank_id": "TCB",
         "account_no": "•••• 5920",
-        "initialBalance": 14200000,
-        "currentBalance": 14064000.0,
+        "initialBalance": 5000000,
+        "currentBalance": 1766000,
         "managementMode": "connect",
         "connectionStatus": "connected",
-        "consentId": "CONSENT_TCB_20260915_02",
-        "note": "Liên kết Open Banking (Open API v2.1 (Thông tư 64/2024/TT-NHNN))",
+        "consentId": "CONSENT_TCB_01",
+        "note": "Liên kết Open Banking (Open API v2.1 - Thông tư 64/2024/TT-NHNN)",
         "color": "linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 50%, #E8632A 100%)",
-        "createdAt": "2026-10-20T08:00:00",
-        "updatedAt": "2026-10-24T18:00:00",
-        "lastSyncedAt": "2026-10-24 18:27"
+        "createdAt": "2026-10-01T08:00:00",
+        "updatedAt": "2026-10-26T08:00:00",
+        "lastSyncedAt": "2026-10-26 08:00"
       },
       {
         "id": "W_OB_MBB_0987654321",
@@ -275,148 +262,19 @@
         "provider": "MB Bank",
         "bank_id": "MBB",
         "account_no": "•••• 4321",
-        "initialBalance": 7500000,
-        "currentBalance": 7320000.0,
+        "initialBalance": 1500000,
+        "currentBalance": 505000,
         "managementMode": "connect",
         "connectionStatus": "connected",
-        "consentId": "CONSENT_MBB_1792839313",
-        "note": "Liên kết Open Banking (Open API v2.1 (Thông tư 64/2024/TT-NHNN))",
+        "consentId": "CONSENT_MBB_01",
+        "note": "Liên kết Open Banking (Open API v2.1 - Thông tư 64/2024/TT-NHNN)",
         "color": "linear-gradient(135deg, #0B1D4F 0%, #002060 60%, #1D4ED8 100%)",
-        "createdAt": "2026-10-24T17:55:13",
-        "updatedAt": "2026-10-24T18:25:39",
-        "lastSyncedAt": "2026-10-25 00:17"
-      },
-      {
-        "id": "W_CASH_001",
-        "name": "Ví Tiền mặt",
-        "type": "cash",
-        "provider": "Tiền mặt",
-        "account_no": "Cá nhân",
-        "initialBalance": 5000000,
-        "currentBalance": 5000000,
-        "managementMode": "manual",
-        "connectionStatus": "manual",
-        "note": "Chi tiêu tiền lẻ hàng ngày",
-        "color": "linear-gradient(135deg, #2D3748 0%, #4A5568 100%)",
-        "createdAt": "2026-10-01T00:00:00",
-        "updatedAt": "2026-10-24T18:00:00",
-        "lastSyncedAt": "2026-10-24 18:00"
+        "createdAt": "2026-10-01T08:00:00",
+        "updatedAt": "2026-10-26T08:00:00",
+        "lastSyncedAt": "2026-10-26 08:00"
       }
     ],
-    "custom_transactions": [
-      {
-        "id": "TXN_OB_1792862254679",
-        "timestamp": "2026-10-25 00:17:34",
-        "bank": "MB Bank",
-        "account_number": "••• .254",
-        "type": "OUTFLOW",
-        "amount": 45000.0,
-        "description": "Highlands Coffee",
-        "reference_code": "MBB.20261025001734.254",
-        "ai_category": "Ăn uống & Cà phê ngoài",
-        "ai_bucket": "WANTS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792862094642",
-        "timestamp": "2026-10-25 00:14:54",
-        "bank": "MB Bank",
-        "account_number": "••• 4.94",
-        "type": "OUTFLOW",
-        "amount": 45000.0,
-        "description": "Highlands Coffee",
-        "reference_code": "MBB.20261025001454.94",
-        "ai_category": "Ăn uống & Cà phê ngoài",
-        "ai_bucket": "WANTS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792841311087",
-        "timestamp": "2026-10-24 18:28:31",
-        "bank": "MB Bank",
-        "account_number": "••• .311",
-        "type": "OUTFLOW",
-        "amount": 45000.0,
-        "description": "Highlands Coffee",
-        "reference_code": "MBB.20261024182831.311",
-        "ai_category": "Ăn uống & Cà phê ngoài",
-        "ai_bucket": "WANTS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792841271249",
-        "timestamp": "2026-10-24 18:27:51",
-        "bank": "Techcombank",
-        "account_number": "••• .271",
-        "type": "OUTFLOW",
-        "amount": 68000.0,
-        "description": "Cơm trưa GrabFood",
-        "reference_code": "TCB.20261024182751.271",
-        "ai_category": "Đi lại & Xăng xe",
-        "ai_bucket": "NEEDS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792841268159",
-        "timestamp": "2026-10-24 18:27:48",
-        "bank": "Techcombank",
-        "account_number": "••• .268",
-        "type": "OUTFLOW",
-        "amount": 68000.0,
-        "description": "Cơm trưa GrabFood",
-        "reference_code": "TCB.20261024182748.268",
-        "ai_category": "Đi lại & Xăng xe",
-        "ai_bucket": "NEEDS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792841139185",
-        "timestamp": "2026-10-24 18:25:39",
-        "bank": "Vietcombank",
-        "account_number": "••• .139",
-        "type": "OUTFLOW",
-        "amount": 350000.0,
-        "description": "Shopee đơn đêm 23:45",
-        "reference_code": "MBB.20261024182539.139",
-        "ai_category": "Mua sắm cá nhân",
-        "ai_bucket": "WANTS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      },
-      {
-        "id": "TXN_OB_1792841139099",
-        "timestamp": "2026-10-24 18:25:39",
-        "bank": "MB Bank",
-        "account_number": "••• .139",
-        "type": "OUTFLOW",
-        "amount": 45000.0,
-        "description": "Highlands Coffee",
-        "reference_code": "MBB.20261024182539.139",
-        "ai_category": "Ăn uống & Cà phê ngoài",
-        "ai_bucket": "WANTS",
-        "ai_confidence": 0.95,
-        "is_night_spending": false,
-        "is_subscription": false,
-        "source": "OPEN_BANKING_WEBHOOK"
-      }
-    ]
+    "custom_transactions": []
   },
   {
     "id": "usr_002",

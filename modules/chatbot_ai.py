@@ -212,13 +212,19 @@ def generate_chatbot_response(user_message, health_data):
     elif any(k in msg for k in ["tiết kiệm", "để dành", "làm sao", "lời khuyên", "kế hoạch"]):
         target = income * (bench_savings / 100.0)
         gap = health_data.get("savings_gap", 2700000)
+        sub_total = health_data.get("subscription_leaks", {}).get("total_amount", 609000)
+        night_total = health_data.get("impulse_night_spending", {}).get("total_amount", 2270000)
+        round_total = health_data.get("round_up", {}).get("monthly_round_up_total", 31000)
+        sub_cut = min(sub_total, 550000) if sub_total >= 550000 else sub_total
+        night_cap = 2000000 if night_total >= 2000000 else night_total
+        night_cut = min(night_cap, max(0, gap - sub_cut))
+        rem_cut = max(0, gap - sub_cut - night_cut)
         return (
             f"Để đạt đúng tỷ lệ tiết kiệm mục tiêu {bench_savings}% thu nhập (**{target:,.0f} VNĐ/tháng**), bạn cần bù đắp khoản thiếu hụt **{gap:,.0f} VNĐ** bằng phác đồ sau:\n"
-            f"1. Hủy 2 gói dịch vụ số không dùng: tiết kiệm **+350.000 VNĐ**.\n"
-            f"2. Cắt giảm 50% đơn mua sắm đêm sau 22h: tiết kiệm **+1.850.000 VNĐ**.\n"
-            f"3. Bật tính năng Heo đất làm tròn: gom thêm **~150.000 VNĐ** tiền lẻ.\n"
-            f"4. Giảm bớt 2 bữa ăn hàng ngoài: tiết kiệm **+500.000 VNĐ**.\n"
-            f"👉 Tổng cắt giảm tối ưu: **{gap:,.0f} VNĐ** ➔ Đạt chuẩn {bench_savings}% tiết kiệm ngay tháng sau!"
+            f"1. Rà soát & hủy các gói dịch vụ số ít dùng (trong tổng {sub_total:,.0f}đ): tiết kiệm **+{sub_cut:,.0f} VNĐ**.\n"
+            f"2. Cắt giảm mua sắm bốc đồng sau 22h (trong tổng {night_total:,.0f}đ): tiết kiệm **+{night_cut:,.0f} VNĐ**.\n"
+            f"3. Kết chuyển từ số dư khả dụng & Heo đất làm tròn ({round_total:,.0f}đ tiền lẻ): bổ sung **+{rem_cut:,.0f} VNĐ**.\n"
+            f"👉 Tổng bù đắp tối ưu: **{gap:,.0f} VNĐ** ➔ Đạt chuẩn {bench_savings}% tiết kiệm ngay tháng này!"
         )
 
     # 10. Câu hỏi về Ngân hàng liên kết / Open Banking
