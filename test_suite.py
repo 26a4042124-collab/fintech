@@ -40,12 +40,15 @@ class FinLabComprehensiveTestSuite(unittest.TestCase):
             self.assertEqual(r.status_code, 200, f'Route {route} failed with {r.status_code}')
 
     def test_04_budget_ratio_api(self):
-        """Test API to update budget ratio (50/30/20)"""
+        """Test API to update budget ratio (50/30/20) and restore baseline"""
         self.client.post('/login', data={'username': 'nguyen_van_a', 'password': 'password123'}, follow_redirects=True)
         res = self.client.post('/api/user/budget-ratio', json={'needs': 55, 'wants': 25, 'savings': 20})
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertTrue(data.get('success'))
+        # Khôi phục tỷ lệ chuẩn 50/30/20 cho kịch bản demo
+        res_restore = self.client.post('/api/user/budget-ratio', json={'needs': 50, 'wants': 30, 'savings': 20})
+        self.assertEqual(res_restore.status_code, 200)
 
     def test_05_consent_management_api(self):
         """Test Open Banking consent revocation and reactivation"""

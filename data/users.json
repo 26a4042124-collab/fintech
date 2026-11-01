@@ -32,7 +32,7 @@
         "target_amount": 50000000,
         "current_amount": 32000000,
         "deadline": "2026-12-31",
-        "icon": "fa-server",
+        "icon": "server",
         "color": "#6366f1",
         "category": "Hạ tầng"
       }
@@ -92,7 +92,7 @@
     "role": "user",
     "status": "active",
     "created_at": "2026-01-15",
-    "occupation": "Nhân viên Marketing",
+    "occupation": "Chuyên viên phân tích dữ liệu",
     "monthly_income": 18000000,
     "connected_banks": [
       "Vietcombank",
@@ -104,40 +104,49 @@
       "emergency"
     ],
     "budget_ratio": {
-      "needs": 55,
-      "wants": 25,
+      "needs": 50,
+      "wants": 30,
       "savings": 20
     },
     "savings_goals": [
       {
         "id": "goal_1",
         "name": "Quỹ khẩn cấp 3 tháng",
+        "target": 20000000,
         "target_amount": 20000000,
+        "current": 8500000,
         "current_amount": 8500000,
         "deadline": "2026-12-31",
-        "icon": "fa-shield-halved",
+        "icon": "shield-halved",
         "color": "#10b981",
-        "category": "Quỹ dự phòng"
+        "category": "Quỹ dự phòng",
+        "ai_forecast": "Tiến độ đạt 42.5% (8,500,000đ / 20,000,000đ). Nếu nâng tiết kiệm lên 3,600,000đ/tháng theo phác đồ AI, bạn sẽ hoàn thành sau ~3.2 tháng."
       },
       {
         "id": "goal_2",
         "name": "Mua Laptop AI & Đồ họa",
+        "target": 25000000,
         "target_amount": 25000000,
+        "current": 14000000,
         "current_amount": 14000000,
         "deadline": "2027-02-28",
-        "icon": "fa-laptop",
+        "icon": "laptop",
         "color": "#3b82f6",
-        "category": "Công nghệ"
+        "category": "Công nghệ",
+        "ai_forecast": "Tiến độ đạt 56.0% (14,000,000đ / 25,000,000đ). Cần tích lũy thêm 11,000,000đ để đạt mục tiêu đúng hạn."
       },
       {
         "id": "goal_3",
         "name": "Du lịch Đà Lạt Nghỉ dưỡng",
+        "target": 8000000,
         "target_amount": 8000000,
+        "current": 3200000,
         "current_amount": 3200000,
-        "deadline": "2026-11-20",
-        "icon": "fa-plane-departure",
+        "deadline": "2026-12-20",
+        "icon": "plane-departure",
         "color": "#f59e0b",
-        "category": "Du lịch"
+        "category": "Du lịch",
+        "ai_forecast": "Tiến độ đạt 40.0% (3,200,000đ / 8,000,000đ). Có thể tận dụng nguồn thu hồi rò rỉ chi tiêu đêm để hoàn thành sớm."
       }
     ],
     "round_up_enabled": true,
@@ -175,8 +184,8 @@
         "bank_name": "Vietcombank",
         "account_no": "1028475938",
         "status": "ACTIVE",
-        "granted_at": "2026-10-30",
-        "expires_at": "2027-01-28",
+        "granted_at": "2026-10-01",
+        "expires_at": "2026-12-30",
         "scopes": [
           "read_balance",
           "read_transactions",
@@ -184,7 +193,7 @@
         ],
         "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
         "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
-        "valid_until": "2027-01-28"
+        "valid_until": "2026-12-30"
       },
       {
         "consent_id": "CONSENT_TCB_01",
@@ -194,13 +203,14 @@
         "status": "ACTIVE",
         "granted_at": "2026-10-01",
         "expires_at": "2026-12-30",
-        "scopes": {
-          "read_balance": true,
-          "read_transactions": true,
-          "analyze_ai": true
-        },
+        "scopes": [
+          "read_balance",
+          "read_transactions",
+          "analyze_ai"
+        ],
         "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
-        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
+        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "valid_until": "2026-12-30"
       },
       {
         "consent_id": "CONSENT_MBB_01",
@@ -210,13 +220,14 @@
         "status": "ACTIVE",
         "granted_at": "2026-10-01",
         "expires_at": "2026-12-30",
-        "scopes": {
-          "read_balance": true,
-          "read_transactions": true,
-          "analyze_ai": true
-        },
+        "scopes": [
+          "read_balance",
+          "read_transactions",
+          "analyze_ai"
+        ],
         "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
-        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
+        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "valid_until": "2026-12-30"
       }
     ],
     "wallets": [
@@ -307,7 +318,7 @@
         "target_amount": 30000000,
         "current_amount": 10000000,
         "deadline": "2027-03-31",
-        "icon": "fa-piggy-bank",
+        "icon": "piggy-bank",
         "color": "#10b981",
         "category": "Quỹ dự phòng"
       }

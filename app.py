@@ -115,7 +115,14 @@ def get_financial_data():
     all_txns = list(custom_txns) + list(raw_txns)
     enriched_txns = process_all_transactions(all_txns)
     enriched_txns_sorted = sorted(enriched_txns, key=lambda x: x.get('timestamp', ''), reverse=True)
-    health_data = compute_financial_health(enriched_txns, total_income=monthly_income)
+    health_data = compute_financial_health(
+        enriched_txns,
+        total_income=monthly_income,
+        target_ratio=user.get('budget_ratio'),
+        category_budgets=user.get('category_budgets') or user.get('category_limits'),
+        round_up_config=user.get('round_up'),
+        savings_goals=user.get('savings_goals')
+    )
     health_data['consents'] = user_consents
     return enriched_txns_sorted, health_data
 
@@ -343,7 +350,17 @@ def dashboard():
     enriched_txns, health_data = get_financial_data()
     banks = get_available_banks(user_consents=user.get('consents', []))
     balance = health_data.get('income', 0) - health_data.get('total_expense', 0)
-    current_month_str = datetime.now().strftime('%m/%Y')
+    month_counts = {}
+    for t in enriched_txns:
+        ts = str(t.get('timestamp', ''))
+        if len(ts) >= 7:
+            ym = ts[:7]
+            month_counts[ym] = month_counts.get(ym, 0) + 1
+    if month_counts:
+        top_ym = max(month_counts.items(), key=lambda x: x[1])[0]
+        current_month_str = f"tháng {top_ym[5:7]}/{top_ym[:4]}"
+    else:
+        current_month_str = f"tháng {datetime.now().strftime('%m/%Y')}"
     return render_template('dashboard.html',
         user=user,
         transactions=enriched_txns[:5],
@@ -1290,76 +1307,57 @@ def wallets():
 @app.route('/budgets', methods=['GET', 'POST'])
 @login_required
 def budgets():
+    user = get_current_user() or session['user']
+    session.pop('custom_budget_limits', None)
     enriched_txns, health_data = get_financial_data()
-    cb = health_data.get('category_breakdown', {})
 
-    budgets_list = [
-        {
-            "category": "Ăn uống & Cà phê",
-            "icon": "utensils",
-            "spent": cb.get("Ăn uống & Cà phê ngoài", 0) or 4200000,
-            "limit": 5500000,
-            "color": "#E8632A",
-            "bg": "rgba(232, 99, 42, 0.12)"
-        },
-        {
-            "category": "Đi lại & Xăng xe",
-            "icon": "motorcycle",
-            "spent": cb.get("Đi lại & Xăng xe", 0) or 950000,
-            "limit": 1500000,
-            "color": "#3B82F6",
-            "bg": "rgba(59, 130, 246, 0.12)"
-        },
-        {
-            "category": "Mua sắm cá nhân",
-            "icon": "bag-shopping",
-            "spent": cb.get("Mua sắm cá nhân", 0) or 3100000,
-            "limit": 3000000,
-            "color": "#EF4444",
-            "bg": "rgba(239, 68, 68, 0.12)"
-        },
-        {
-            "category": "Nhà cửa & Hóa đơn",
-            "icon": "house",
-            "spent": cb.get("Nhà ở & Hóa đơn tiện ích", 0) or 3500000,
-            "limit": 4000000,
-            "color": "#10B981",
-            "bg": "rgba(16, 185, 129, 0.12)"
-        },
-        {
-            "category": "Giải trí & Bạn bè",
-            "icon": "film",
-            "spent": cb.get("Giải trí & Phim ảnh", 0) or 1200000,
-            "limit": 2000000,
-            "color": "#8B5CF6",
-            "bg": "rgba(139, 92, 246, 0.12)"
-        },
-        {
-            "category": "Sức khỏe & Thuốc",
-            "icon": "heart-pulse",
-            "spent": cb.get("Y tế & Giáo dục", 0) or 350000,
-            "limit": 1000000,
-            "color": "#06B6D4",
-            "bg": "rgba(6, 182, 212, 0.12)"
-        }
-    ]
-    # Áp dụng các hạn mức do người dùng tự điều chỉnh (nếu có)
-    custom_limits = session.get('custom_budget_limits', {})
-    for b in budgets_list:
-        if b['category'] in custom_limits:
-            b['limit'] = float(custom_limits[b['category']])
-    
-    total_spent = sum(b['spent'] for b in budgets_list)
-    total_limit = sum(b['limit'] for b in budgets_list)
-    percent_spent = round((total_spent / total_limit) * 100) if total_limit > 0 else 0
-    days_left = 11
+    cat_icons = {
+        "Mua sắm cá nhân": "bag-shopping",
+        "Nhà ở & Hóa đơn tiện ích": "house",
+        "Thực phẩm & Đi chợ": "basket-shopping",
+        "Ăn uống & Cà phê ngoài": "utensils",
+        "Đi lại & Xăng xe": "motorcycle",
+        "Giải trí & Phim ảnh": "film",
+        "Y tế & Giáo dục": "heart-pulse",
+        "Dịch vụ số định kỳ (Subscription)": "repeat"
+    }
+    status_styles = {
+        "danger": {"color": "#EF4444", "bg": "rgba(239, 68, 68, 0.12)"},
+        "warning": {"color": "#F59E0B", "bg": "rgba(245, 158, 11, 0.12)"},
+        "safe": {"color": "#10B981", "bg": "rgba(16, 185, 129, 0.12)"}
+    }
+
+    budgets_list = []
+    for item in health_data.get('category_budgets', []):
+        st = item.get('status', 'safe')
+        style = status_styles.get(st, status_styles['safe'])
+        budgets_list.append({
+            "category": item['category'],
+            "icon": cat_icons.get(item['category'], 'tags'),
+            "spent": item['spent'],
+            "limit": item['limit'],
+            "percentage": item['percentage'],
+            "status": st,
+            "label": item['label'],
+            "color": style['color'],
+            "bg": style['bg']
+        })
+
+    # Tổng ngân sách phân bổ tháng 10 theo kịch bản thu nhập 18.000.000 VNĐ (Quy tắc 50/30/20)
+    total_limit = health_data.get('income', user.get('monthly_income', 18000000))
+    total_spent = health_data.get('total_expense', 0)
+    percent_spent = round((total_spent / total_limit) * 100, 1) if total_limit > 0 else 0
+    category_limit_sum = sum(b['limit'] for b in budgets_list)
+    days_left = 5
 
     return render_template('budgets.html',
-        user=session['user'],
+        user=user,
+        health=health_data,
         budgets=budgets_list,
         total_spent=total_spent,
         total_limit=total_limit,
         percent_spent=percent_spent,
+        category_limit_sum=category_limit_sum,
         days_left=days_left
     )
 
@@ -1367,17 +1365,31 @@ def budgets():
 @login_required
 def api_update_budget():
     data = request.get_json() or {}
-    category = data.get('category')
+    category = (data.get('category') or '').strip()
     new_limit = data.get('limit')
     try:
-        new_limit = float(new_limit)
+        new_limit = int(float(new_limit))
+        if new_limit <= 0:
+            raise ValueError
     except (ValueError, TypeError):
         return jsonify({"success": False, "message": "Số tiền hạn mức không hợp lệ!"}), 400
-    
-    if 'custom_budget_limits' not in session:
-        session['custom_budget_limits'] = {}
-    session['custom_budget_limits'][category] = new_limit
+
+    user = get_current_user() or session['user']
+    current_budgets = dict(user.get('category_budgets') or user.get('category_limits') or {})
+    current_budgets[category] = new_limit
+    update_user_field(user['id'], 'category_limits', current_budgets)
+    updated_user = update_user_field(user['id'], 'category_budgets', current_budgets)
+    session['user'] = sanitize_user(updated_user) if updated_user else user
+    session.pop('custom_budget_limits', None)
     session.modified = True
+
+    log_action(
+        actor=user.get('username', 'user'),
+        action="Điều chỉnh hạn mức danh mục",
+        target=category,
+        result="Success",
+        details=f"Cập nhật trần ngân sách '{category}' thành {new_limit:,.0f} VNĐ"
+    )
     return jsonify({"success": True, "message": f"Đã cập nhật hạn mức danh mục '{category}' thành {new_limit:,.0f}đ!"})
 
 # ==========================================================================
@@ -1386,6 +1398,7 @@ def api_update_budget():
 @app.route('/notifications')
 @login_required
 def notifications():
+    user = get_current_user() or session['user']
     notifications_data = [
         {
             "id": 1,
@@ -1393,19 +1406,19 @@ def notifications():
             "icon": "fa-triangle-exclamation",
             "color": "#EF4444",
             "bg": "rgba(239, 68, 68, 0.12)",
-            "title": "Cảnh báo vượt ngân sách",
-            "body": "Bạn đã chi tiêu vượt hạn mức danh mục 'Mua sắm cá nhân' 100.000đ trong tháng 10.",
+            "title": "Cảnh báo vượt ngân sách (Đỏ)",
+            "body": "Danh mục 'Mua sắm cá nhân' đã chi 2.270.000đ / 1.500.000đ (đạt 151,3% hạn mức, vượt trần 770.000đ từ 05 đơn hàng đêm).",
             "time": "10 phút trước",
             "unread": True
         },
         {
             "id": 2,
             "type": "reminder",
-            "icon": "fa-receipt",
+            "icon": "fa-gauge-high",
             "color": "#F59E0B",
             "bg": "rgba(245, 158, 11, 0.12)",
-            "title": "Nhắc nhở thanh toán hóa đơn",
-            "body": "Hóa đơn tiền điện VNPT/EVN hạn thanh toán ngày 25/10 (ước tính 680.000đ).",
+            "title": "Cảnh báo sắp chạm trần (Vàng)",
+            "body": "Danh mục 'Nhà ở & Hóa đơn tiện ích' đã đạt 97,0% hạn mức tháng 10 (4.850.000đ / 5.000.000đ, còn lại 150.000đ).",
             "time": "2 giờ trước",
             "unread": True
         },
@@ -1416,8 +1429,8 @@ def notifications():
             "color": "#10B981",
             "bg": "rgba(16, 185, 129, 0.12)",
             "title": "Biến động số dư +18.000.000đ",
-            "body": "Tài khoản Vietcombank nhận lương tháng 09 từ CÔNG TY CP CÔNG NGHỆ ABC.",
-            "time": "Hôm qua, 08:30",
+            "body": "Tài khoản Vietcombank (•••• 5938) nhận lương tháng 10/2026 từ CÔNG TY CP CÔNG NGHỆ ABC.",
+            "time": "05/10/2026, 09:15",
             "unread": False
         },
         {
@@ -1426,13 +1439,13 @@ def notifications():
             "icon": "fa-bullseye",
             "color": "#E8632A",
             "bg": "rgba(232, 99, 42, 0.12)",
-            "title": "Tiến độ mục tiêu tài chính",
-            "body": "Mục tiêu 'Quỹ khẩn cấp' đã đạt 30% kế hoạch. Tiếp tục phát huy nhé!",
-            "time": "3 ngày trước",
+            "title": "Tiến độ mục tiêu & Heo đất làm tròn",
+            "body": "Mục tiêu 'Quỹ khẩn cấp 3 tháng' đạt 42,5% (8.500.000đ / 20.000.000đ). Heo đất làm tròn 07 giao dịch đã thu gom 31.000đ tiền lẻ!",
+            "time": "26/10/2026, 08:30",
             "unread": False
         }
     ]
-    return render_template('notifications.html', user=session['user'], notifications=notifications_data)
+    return render_template('notifications.html', user=user, notifications=notifications_data)
 
 # ==========================================================================
 # 5f. Reports (Báo cáo thu chi đơn giản)
@@ -1478,6 +1491,7 @@ def goals():
             g['current_amount'] = c
             g['target'] = t
             g['target_amount'] = t
+            g['icon'] = str(g.get('icon', 'bullseye')).replace('fa-', '')
     return render_template('goals.html', user=user, goals=savings_goals)
 
 # ==========================================================================
