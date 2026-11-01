@@ -104,8 +104,8 @@
       "emergency"
     ],
     "budget_ratio": {
-      "needs": 50,
-      "wants": 30,
+      "needs": 55,
+      "wants": 25,
       "savings": 20
     },
     "savings_goals": [
@@ -175,15 +175,16 @@
         "bank_name": "Vietcombank",
         "account_no": "1028475938",
         "status": "ACTIVE",
-        "granted_at": "2026-10-01",
-        "expires_at": "2026-12-30",
-        "scopes": {
-          "read_balance": true,
-          "read_transactions": true,
-          "analyze_ai": true
-        },
+        "granted_at": "2026-10-30",
+        "expires_at": "2027-01-28",
+        "scopes": [
+          "read_balance",
+          "read_transactions",
+          "analyze_ai"
+        ],
         "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
-        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)"
+        "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
+        "valid_until": "2027-01-28"
       },
       {
         "consent_id": "CONSENT_TCB_01",

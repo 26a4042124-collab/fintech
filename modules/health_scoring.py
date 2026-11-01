@@ -1,5 +1,133 @@
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
+
+def detect_subscription_periodicity(transactions):
+    """
+    Thuat toan nhan dien chu ky lap dinh ky 30 ngay (+-2 ngay) theo chuan nghien cuu:
+    1. Cung Merchant ID / Don vi thu huong
+    2. Gia tri giao dich co dinh hoac xap xi bien do hep (<= 5%)
+    3. Khoang cach thoi gian giua 2 lan thanh toan lien tiep: 28 <= delta_days <= 32
+    """
+    merchants = {}
+    for t in transactions:
+        if t.get("type") != "OUTFLOW":
+            continue
+        desc = (t.get("description") or "").upper()
+        brand = None
+        for b in ["NETFLIX", "SPOTIFY", "APPLE.COM/BILL", "ICLOUD", "YOUTUBE", "CHATGPT"]:
+            if b in desc:
+                brand = b
+                break
+        if not brand and t.get("is_subscription"):
+            brand = desc[:20]
+
+        if brand:
+            merchants.setdefault(brand, []).append(t)
+
+    results = []
+    for brand, tx_list in merchants.items():
+        tx_list_sorted = sorted(tx_list, key=lambda x: x.get("timestamp", ""))
+        is_verified_cycle = False
+        avg_interval = 30.0
+        detected_intervals = []
+
+        if len(tx_list_sorted) >= 2:
+            for i in range(len(tx_list_sorted) - 1):
+                try:
+                    t1 = datetime.strptime(tx_list_sorted[i]["timestamp"][:19], "%Y-%m-%d %H:%M:%S")
+                    t2 = datetime.strptime(tx_list_sorted[i+1]["timestamp"][:19], "%Y-%m-%d %H:%M:%S")
+                    diff_days = (t2 - t1).days
+                    amt1 = tx_list_sorted[i].get("amount", 0)
+                    amt2 = tx_list_sorted[i+1].get("amount", 0)
+                    amt_diff = abs(amt2 - amt1) / max(amt1, 1)
+
+                    if 28 <= diff_days <= 32 and amt_diff <= 0.05:
+                        is_verified_cycle = True
+                        detected_intervals.append(diff_days)
+                except Exception:
+                    pass
+
+        latest_tx = tx_list_sorted[-1]
+        try:
+            latest_dt = datetime.strptime(latest_tx["timestamp"][:19], "%Y-%m-%d %H:%M:%S")
+            next_date = (latest_dt + timedelta(days=30)).strftime("%d/%m/%Y")
+        except Exception:
+            next_date = "Thang tiep theo"
+
+        if is_verified_cycle and detected_intervals:
+            avg_interval = round(sum(detected_intervals) / len(detected_intervals), 1)
+            status_desc = f"Chu ky {avg_interval} ngay (Da xac thuc thuc te)"
+        else:
+            status_desc = "Don ky (Dang theo doi chu ky 30 ngay)"
+
+        results.append({
+            "brand": brand,
+            "merchant": latest_tx.get("description"),
+            "amount": latest_tx.get("amount", 0),
+            "bank": latest_tx.get("bank"),
+            "latest_timestamp": latest_tx.get("timestamp"),
+            "occurrences": len(tx_list_sorted),
+            "is_verified_cycle": is_verified_cycle,
+            "interval_days": avg_interval,
+            "cycle_status": status_desc,
+            "estimated_next_billing": next_date
+        })
+
+    return results
+
+def detect_internal_transfers(transactions):
+    """
+    Phat hien giao dich chuyen tien noi bo giua cac tai khoan cung chu so huu:
+    1. Cap giao dich OUTFLOW tai Bank A va INFLOW tai Bank B
+    2. Cung gia tri so tien
+    3. Khoang cach thoi gian <= 120 phut
+    4. Mo ta chua dau hieu chuyen khoan ca nhan / vi / noi bo
+    """
+    outflows = [t for t in transactions if t.get("type") == "OUTFLOW"]
+    inflows = [t for t in transactions if t.get("type") == "INFLOW"]
+
+    matched_pairs = []
+    used_inflows = set()
+
+    for out_t in outflows:
+        desc_out = (out_t.get("description") or "").upper()
+        amt_out = out_t.get("amount", 0)
+        try:
+            ts_out = datetime.strptime(out_t["timestamp"][:19], "%Y-%m-%d %H:%M:%S")
+        except Exception:
+            continue
+
+        for in_t in inflows:
+            if in_t.get("id") in used_inflows:
+                continue
+
+            desc_in = (in_t.get("description") or "").upper()
+            amt_in = in_t.get("amount", 0)
+            try:
+                ts_in = datetime.strptime(in_t["timestamp"][:19], "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                continue
+
+            if amt_out == amt_in:
+                diff_minutes = abs((ts_in - ts_out).total_seconds()) / 60.0
+                if diff_minutes <= 120:
+                    has_kw = any(w in desc_out or w in desc_in for w in [
+                        "NOI BO", "CHUYEN TIEN", "CHUYEN KHOAN", "NAP TIEN", "VI MO", "TU VCB", "SANG TCB", "SANG MB"
+                    ])
+                    different_banks = out_t.get("bank") != in_t.get("bank")
+                    if has_kw or different_banks:
+                        matched_pairs.append({
+                            "outflow_id": out_t.get("id"),
+                            "outflow_bank": out_t.get("bank"),
+                            "inflow_id": in_t.get("id"),
+                            "inflow_bank": in_t.get("bank"),
+                            "amount": amt_out,
+                            "time_diff_minutes": round(diff_minutes, 1)
+                        })
+                        used_inflows.add(in_t.get("id"))
+                        break
+
+    return matched_pairs
 
 def compute_financial_health(
     enriched_transactions, 
@@ -337,8 +465,10 @@ def compute_financial_health(
             "count": len(subscription_items),
             "total_amount": total_sub_leak,
             "list": subscription_items,
-            "items": subscription_items
+            "items": subscription_items,
+            "periodicity_analysis": detect_subscription_periodicity(enriched_transactions)
         },
+        "internal_transfers": detect_internal_transfers(enriched_transactions),
         "impulse_night_spending": {
             "count": len(night_impulse_items),
             "total_amount": total_night_impulse,

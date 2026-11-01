@@ -97,6 +97,35 @@ def is_night_time(timestamp_str):
     except Exception:
         return False
 
+def compute_match_confidence(desc_upper, desc_ascii, kw_upper, kw_ascii, source_level=1, is_sub=False):
+    """
+    Tính toán Điểm tin cậy (Confidence Score) khoa học dựa trên mức độ tương đồng chuỗi:
+    - Xét ranh giới từ chính xác (\\b) vs đối sánh chuỗi con.
+    - Xét tỷ lệ bao phủ độ dài từ khóa trên mô tả (Coverage Ratio = len(kw) / len(desc)).
+    - Phân tầng mức độ ưu tiên: Danh mục động Admin (Level 1) > Luật mặc định (Level 2) > Fallback (Level 3).
+    - Trả về giá trị thực tế dao động từ 0.65 đến 0.99 (thay vì hằng số gán cứng).
+    """
+    if source_level == 3:
+        words = len(desc_ascii.split())
+        return min(0.72, max(0.65, round(0.65 + min(words, 3) * 0.02, 2)))
+
+    is_exact_word = bool(
+        re.search(r'\b' + re.escape(kw_upper) + r'\b', desc_upper) or 
+        re.search(r'\b' + re.escape(kw_ascii) + r'\b', desc_ascii)
+    )
+    kw_len = len(kw_ascii.strip())
+    desc_len = max(len(desc_ascii.strip()), 1)
+    coverage = min(1.0, kw_len / desc_len)
+
+    if source_level == 1:
+        base = 0.90 if is_exact_word else 0.85
+        bonus = (coverage * 0.07) + (0.02 if is_sub else 0)
+        return min(0.99, max(0.86, round(base + bonus, 2)))
+    else:  # source_level == 2
+        base = 0.84 if is_exact_word else 0.78
+        bonus = coverage * 0.08
+        return min(0.94, max(0.80, round(base + bonus, 2)))
+
 def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
     """
     Mô hình AI/NLP xử lý ngôn ngữ tự nhiên:
@@ -145,13 +174,14 @@ def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
                     is_sub = "SUBSCRIPTION" in cat.get("id", "").upper() or "ĐỊNH KỲ" in cat.get("name", "").upper() or is_sub_desc
                     # Subscriptions gia hạn ban đêm không phải chi tiêu bốc đồng
                     night_flag = False if is_sub else (is_night_time(timestamp_str) and cat.get("bucket") == "WANTS")
+                    confidence = compute_match_confidence(desc_upper, desc_ascii, kw_upper, kw_ascii, source_level=1, is_sub=is_sub)
                     return {
                         "rule_key": cat.get("id"),
                         "category": cat.get("name"),
                         "bucket": cat.get("bucket"),
                         "is_night_spending": night_flag,
                         "is_subscription": is_sub,
-                        "confidence_score": 0.95
+                        "confidence_score": confidence
                     }
                     
     # 2. Fallback sang luật mặc định nếu file categories lỗi hoặc chưa khớp
@@ -180,38 +210,56 @@ def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
             if matched:
                 is_sub = "cat_wants_subscription" == rule_key or is_sub_desc
                 night_flag = False if is_sub else (is_night_time(timestamp_str) and rule_data["bucket"] == "WANTS")
+                confidence = compute_match_confidence(desc_upper, desc_ascii, kw_upper, kw_ascii, source_level=2, is_sub=is_sub)
                 return {
                     "rule_key": rule_key,
                     "category": rule_data["name"],
                     "bucket": rule_data["bucket"],
                     "is_night_spending": night_flag,
                     "is_subscription": is_sub,
-                    "confidence_score": 0.92
+                    "confidence_score": confidence
                 }
 
     # 3. Mặc định nếu không khớp từ khóa
+    confidence = compute_match_confidence(desc_upper, desc_ascii, "", "", source_level=3)
     return {
         "rule_key": "cat_wants_other",
         "category": "Chi tiêu khác",
         "bucket": "WANTS",
         "is_night_spending": is_night_time(timestamp_str),
         "is_subscription": False,
-        "confidence_score": 0.70
+        "confidence_score": confidence
     }
 
 def process_all_transactions(transactions):
     """
     Xử lý gán nhãn toàn bộ danh sách giao dịch đầu vào.
+    Hỗ trợ đa dạng hóa nguồn tiền vào và nhận diện chuyển khoản nội bộ.
     """
     enriched = []
     for t in transactions:
         t_copy = dict(t)
         if t_copy.get("type") == "INFLOW":
-            t_copy["ai_category"] = "Thu nhập tiền lương"
+            desc_ascii = remove_accents((t_copy.get("description") or "").upper())
+            if any(w in desc_ascii for w in ["LUONG", "SALARY", "PAYROLL", "CONG TY"]):
+                t_copy["ai_category"] = "Thu nhập tiền lương"
+                t_copy["ai_confidence"] = 0.98
+            elif any(w in desc_ascii for w in ["THUONG", "BONUS"]):
+                t_copy["ai_category"] = "Thu nhập tiền thưởng"
+                t_copy["ai_confidence"] = 0.95
+            elif any(w in desc_ascii for w in ["HOAN TIEN", "REFUND", "CASHBACK"]):
+                t_copy["ai_category"] = "Hoàn tiền & Khuyến mại"
+                t_copy["ai_confidence"] = 0.93
+            elif any(w in desc_ascii for w in ["CHUYEN KHOAN NOI BO", "NAP TIEN TU", "CHUYEN NOI BO"]):
+                t_copy["ai_category"] = "Chuyển tiền nội bộ"
+                t_copy["ai_confidence"] = 0.96
+            else:
+                t_copy["ai_category"] = "Thu nhập khác"
+                t_copy["ai_confidence"] = 0.88
+
             t_copy["ai_bucket"] = "INCOME"
             t_copy["is_night_spending"] = False
             t_copy["is_subscription"] = False
-            t_copy["ai_confidence"] = 0.98
         else:
             cat_result = categorize_transaction(
                 t_copy.get("description", ""), 

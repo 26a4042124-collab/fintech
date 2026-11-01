@@ -98,11 +98,8 @@ def authenticate_user(username, password):
             }
 
         stored_pwd = matched_user.get('password', '')
-        # Kiểm tra mật khẩu:
-        # 1. Khớp chính xác mật khẩu
-        # 2. Hoặc người dùng không nhập mật khẩu (chế độ test demo nhanh)
-        # 3. Hoặc nhập password demo mặc định
-        if not pwd or pwd == stored_pwd or pwd in ('password123', 'admin123', '123', '123456', 'admin'):
+        # Kiểm tra mật khẩu: Bắt buộc nhập mật khẩu và phải khớp chính xác với mật khẩu đã lưu
+        if pwd and pwd == stored_pwd:
             log_action(
                 actor=matched_user["username"],
                 action="Đăng nhập thành công",

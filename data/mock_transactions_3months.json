@@ -1,0 +1,1122 @@
+[
+  {
+    "id": "TXN_AUG_001",
+    "timestamp": "2026-08-01 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "INFLOW",
+    "amount": 18000000,
+    "description": "CONG TY CP CONG NGHE ABC CHUYEN LUONG THANG 07/2026",
+    "reference_code": "VCB.20260801.001"
+  },
+  {
+    "id": "ITXN_AUG_01",
+    "timestamp": "2026-08-02 09:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 3500000,
+    "description": "CHUYEN KHOAN NOI BO SANG TECHCOMBANK CHI TIEU",
+    "reference_code": "VCB.20260802.IT01"
+  },
+  {
+    "id": "ITXN_AUG_02",
+    "timestamp": "2026-08-02 09:02:00",
+    "bank": "Techcombank",
+    "account_number": "190384725920",
+    "type": "INFLOW",
+    "amount": 3500000,
+    "description": "NHAN TIEN CHUYEN NOI BO TU TAI KHOAN VCB",
+    "reference_code": "TCB.20260802.IT02"
+  },
+  {
+    "id": "TXN_AUG_002",
+    "timestamp": "2026-08-02 09:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 3500000,
+    "description": "CHUYEN TIEN THUE NHA THANG 08 NGUYEN VAN CHU NHA",
+    "reference_code": "VCB.20260802.045"
+  },
+  {
+    "id": "TXN_AUG_003",
+    "timestamp": "2026-08-02 12:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "THANH TOAN QR COM TRUA VAN PHONG",
+    "reference_code": "TCB.20260802.112"
+  },
+  {
+    "id": "TXN_AUG_004",
+    "timestamp": "2026-08-03 07:45:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "HIGHLANDS COFFEE THANH TOAN POS",
+    "reference_code": "VCB.20260803.018"
+  },
+  {
+    "id": "TXN_AUG_005",
+    "timestamp": "2026-08-03 23:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "SHOPEEPAY THANH TOAN DON HANG SHOPEE VN AP DUNG MA GIAM GIA",
+    "reference_code": "TCB.20260803.882"
+  },
+  {
+    "id": "TXN_AUG_006",
+    "timestamp": "2026-08-04 18:20:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 550000,
+    "description": "WINMART CONG HOA MUA THUC PHAM SIÊU THI CUOI TUAN",
+    "reference_code": "VCB.20260804.301"
+  },
+  {
+    "id": "TXN_AUG_007",
+    "timestamp": "2026-08-05 08:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "GRAB VIETNAM DI CHUYEN DI LAM",
+    "reference_code": "TCB.20260805.021"
+  },
+  {
+    "id": "TXN_AUG_008",
+    "timestamp": "2026-08-05 15:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "THANH TOAN TIEN DIEN EVN HANOI MA KH PD08927162",
+    "reference_code": "MBB.20260805.109"
+  },
+  {
+    "id": "TXN_AUG_009",
+    "timestamp": "2026-08-06 12:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 75000,
+    "description": "BUN CHA SINH TU THANH TOAN QR",
+    "reference_code": "TCB.20260806.142"
+  },
+  {
+    "id": "TXN_AUG_010",
+    "timestamp": "2026-08-06 23:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 680000,
+    "description": "SHOPEEPAY CHOT DON AO KHOAC THOI TRANG SHOPEE LIVE",
+    "reference_code": "TCB.20260806.911"
+  },
+  {
+    "id": "TXN_AUG_011",
+    "timestamp": "2026-08-07 19:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 120000,
+    "description": "NAP TIEN XANG PETROLIMEX CUA HANG SO 12",
+    "reference_code": "VCB.20260807.412"
+  },
+  {
+    "id": "TXN_AUG_012",
+    "timestamp": "2026-08-08 11:20:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 230000,
+    "description": "THANH TOAN NUOC SACH HA NOI MA SO KH 192837",
+    "reference_code": "MBB.20260808.055"
+  },
+  {
+    "id": "TXN_AUG_013",
+    "timestamp": "2026-08-08 20:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 250000,
+    "description": "CGV CINEMAS VE XEM PHIM CUOI TUAN",
+    "reference_code": "VCB.20260808.621"
+  },
+  {
+    "id": "TXN_AUG_014",
+    "timestamp": "2026-08-09 12:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 70000,
+    "description": "COM TAM SA I GON THANH TOAN VIETQR",
+    "reference_code": "TCB.20260809.118"
+  },
+  {
+    "id": "TXN_AUG_015",
+    "timestamp": "2026-08-10 00:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 320000,
+    "description": "TIKTOK SHOP DON HANG MY PHAM DEM KHUYEN MAI",
+    "reference_code": "TCB.20260810.005"
+  },
+  {
+    "id": "TXN_AUG_016",
+    "timestamp": "2026-08-10 14:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 350000,
+    "description": "TIEN INTERNET VNPT FIBER GOI HOME NET 3",
+    "reference_code": "VCB.20260810.231"
+  },
+  {
+    "id": "TXN_AUG_017",
+    "timestamp": "2026-08-11 10:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 55000,
+    "description": "PHUC LONG COFFEE & TEA GIAO HANG",
+    "reference_code": "TCB.20260811.092"
+  },
+  {
+    "id": "TXN_AUG_018",
+    "timestamp": "2026-08-12 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "GRAB BIKE DI CHUYEN",
+    "reference_code": "VCB.20260812.019"
+  },
+  {
+    "id": "TXN_AUG_019",
+    "timestamp": "2026-08-13 12:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 60000,
+    "description": "PHO BO HA NOI THANH TOAN QR",
+    "reference_code": "TCB.20260813.120"
+  },
+  {
+    "id": "TXN_AUG_020",
+    "timestamp": "2026-08-13 17:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 1200000,
+    "description": "CHI PHI KHOA HOC TIENG ANH ONLINE HANG THANG",
+    "reference_code": "VCB.20260813.512"
+  },
+  {
+    "id": "TXN_AUG_021",
+    "timestamp": "2026-08-14 01:10:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 180000,
+    "description": "GRABFOOD AN DEM GIAO TAN NOI",
+    "reference_code": "TCB.20260814.002"
+  },
+  {
+    "id": "TXN_AUG_022",
+    "timestamp": "2026-08-15 03:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 260000,
+    "description": "NETFLIX.COM GIA HAN GOI PREMIUM DINH KY HANG THANG",
+    "reference_code": "TCB.20260815.001"
+  },
+  {
+    "id": "TXN_AUG_023",
+    "timestamp": "2026-08-15 03:05:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 59000,
+    "description": "SPOTIFY VIETNAM GIA HAN GOI INDIVIDUAL HANG THANG",
+    "reference_code": "TCB.20260815.002"
+  },
+  {
+    "id": "TXN_AUG_024",
+    "timestamp": "2026-08-15 03:10:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 290000,
+    "description": "APPLE.COM/BILL GIA HAN GOI DUNG LUONG ICLOUD 2TB & APP",
+    "reference_code": "VCB.20260815.003"
+  },
+  {
+    "id": "TXN_AUG_025",
+    "timestamp": "2026-08-16 12:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 80000,
+    "description": "BUN DAU MAM TOM THANH TOAN VIETQR",
+    "reference_code": "MBB.20260816.144"
+  },
+  {
+    "id": "TXN_AUG_026",
+    "timestamp": "2026-08-17 19:40:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "COOPMART MUA SAM DO DUNG GIA DINH",
+    "reference_code": "VCB.20260817.389"
+  },
+  {
+    "id": "TXN_AUG_027",
+    "timestamp": "2026-08-18 23:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 520000,
+    "description": "SHOPEEPAY MUA GIAY THE THAO SALE CUOI TUAN",
+    "reference_code": "TCB.20260818.940"
+  },
+  {
+    "id": "TXN_AUG_028",
+    "timestamp": "2026-08-19 08:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "BE CAR DI CHUYEN DI LAM",
+    "reference_code": "TCB.20260819.030"
+  },
+  {
+    "id": "INFLOW_AUG_01",
+    "timestamp": "2026-08-20 15:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "INFLOW",
+    "amount": 1500000,
+    "description": "CONG TY ABC CHUYEN TIEN THUONG KPI QUY 2",
+    "reference_code": "VCB.20260820.009"
+  },
+  {
+    "id": "TXN_AUG_029",
+    "timestamp": "2026-08-20 18:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 850000,
+    "description": "LIEN HOAN CUOI TUAN NHA HANG LAU MANWAH",
+    "reference_code": "VCB.20260820.501"
+  },
+  {
+    "id": "TXN_AUG_030",
+    "timestamp": "2026-08-21 00:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 300000,
+    "description": "TIKTOK SHOP MUA PHU KIEN CONG NGHE TAI NGHE BLUETOOTH",
+    "reference_code": "TCB.20260821.009"
+  },
+  {
+    "id": "TXN_AUG_031",
+    "timestamp": "2026-08-22 12:15:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "COM GA XOI MO THANH TOAN QR",
+    "reference_code": "MBB.20260822.115"
+  },
+  {
+    "id": "TXN_AUG_032",
+    "timestamp": "2026-08-23 15:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 150000,
+    "description": "NAP TIEN DIEN THOAI VIETTEL TRA SAU",
+    "reference_code": "VCB.20260823.280"
+  },
+  {
+    "id": "TXN_AUG_033",
+    "timestamp": "2026-08-24 10:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 40000,
+    "description": "THE COFFEE HOUSE THANH TOAN POS",
+    "reference_code": "TCB.20260824.088"
+  },
+  {
+    "id": "TXN_AUG_034",
+    "timestamp": "2026-08-25 18:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "NHA THUOC PHARMACITY MUA THUOC VA THUC PHAM CHUC NANG",
+    "reference_code": "VCB.20260825.430"
+  },
+  {
+    "id": "TXN_AUG_035",
+    "timestamp": "2026-08-26 21:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 900000,
+    "description": "TRICH TIEN GIAO DICH TIET KIEM TICH LUY ONLINE THANG 08",
+    "reference_code": "VCB.20260826.790"
+  },
+  {
+    "id": "TXN_SEP_001",
+    "timestamp": "2026-09-01 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "INFLOW",
+    "amount": 18000000,
+    "description": "CONG TY CP CONG NGHE ABC CHUYEN LUONG THANG 08/2026",
+    "reference_code": "VCB.20260901.001"
+  },
+  {
+    "id": "ITXN_SEP_01",
+    "timestamp": "2026-09-02 09:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 3500000,
+    "description": "CHUYEN KHOAN NOI BO SANG TECHCOMBANK CHI TIEU",
+    "reference_code": "VCB.20260902.IT01"
+  },
+  {
+    "id": "ITXN_SEP_02",
+    "timestamp": "2026-09-02 09:02:00",
+    "bank": "Techcombank",
+    "account_number": "190384725920",
+    "type": "INFLOW",
+    "amount": 3500000,
+    "description": "NHAN TIEN CHUYEN NOI BO TU TAI KHOAN VCB",
+    "reference_code": "TCB.20260902.IT02"
+  },
+  {
+    "id": "TXN_SEP_002",
+    "timestamp": "2026-09-02 09:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 3500000,
+    "description": "CHUYEN TIEN THUE NHA THANG 09 NGUYEN VAN CHU NHA",
+    "reference_code": "VCB.20260902.045"
+  },
+  {
+    "id": "TXN_SEP_003",
+    "timestamp": "2026-09-02 12:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "THANH TOAN QR COM TRUA VAN PHONG",
+    "reference_code": "TCB.20260902.112"
+  },
+  {
+    "id": "TXN_SEP_004",
+    "timestamp": "2026-09-03 07:45:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "HIGHLANDS COFFEE THANH TOAN POS",
+    "reference_code": "VCB.20260903.018"
+  },
+  {
+    "id": "TXN_SEP_005",
+    "timestamp": "2026-09-03 23:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "SHOPEEPAY THANH TOAN DON HANG SHOPEE VN AP DUNG MA GIAM GIA",
+    "reference_code": "TCB.20260903.882"
+  },
+  {
+    "id": "TXN_SEP_006",
+    "timestamp": "2026-09-04 18:20:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 550000,
+    "description": "WINMART CONG HOA MUA THUC PHAM SIÊU THI CUOI TUAN",
+    "reference_code": "VCB.20260904.301"
+  },
+  {
+    "id": "TXN_SEP_007",
+    "timestamp": "2026-09-05 08:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "GRAB VIETNAM DI CHUYEN DI LAM",
+    "reference_code": "TCB.20260905.021"
+  },
+  {
+    "id": "TXN_SEP_008",
+    "timestamp": "2026-09-05 15:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "THANH TOAN TIEN DIEN EVN HANOI MA KH PD08927162",
+    "reference_code": "MBB.20260905.109"
+  },
+  {
+    "id": "TXN_SEP_009",
+    "timestamp": "2026-09-06 12:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 75000,
+    "description": "BUN CHA SINH TU THANH TOAN QR",
+    "reference_code": "TCB.20260906.142"
+  },
+  {
+    "id": "TXN_SEP_010",
+    "timestamp": "2026-09-06 23:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 680000,
+    "description": "SHOPEEPAY CHOT DON AO KHOAC THOI TRANG SHOPEE LIVE",
+    "reference_code": "TCB.20260906.911"
+  },
+  {
+    "id": "TXN_SEP_011",
+    "timestamp": "2026-09-07 19:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 120000,
+    "description": "NAP TIEN XANG PETROLIMEX CUA HANG SO 12",
+    "reference_code": "VCB.20260907.412"
+  },
+  {
+    "id": "TXN_SEP_012",
+    "timestamp": "2026-09-08 11:20:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 230000,
+    "description": "THANH TOAN NUOC SACH HA NOI MA SO KH 192837",
+    "reference_code": "MBB.20260908.055"
+  },
+  {
+    "id": "TXN_SEP_013",
+    "timestamp": "2026-09-08 20:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 250000,
+    "description": "CGV CINEMAS VE XEM PHIM CUOI TUAN",
+    "reference_code": "VCB.20260908.621"
+  },
+  {
+    "id": "TXN_SEP_014",
+    "timestamp": "2026-09-09 12:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 70000,
+    "description": "COM TAM SA I GON THANH TOAN VIETQR",
+    "reference_code": "TCB.20260909.118"
+  },
+  {
+    "id": "TXN_SEP_015",
+    "timestamp": "2026-09-10 00:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 320000,
+    "description": "TIKTOK SHOP DON HANG MY PHAM DEM KHUYEN MAI",
+    "reference_code": "TCB.20260910.005"
+  },
+  {
+    "id": "TXN_SEP_016",
+    "timestamp": "2026-09-10 14:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 350000,
+    "description": "TIEN INTERNET VNPT FIBER GOI HOME NET 3",
+    "reference_code": "VCB.20260910.231"
+  },
+  {
+    "id": "TXN_SEP_017",
+    "timestamp": "2026-09-11 10:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 55000,
+    "description": "PHUC LONG COFFEE & TEA GIAO HANG",
+    "reference_code": "TCB.20260911.092"
+  },
+  {
+    "id": "TXN_SEP_018",
+    "timestamp": "2026-09-12 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "GRAB BIKE DI CHUYEN",
+    "reference_code": "VCB.20260912.019"
+  },
+  {
+    "id": "INFLOW_SEP_01",
+    "timestamp": "2026-09-12 11:20:00",
+    "bank": "Techcombank",
+    "account_number": "190384725920",
+    "type": "INFLOW",
+    "amount": 65000,
+    "description": "NGUYEN THI B CHUYEN TIEN AN TRUA CHIA DEU",
+    "reference_code": "TCB.20260912.015"
+  },
+  {
+    "id": "TXN_SEP_019",
+    "timestamp": "2026-09-13 12:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 60000,
+    "description": "PHO BO HA NOI THANH TOAN QR",
+    "reference_code": "TCB.20260913.120"
+  },
+  {
+    "id": "TXN_SEP_020",
+    "timestamp": "2026-09-13 17:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 1200000,
+    "description": "CHI PHI KHOA HOC TIENG ANH ONLINE HANG THANG",
+    "reference_code": "VCB.20260913.512"
+  },
+  {
+    "id": "TXN_SEP_021",
+    "timestamp": "2026-09-14 01:10:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 180000,
+    "description": "GRABFOOD AN DEM GIAO TAN NOI",
+    "reference_code": "TCB.20260914.002"
+  },
+  {
+    "id": "TXN_SEP_022",
+    "timestamp": "2026-09-15 03:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 260000,
+    "description": "NETFLIX.COM GIA HAN GOI PREMIUM DINH KY HANG THANG",
+    "reference_code": "TCB.20260915.001"
+  },
+  {
+    "id": "TXN_SEP_023",
+    "timestamp": "2026-09-15 03:05:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 59000,
+    "description": "SPOTIFY VIETNAM GIA HAN GOI INDIVIDUAL HANG THANG",
+    "reference_code": "TCB.20260915.002"
+  },
+  {
+    "id": "TXN_SEP_024",
+    "timestamp": "2026-09-15 03:10:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 290000,
+    "description": "APPLE.COM/BILL GIA HAN GOI DUNG LUONG ICLOUD 2TB & APP",
+    "reference_code": "VCB.20260915.003"
+  },
+  {
+    "id": "TXN_SEP_025",
+    "timestamp": "2026-09-16 12:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 80000,
+    "description": "BUN DAU MAM TOM THANH TOAN VIETQR",
+    "reference_code": "MBB.20260916.144"
+  },
+  {
+    "id": "TXN_SEP_026",
+    "timestamp": "2026-09-17 19:40:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "COOPMART MUA SAM DO DUNG GIA DINH",
+    "reference_code": "VCB.20260917.389"
+  },
+  {
+    "id": "TXN_SEP_027",
+    "timestamp": "2026-09-18 23:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 520000,
+    "description": "SHOPEEPAY MUA GIAY THE THAO SALE CUOI TUAN",
+    "reference_code": "TCB.20260918.940"
+  },
+  {
+    "id": "TXN_SEP_028",
+    "timestamp": "2026-09-19 08:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "BE CAR DI CHUYEN DI LAM",
+    "reference_code": "TCB.20260919.030"
+  },
+  {
+    "id": "TXN_SEP_029",
+    "timestamp": "2026-09-20 18:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 850000,
+    "description": "LIEN HOAN CUOI TUAN NHA HANG LAU MANWAH",
+    "reference_code": "VCB.20260920.501"
+  },
+  {
+    "id": "TXN_SEP_030",
+    "timestamp": "2026-09-21 00:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 300000,
+    "description": "TIKTOK SHOP MUA PHU KIEN CONG NGHE TAI NGHE BLUETOOTH",
+    "reference_code": "TCB.20260921.009"
+  },
+  {
+    "id": "TXN_SEP_031",
+    "timestamp": "2026-09-22 12:15:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "COM GA XOI MO THANH TOAN QR",
+    "reference_code": "MBB.20260922.115"
+  },
+  {
+    "id": "TXN_SEP_032",
+    "timestamp": "2026-09-23 15:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 150000,
+    "description": "NAP TIEN DIEN THOAI VIETTEL TRA SAU",
+    "reference_code": "VCB.20260923.280"
+  },
+  {
+    "id": "TXN_SEP_033",
+    "timestamp": "2026-09-24 10:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 40000,
+    "description": "THE COFFEE HOUSE THANH TOAN POS",
+    "reference_code": "TCB.20260924.088"
+  },
+  {
+    "id": "TXN_SEP_034",
+    "timestamp": "2026-09-25 18:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "NHA THUOC PHARMACITY MUA THUOC VA THUC PHAM CHUC NANG",
+    "reference_code": "VCB.20260925.430"
+  },
+  {
+    "id": "TXN_SEP_035",
+    "timestamp": "2026-09-26 21:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 900000,
+    "description": "TRICH TIEN GIAO DICH TIET KIEM TICH LUY ONLINE THANG 09",
+    "reference_code": "VCB.20260926.790"
+  },
+  {
+    "id": "TXN_001",
+    "timestamp": "2026-10-01 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "INFLOW",
+    "amount": 18000000,
+    "description": "CONG TY CP CONG NGHE ABC CHUYEN LUONG THANG 09/2026",
+    "reference_code": "VCB.20261001.001"
+  },
+  {
+    "id": "TXN_002",
+    "timestamp": "2026-10-02 09:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 3500000,
+    "description": "CHUYEN TIEN THUE NHA THANG 10 NGUYEN VAN CHU NHA",
+    "reference_code": "VCB.20261002.045"
+  },
+  {
+    "id": "TXN_003",
+    "timestamp": "2026-10-02 12:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "THANH TOAN QR COM TRUA VAN PHONG",
+    "reference_code": "TCB.20261002.112"
+  },
+  {
+    "id": "TXN_004",
+    "timestamp": "2026-10-03 07:45:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "HIGHLANDS COFFEE THANH TOAN POS",
+    "reference_code": "VCB.20261003.018"
+  },
+  {
+    "id": "TXN_005",
+    "timestamp": "2026-10-03 23:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "SHOPEEPAY THANH TOAN DON HANG SHOPEE VN AP DUNG MA GIAM GIA",
+    "reference_code": "TCB.20261003.882"
+  },
+  {
+    "id": "TXN_006",
+    "timestamp": "2026-10-04 18:20:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 550000,
+    "description": "WINMART CONG HOA MUA THUC PHAM SIÊU THI CUOI TUAN",
+    "reference_code": "VCB.20261004.301"
+  },
+  {
+    "id": "TXN_007",
+    "timestamp": "2026-10-05 08:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "GRAB VIETNAM DI CHUYEN DI LAM",
+    "reference_code": "TCB.20261005.021"
+  },
+  {
+    "id": "TXN_008",
+    "timestamp": "2026-10-05 15:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "THANH TOAN TIEN DIEN EVN HANOI MA KH PD08927162",
+    "reference_code": "MBB.20261005.109"
+  },
+  {
+    "id": "TXN_009",
+    "timestamp": "2026-10-06 12:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 75000,
+    "description": "BUN CHA SINH TU THANH TOAN QR",
+    "reference_code": "TCB.20261006.142"
+  },
+  {
+    "id": "TXN_010",
+    "timestamp": "2026-10-06 23:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 680000,
+    "description": "SHOPEEPAY CHOT DON AO KHOAC THOI TRANG SHOPEE LIVE",
+    "reference_code": "TCB.20261006.911"
+  },
+  {
+    "id": "TXN_011",
+    "timestamp": "2026-10-07 19:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 120000,
+    "description": "NAP TIEN XANG PETROLIMEX CUA HANG SO 12",
+    "reference_code": "VCB.20261007.412"
+  },
+  {
+    "id": "TXN_012",
+    "timestamp": "2026-10-08 11:20:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 230000,
+    "description": "THANH TOAN NUOC SACH HA NOI MA SO KH 192837",
+    "reference_code": "MBB.20261008.055"
+  },
+  {
+    "id": "TXN_013",
+    "timestamp": "2026-10-08 20:15:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 250000,
+    "description": "CGV CINEMAS VE XEM PHIM CUOI TUAN",
+    "reference_code": "VCB.20261008.621"
+  },
+  {
+    "id": "TXN_014",
+    "timestamp": "2026-10-09 12:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 70000,
+    "description": "COM TAM SA I GON THANH TOAN VIETQR",
+    "reference_code": "TCB.20261009.118"
+  },
+  {
+    "id": "TXN_015",
+    "timestamp": "2026-10-10 00:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 320000,
+    "description": "TIKTOK SHOP DON HANG MY PHAM DEM KHUYEN MAI",
+    "reference_code": "TCB.20261010.005"
+  },
+  {
+    "id": "TXN_016",
+    "timestamp": "2026-10-10 14:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 350000,
+    "description": "TIEN INTERNET VNPT FIBER GOI HOME NET 3",
+    "reference_code": "VCB.20261010.231"
+  },
+  {
+    "id": "TXN_017",
+    "timestamp": "2026-10-11 10:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 55000,
+    "description": "PHUC LONG COFFEE & TEA GIAO HANG",
+    "reference_code": "TCB.20261011.092"
+  },
+  {
+    "id": "TXN_018",
+    "timestamp": "2026-10-12 08:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 45000,
+    "description": "GRAB BIKE DI CHUYEN",
+    "reference_code": "VCB.20261012.019"
+  },
+  {
+    "id": "TXN_019",
+    "timestamp": "2026-10-13 12:15:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 60000,
+    "description": "PHO BO HA NOI THANH TOAN QR",
+    "reference_code": "TCB.20261013.120"
+  },
+  {
+    "id": "TXN_020",
+    "timestamp": "2026-10-13 17:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 1200000,
+    "description": "CHI PHI KHOA HOC TIENG ANH ONLINE HANG THANG",
+    "reference_code": "VCB.20261013.512"
+  },
+  {
+    "id": "TXN_021",
+    "timestamp": "2026-10-14 01:10:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 180000,
+    "description": "GRABFOOD AN DEM GIAO TAN NOI",
+    "reference_code": "TCB.20261014.002"
+  },
+  {
+    "id": "TXN_022",
+    "timestamp": "2026-10-15 03:00:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 260000,
+    "description": "NETFLIX.COM GIA HAN GOI PREMIUM DINH KY HANG THANG",
+    "reference_code": "TCB.20261015.001"
+  },
+  {
+    "id": "TXN_023",
+    "timestamp": "2026-10-15 03:05:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 59000,
+    "description": "SPOTIFY VIETNAM GIA HAN GOI INDIVIDUAL HANG THANG",
+    "reference_code": "TCB.20261015.002"
+  },
+  {
+    "id": "TXN_024",
+    "timestamp": "2026-10-15 03:10:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 290000,
+    "description": "APPLE.COM/BILL GIA HAN GOI DUNG LUONG ICLOUD 2TB & APP",
+    "reference_code": "VCB.20261015.003"
+  },
+  {
+    "id": "TXN_025",
+    "timestamp": "2026-10-16 12:30:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 80000,
+    "description": "BUN DAU MAM TOM THANH TOAN VIETQR",
+    "reference_code": "MBB.20261016.144"
+  },
+  {
+    "id": "TXN_026",
+    "timestamp": "2026-10-17 19:40:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 620000,
+    "description": "COOPMART MUA SAM DO DUNG GIA DINH",
+    "reference_code": "VCB.20261017.389"
+  },
+  {
+    "id": "INFLOW_OCT_01",
+    "timestamp": "2026-10-18 10:15:00",
+    "bank": "Techcombank",
+    "account_number": "190384725920",
+    "type": "INFLOW",
+    "amount": 45000,
+    "description": "SHOPEEPAY HOAN TIEN DON HANG HUY",
+    "reference_code": "TCB.20261018.022"
+  },
+  {
+    "id": "TXN_027",
+    "timestamp": "2026-10-18 23:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 520000,
+    "description": "SHOPEEPAY MUA GIAY THE THAO SALE CUOI TUAN",
+    "reference_code": "TCB.20261018.940"
+  },
+  {
+    "id": "TXN_028",
+    "timestamp": "2026-10-19 08:20:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 50000,
+    "description": "BE CAR DI CHUYEN DI LAM",
+    "reference_code": "TCB.20261019.030"
+  },
+  {
+    "id": "TXN_029",
+    "timestamp": "2026-10-20 18:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 850000,
+    "description": "LIEN HOAN CUOI TUAN NHA HANG LAU MANWAH",
+    "reference_code": "VCB.20261020.501"
+  },
+  {
+    "id": "TXN_030",
+    "timestamp": "2026-10-21 00:45:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 300000,
+    "description": "TIKTOK SHOP MUA PHU KIEN CONG NGHE TAI NGHE BLUETOOTH",
+    "reference_code": "TCB.20261021.009"
+  },
+  {
+    "id": "TXN_031",
+    "timestamp": "2026-10-22 12:15:00",
+    "bank": "MB Bank",
+    "account_number": "0987654321",
+    "type": "OUTFLOW",
+    "amount": 65000,
+    "description": "COM GA XOI MO THANH TOAN QR",
+    "reference_code": "MBB.20261022.115"
+  },
+  {
+    "id": "TXN_032",
+    "timestamp": "2026-10-23 15:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 150000,
+    "description": "NAP TIEN DIEN THOAI VIETTEL TRA SAU",
+    "reference_code": "VCB.20261023.280"
+  },
+  {
+    "id": "TXN_033",
+    "timestamp": "2026-10-24 10:30:00",
+    "bank": "Techcombank",
+    "account_number": "19038475920",
+    "type": "OUTFLOW",
+    "amount": 40000,
+    "description": "THE COFFEE HOUSE THANH TOAN POS",
+    "reference_code": "TCB.20261024.088"
+  },
+  {
+    "id": "TXN_034",
+    "timestamp": "2026-10-25 18:30:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 450000,
+    "description": "NHA THUOC PHARMACITY MUA THUOC VA THUC PHAM CHUC NANG",
+    "reference_code": "VCB.20261025.430"
+  },
+  {
+    "id": "TXN_035",
+    "timestamp": "2026-10-26 21:00:00",
+    "bank": "Vietcombank",
+    "account_number": "1028475938",
+    "type": "OUTFLOW",
+    "amount": 900000,
+    "description": "TRICH TIEN GIAO DICH TIET KIEM TICH LUY ONLINE THANG 10",
+    "reference_code": "VCB.20261026.790"
+  }
+]
