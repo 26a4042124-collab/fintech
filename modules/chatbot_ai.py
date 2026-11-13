@@ -76,10 +76,12 @@ def generate_chatbot_response(user_message, health_data):
             )
         res = "🏦 **Trạng thái kết nối Open Banking của bạn:**\n\n"
         for c in active_c:
+            raw_scopes = c.get("scopes") or {}
+            has_scope = (lambda k: raw_scopes.get(k)) if isinstance(raw_scopes, dict) else (lambda k: k in raw_scopes)
             scopes_txt = []
-            if c.get("scopes", {}).get("read_balance"): scopes_txt.append("Xem số dư")
-            if c.get("scopes", {}).get("read_transactions"): scopes_txt.append("Xem giao dịch")
-            if c.get("scopes", {}).get("analyze_ai"): scopes_txt.append("Phân tích AI")
+            if has_scope("read_balance"): scopes_txt.append("Xem số dư")
+            if has_scope("read_transactions"): scopes_txt.append("Xem giao dịch")
+            if has_scope("analyze_ai"): scopes_txt.append("Phân tích AI")
             res += f"• 🟢 **{c.get('bank_name')}** (STK: {c.get('account_no')}): **Đang hoạt động**\n  ↳ Quyền cấp: {', '.join(scopes_txt)}\n  ↳ Hết hạn: {c.get('expires_at')}\n"
         for c in revoked_c:
             res += f"• 🔴 **{c.get('bank_name')}**: **Đã thu hồi quyền (Revoked)**\n"
@@ -193,19 +195,32 @@ def generate_chatbot_response(user_message, health_data):
             f"Đây là thói quen 'chi tiêu cảm xúc' khiến ngân sách thâm hụt nhanh nhất. Áp dụng ngay quy tắc **'chờ 24 giờ trước khi thanh toán giỏ hàng đêm'** để cắt giảm ít nhất **{total:,.0f} VNĐ** lãng phí!"
         )
         
-    # 8. Câu hỏi về Điểm sức khỏe tài chính & Tỷ lệ tùy chọn
-    elif any(k in msg for k in ["sức khỏe", "điểm", "score", "tình hình", "thế nào", "đánh giá", "tỷ lệ"]):
-        score = health_data.get("health_score", 58)
+    # 8. Câu hỏi về Điểm sức khỏe tài chính & Tự chia tỷ lệ theo thu nhập
+    elif any(k in msg for k in ["sức khỏe", "điểm", "score", "tình hình", "thế nào", "đánh giá", "tỷ lệ", "chia ngân sách", "gợi ý chia", "thu nhập"]):
+        score = health_data.get("health_score", 62)
         status = health_data.get("health_status", "Cảnh báo")
-        needs_p = health_data.get("needs", {}).get("percentage", 52)
-        wants_p = health_data.get("wants", {}).get("percentage", 43)
-        savings_p = health_data.get("savings", {}).get("percentage", 5)
+        needs_p = health_data.get("needs", {}).get("percentage", 0)
+        wants_p = health_data.get("wants", {}).get("percentage", 0)
+        savings_p = health_data.get("savings", {}).get("percentage", 0)
+        tr = health_data.get("target_ratio", {})
+        needs_amt = tr.get("needs_amount", int(round(income * bench_needs / 100.0)))
+        wants_amt = tr.get("wants_amount", int(round(income * bench_wants / 100.0)))
+        savings_amt = tr.get("savings_amount", int(round(income * bench_savings / 100.0)))
+        sugg = health_data.get("income_suggestion", {})
+        sugg_line = ""
+        if sugg:
+            sugg_line = (
+                f"\n💡 **Gợi ý theo bậc thu nhập ({sugg.get('bracket', '')})**: "
+                f"**{sugg.get('needs')}% / {sugg.get('wants')}% / {sugg.get('savings')}%** — {sugg.get('reason')}\n"
+            )
         return (
-            f"Điểm sức khỏe tài chính tháng này của bạn đạt **{score}/100 điểm** - Mức **{status}**.\n\n"
-            f"• **Thiết yếu**: Thực tế **{needs_p}%** (Mục tiêu của bạn: {bench_needs}%)\n"
-            f"• **Mong muốn**: Thực tế **{wants_p}%** (Mục tiêu của bạn: {bench_wants}%)\n"
-            f"• **Tiết kiệm**: Thực tế **{savings_p}%** (Mục tiêu của bạn: {bench_savings}%)\n\n"
-            f"Bạn có thể điều chỉnh lại Tỷ lệ ngân sách mong muốn bất kỳ lúc nào tại nút **'Tỷ lệ ngân sách'** trên thanh menu!"
+            f"Điểm sức khỏe tài chính tháng này của bạn đạt **{score}/100 điểm** - Mức **{status}** "
+            f"(đối chiếu trên thu nhập **{income:,.0f} VNĐ**).\n\n"
+            f"• **Thiết yếu**: Thực tế **{needs_p}%** / mục tiêu bạn chia **{bench_needs}%** ({needs_amt:,.0f}đ)\n"
+            f"• **Mong muốn**: Thực tế **{wants_p}%** / mục tiêu bạn chia **{bench_wants}%** ({wants_amt:,.0f}đ)\n"
+            f"• **Tiết kiệm**: Thực tế **{savings_p}%** / mục tiêu bạn chia **{bench_savings}%** ({savings_amt:,.0f}đ)\n"
+            f"{sugg_line}\n"
+            f"Bạn có thể tự chia lại tỷ lệ & thu nhập bất kỳ lúc nào tại mục **'Tự chia ngân sách'** trên menu hoặc trang Ngân sách!"
         )
         
     # 9. Câu hỏi về Tiết kiệm / Cách tiết kiệm / Bù đắp

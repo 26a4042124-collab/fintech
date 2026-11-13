@@ -3,6 +3,7 @@ import os
 import unicodedata
 from functools import wraps
 from flask import session, redirect, url_for, render_template
+from modules.health_scoring import suggest_ratio_by_income
 
 try:
     from modules.audit_logger import log_action
@@ -45,7 +46,7 @@ def sanitize_user(user):
         "connected_banks": [c.get("bank_name") for c in user.get("consents", []) if c.get("status") == "ACTIVE" and c.get("bank_name")] or user.get("connected_banks", []),
         "goals": user.get("goals", []),
         "avatar_initial": avatar_initial,
-        "budget_ratio": user.get("budget_ratio", {"needs": 50, "wants": 30, "savings": 20}),
+        "budget_ratio": user.get("budget_ratio") or suggest_ratio_by_income(user.get("monthly_income", 18000000)),
         "savings_goals": user.get("savings_goals", []),
         "round_up_enabled": user.get("round_up_enabled", True),
         "round_up": user.get("round_up", {"enabled": True, "step": 10000, "accumulated_total": 0}),
@@ -129,7 +130,7 @@ def authenticate_user(username, password):
 
     return {"success": False, "message": "Không tìm thấy tài khoản với thông tin đã nhập!"}
 
-def register_user(phone, full_name, email, password, goals=None):
+def register_user(phone, full_name, email, password, goals=None, monthly_income=None, budget_ratio=None):
     users = load_users()
     for user in users:
         if phone and user.get('phone', '').strip() == phone.strip():
@@ -148,6 +149,27 @@ def register_user(phone, full_name, email, password, goals=None):
         username = f"{username_base}_{counter}"
         counter += 1
 
+    try:
+        income_val = int(float(monthly_income)) if monthly_income else 18000000
+        if income_val <= 0:
+            income_val = 18000000
+    except (ValueError, TypeError):
+        income_val = 18000000
+
+    suggested = suggest_ratio_by_income(income_val)
+    if isinstance(budget_ratio, dict) and sum(int(budget_ratio.get(k, 0)) for k in ("needs", "wants", "savings")) == 100:
+        final_ratio = {
+            "needs": int(budget_ratio["needs"]),
+            "wants": int(budget_ratio["wants"]),
+            "savings": int(budget_ratio["savings"]),
+        }
+    else:
+        final_ratio = {
+            "needs": suggested["needs"],
+            "wants": suggested["wants"],
+            "savings": suggested["savings"],
+        }
+
     new_user = {
         "id": new_id,
         "username": username,
@@ -159,7 +181,8 @@ def register_user(phone, full_name, email, password, goals=None):
         "status": "active",
         "created_at": "2026-10-23",
         "occupation": "Cá nhân",
-        "monthly_income": 18000000,
+        "monthly_income": income_val,
+        "budget_ratio": final_ratio,
         "connected_banks": ["Vietcombank", "Techcombank"],
         "goals": goals or []
     }

@@ -66,7 +66,49 @@
         </label>
       </div>
 
-      <button type="submit" class="btn-primary">Tiếp tục</button>
+      <!-- Income-Based Custom Budget Allocation Onboarding -->
+      <div style="margin:18px 0;padding:14px;border-radius:16px;background:rgba(255,255,255,0.92);border:1px solid rgba(232,99,42,0.22);box-shadow:0 4px 14px rgba(15,23,42,0.04);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:800;color:#1E293B;">
+            <i class="fa-solid fa-sliders" style="color:#E8632A;"></i> Thu nhập &amp; Tự chia ngân sách
+          </div>
+          <span id="reg-ratio-total-badge" style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:#ECFDF5;color:#059669;">Tổng: 100%</span>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label for="reg-monthly-income" style="display:block;font-size:11.5px;font-weight:700;color:#475569;margin-bottom:5px;">Thu nhập hàng tháng (VNĐ)</label>
+          <input type="number" id="reg-monthly-income" name="monthly_income" class="form-input" value="18000000" min="1000000" step="500000" oninput="onRegIncomeChange()" style="padding:10px 12px;font-size:14px;font-weight:700;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+            <button type="button" onclick="setRegIncomePreset(9000000)" style="font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:99px;border:1px solid #E2E8F0;background:#F8FAFC;color:#475569;cursor:pointer;">9tr (SV/Mới đi làm)</button>
+            <button type="button" onclick="setRegIncomePreset(18000000)" style="font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:99px;border:1px solid #E2E8F0;background:#F8FAFC;color:#475569;cursor:pointer;">18tr (Phổ thông)</button>
+            <button type="button" onclick="setRegIncomePreset(30000000)" style="font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:99px;border:1px solid #E2E8F0;background:#F8FAFC;color:#475569;cursor:pointer;">30tr (Thu nhập cao)</button>
+          </div>
+        </div>
+
+        <div id="reg-suggestion-hint" style="font-size:11px;color:#2563EB;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:7px 10px;margin-bottom:10px;line-height:1.4;">
+          Gợi ý mức 12–25tr: <strong>55% Thiết yếu / 25% Mong muốn / 20% Tiết kiệm</strong>. Bạn có thể tự chỉnh % theo nhu cầu.
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px;">
+            <label for="reg-ratio-needs" style="display:block;font-size:10.5px;font-weight:800;color:#1D4ED8;margin-bottom:4px;">Thiết yếu (%)</label>
+            <input type="number" id="reg-ratio-needs" name="ratio_needs" value="55" min="0" max="100" oninput="onRegRatioManualEdit()" style="width:100%;padding:6px;border-radius:8px;border:1px solid #93C5FD;font-size:13px;font-weight:800;text-align:center;">
+            <div id="reg-vnd-needs" style="font-size:10px;color:#475569;margin-top:4px;text-align:center;">9.900.000đ</div>
+          </div>
+          <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;">
+            <label for="reg-ratio-wants" style="display:block;font-size:10.5px;font-weight:800;color:#B45309;margin-bottom:4px;">Mong muốn (%)</label>
+            <input type="number" id="reg-ratio-wants" name="ratio_wants" value="25" min="0" max="100" oninput="onRegRatioManualEdit()" style="width:100%;padding:6px;border-radius:8px;border:1px solid #FCD34D;font-size:13px;font-weight:800;text-align:center;">
+            <div id="reg-vnd-wants" style="font-size:10px;color:#475569;margin-top:4px;text-align:center;">4.500.000đ</div>
+          </div>
+          <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:8px;">
+            <label for="reg-ratio-savings" style="display:block;font-size:10.5px;font-weight:800;color:#047857;margin-bottom:4px;">Tiết kiệm (%)</label>
+            <input type="number" id="reg-ratio-savings" name="ratio_savings" value="20" min="0" max="100" oninput="onRegRatioManualEdit()" style="width:100%;padding:6px;border-radius:8px;border:1px solid #6EE7B7;font-size:13px;font-weight:800;text-align:center;">
+            <div id="reg-vnd-savings" style="font-size:10px;color:#475569;margin-top:4px;text-align:center;">3.600.000đ</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="reg-goals-submit-btn" class="btn-primary">Tiếp tục</button>
     </form>
   </div>
 
@@ -76,6 +118,72 @@
 {% endblock %}
 {% block scripts %}
 <script>
+let regAutoSuggestEnabled = true;
+
+function getRegSuggestionByIncome(income) {
+  if (income < 12000000) {
+    return { needs: 65, wants: 20, savings: 15, label: 'Gợi ý dưới 12tr: 65% Thiết yếu / 20% Mong muốn / 15% Tiết kiệm.' };
+  }
+  if (income < 25000000) {
+    return { needs: 55, wants: 25, savings: 20, label: 'Gợi ý mức 12–25tr: 55% Thiết yếu / 25% Mong muốn / 20% Tiết kiệm.' };
+  }
+  return { needs: 40, wants: 25, savings: 35, label: 'Gợi ý từ 25tr trở lên: 40% Thiết yếu / 25% Mong muốn / 35% Tiết kiệm.' };
+}
+
+function updateRegRatioPreview() {
+  const income = Math.max(0, Number(document.getElementById('reg-monthly-income')?.value || 0));
+  const needs = Number(document.getElementById('reg-ratio-needs')?.value || 0);
+  const wants = Number(document.getElementById('reg-ratio-wants')?.value || 0);
+  const savings = Number(document.getElementById('reg-ratio-savings')?.value || 0);
+  const total = needs + wants + savings;
+
+  const fmt = (n) => Math.round(n).toLocaleString('vi-VN') + 'đ';
+  const nEl = document.getElementById('reg-vnd-needs');
+  const wEl = document.getElementById('reg-vnd-wants');
+  const sEl = document.getElementById('reg-vnd-savings');
+  if (nEl) nEl.textContent = fmt(income * needs / 100);
+  if (wEl) wEl.textContent = fmt(income * wants / 100);
+  if (sEl) sEl.textContent = fmt(income * savings / 100);
+
+  const badge = document.getElementById('reg-ratio-total-badge');
+  const btn = document.getElementById('reg-goals-submit-btn');
+  if (badge) {
+    badge.textContent = `Tổng: ${total}%` + (total === 100 ? '' : ' (cần 100%)');
+    badge.style.background = total === 100 ? '#ECFDF5' : '#FEF2F2';
+    badge.style.color = total === 100 ? '#059669' : '#DC2626';
+  }
+  if (btn) {
+    btn.disabled = total !== 100;
+    btn.style.opacity = total === 100 ? '1' : '0.55';
+  }
+}
+
+function onRegIncomeChange() {
+  const income = Math.max(0, Number(document.getElementById('reg-monthly-income')?.value || 0));
+  const sug = getRegSuggestionByIncome(income);
+  const hint = document.getElementById('reg-suggestion-hint');
+  if (hint) hint.innerHTML = sug.label + ' Bạn có thể tự chỉnh % theo nhu cầu.';
+  if (regAutoSuggestEnabled) {
+    document.getElementById('reg-ratio-needs').value = sug.needs;
+    document.getElementById('reg-ratio-wants').value = sug.wants;
+    document.getElementById('reg-ratio-savings').value = sug.savings;
+  }
+  updateRegRatioPreview();
+}
+
+function setRegIncomePreset(val) {
+  regAutoSuggestEnabled = true;
+  document.getElementById('reg-monthly-income').value = val;
+  onRegIncomeChange();
+}
+
+function onRegRatioManualEdit() {
+  regAutoSuggestEnabled = false;
+  updateRegRatioPreview();
+}
+
+document.addEventListener('DOMContentLoaded', onRegIncomeChange);
+
 function toggleGoalItem(cardId, checkbox) {
   const card = document.getElementById(cardId);
   // Prevent double-toggle since label click already toggles checkbox

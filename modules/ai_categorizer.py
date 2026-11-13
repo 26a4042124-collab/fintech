@@ -129,7 +129,7 @@ def compute_match_confidence(desc_upper, desc_ascii, kw_upper, kw_ascii, source_
 def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
     """
     Mô hình AI/NLP xử lý ngôn ngữ tự nhiên:
-    Đọc từ điển động từ categories.json -> gán nhãn danh mục và rổ 50/30/20.
+    Đọc từ điển động từ categories.json -> gán nhãn danh mục và 3 rổ ngân sách (Needs/Wants/Savings).
     Loại bỏ dấu tiếng Việt và nhận diện chính xác các trường hợp ngoại lệ.
     """
     desc_upper = description.upper()

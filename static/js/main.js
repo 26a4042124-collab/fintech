@@ -84,7 +84,7 @@ function triggerBankPushNotification(opts) {
   const balance = opts.balance;
   const account = opts.account || '•••• 4321';
   const aiCategory = opts.aiCategory || 'Ăn uống & Cà phê';
-  const aiBucket = opts.aiBucket || '30% Nhu cầu linh hoạt';
+  const aiBucket = opts.aiBucket || 'Nhu cầu linh hoạt (Wants)';
 
   const banner = document.getElementById('bank-push-banner');
   if (!banner) return;
@@ -354,7 +354,7 @@ async function submitSimulateTxn() {
         const catB = document.getElementById('sim-res-cat-badge');
         if (catB) catB.textContent = (ai.category || 'Ăn uống & Cà phê');
         const bB = document.getElementById('sim-res-bucket-badge');
-        if (bB) bB.textContent = (ai.bucket_label || '30% Nhu cầu linh hoạt');
+        if (bB) bB.textContent = (ai.bucket_label || 'Nhu cầu linh hoạt (Wants)');
         const cB = document.getElementById('sim-res-conf-badge');
         if (cB) cB.textContent = `🎯 Tin cậy: ${ai.confidence_pct || 98}%`;
 
@@ -393,7 +393,7 @@ async function submitSimulateTxn() {
         balance: data.updated_wallet_balance,
         account: (data.transaction && data.transaction.account_number) ? data.transaction.account_number : '•••• ' + (data.wallet_id ? data.wallet_id.slice(-4) : '4321'),
         aiCategory: (data.ai_analysis && data.ai_analysis.category) || 'Ăn uống & Cà phê',
-        aiBucket: (data.ai_analysis && data.ai_analysis.bucket_label) || '30% Nhu cầu linh hoạt'
+        aiBucket: (data.ai_analysis && data.ai_analysis.bucket_label) || 'Nhu cầu linh hoạt (Wants)'
       };
 
       if (typeof window.triggerBankPushNotification === 'function') {
@@ -405,7 +405,7 @@ async function submitSimulateTxn() {
       const statusEl = document.getElementById('ddp-last-event');
       if (statusEl) {
         const ai = data.ai_analysis || {};
-        statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Đã bắn Webhook: <strong>${escapeHtmlMain(desc)}</strong> (${type === 'INFLOW' ? '+' : '-'}${amount.toLocaleString('vi-VN')}đ)<br><span style="color:#CBD5E1;font-size:9.5px;">AI: ${escapeHtmlMain(ai.category || 'Mới')} &bull; ${escapeHtmlMain(ai.bucket_label || '50/30/20')}</span>`;
+        statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Đã bắn Webhook: <strong>${escapeHtmlMain(desc)}</strong> (${type === 'INFLOW' ? '+' : '-'}${amount.toLocaleString('vi-VN')}đ)<br><span style="color:#CBD5E1;font-size:9.5px;">AI: ${escapeHtmlMain(ai.category || 'Mới')} &bull; ${escapeHtmlMain(ai.bucket_label || 'Phân loại tự động')}</span>`;
         statusEl.style.display = 'block';
       }
     } else {
@@ -433,7 +433,7 @@ function replayPushFromSimResult() {
       description: 'Highlands Coffee',
       balance: 7455000,
       aiCategory: 'Cà phê & Đồ uống',
-      aiBucket: '30% Nhu cầu linh hoạt'
+      aiBucket: 'Nhu cầu linh hoạt (Wants)'
     });
   }
 }
@@ -454,7 +454,7 @@ async function quickFireWebhookPreset(bank, desc, amount, type) {
       balance: type === 'INFLOW' ? 32455000 : 7410000,
       account: '•••• 4321',
       aiCategory: desc.includes('Highlands') ? 'Cà phê & Đồ uống' : (desc.includes('Grab') ? 'Ăn uống & Cà phê' : (desc.includes('Shopee') ? 'Mua sắm & Giải trí' : 'Thu nhập lương')),
-      aiBucket: type === 'INFLOW' ? 'Thu nhập' : (desc.includes('Shopee') ? '30% Nhu cầu linh hoạt' : '50% Nhu cầu thiết yếu')
+      aiBucket: type === 'INFLOW' ? 'Dòng thu nhập (Inflow)' : (desc.includes('Shopee') ? 'Nhu cầu linh hoạt (Wants)' : 'Nhu cầu thiết yếu (Needs)')
     });
   }
 
@@ -493,7 +493,7 @@ async function quickFireWebhookPreset(bank, desc, amount, type) {
       const statusEl = document.getElementById('ddp-last-event');
       if (statusEl) {
         const ai = data.ai_analysis || {};
-        statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Đã bắn Webhook: <strong>${escapeHtmlMain(desc)}</strong> (${type === 'INFLOW' ? '+' : '-'}${amount.toLocaleString('vi-VN')}đ)<br><span style="color:#CBD5E1;font-size:9.5px;">AI: ${escapeHtmlMain(ai.category || 'Mới')} &bull; ${escapeHtmlMain(ai.bucket_label || '50/30/20')}</span>`;
+        statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Đã bắn Webhook: <strong>${escapeHtmlMain(desc)}</strong> (${type === 'INFLOW' ? '+' : '-'}${amount.toLocaleString('vi-VN')}đ)<br><span style="color:#CBD5E1;font-size:9.5px;">AI: ${escapeHtmlMain(ai.category || 'Mới')} &bull; ${escapeHtmlMain(ai.bucket_label || 'Phân loại tự động')}</span>`;
         statusEl.style.display = 'block';
       }
     }
@@ -509,6 +509,279 @@ function toggleDesktopDemoPanel() {
   }
 }
 
+// ==========================================================================
+// Income-Based Custom Budget Allocation Modal Controller (Global)
+// ==========================================================================
+function _getLocalSuggestionByIncome(income) {
+  const inc = Number(income) || 0;
+  if (inc < 12000000) {
+    return {
+      needs: 65,
+      wants: 20,
+      savings: 15,
+      bracket: '< 12 triệu',
+      reason: 'Thu nhập dưới 12 triệu nên ưu tiên 65% chi tiêu thiết yếu, 20% mong muốn và duy trì 15% tiết kiệm.'
+    };
+  }
+  if (inc < 25000000) {
+    return {
+      needs: 55,
+      wants: 25,
+      savings: 20,
+      bracket: '12 – 25 triệu',
+      reason: 'Thu nhập 12–25 triệu phù hợp 55% thiết yếu, 25% mong muốn và 20% tích lũy.'
+    };
+  }
+  return {
+    needs: 40,
+    wants: 25,
+    savings: 35,
+    bracket: 'Từ 25 triệu trở lên',
+    reason: 'Thu nhập từ 25 triệu trở lên tối ưu đẩy mạnh tỷ trọng tích sản & đầu tư lên 35%.'
+  };
+}
+
+function _applyRatioValues(needs, wants, savings, incomeOverride) {
+  const incEl = document.getElementById('ratio-income-input');
+  if (incomeOverride !== undefined && incomeOverride !== null && incEl) {
+    incEl.value = Math.round(Number(incomeOverride) || 0);
+  }
+  const income = Math.max(0, Number(incEl ? incEl.value : 0));
+  const map = { needs: needs, wants: wants, savings: savings };
+  ['needs', 'wants', 'savings'].forEach((k) => {
+    const pct = Math.max(0, Math.min(100, Math.round(Number(map[k]) || 0)));
+    const rng = document.getElementById(`ratio-range-${k}`);
+    const pctEl = document.getElementById(`ratio-pct-${k}`);
+    const vndEl = document.getElementById(`ratio-vnd-${k}`);
+    const fmtEl = document.getElementById(`ratio-vnd-fmt-${k}`);
+    if (rng) rng.value = pct;
+    if (pctEl) pctEl.value = pct;
+    const vnd = Math.round((income * pct) / 100);
+    if (vndEl) vndEl.value = vnd;
+    if (fmtEl) fmtEl.textContent = vnd.toLocaleString('vi-VN') + 'đ';
+  });
+  _updateRatioSuggestionHint(income);
+  refreshRatioSummary();
+}
+
+function _updateRatioSuggestionHint(income) {
+  const noteEl = document.getElementById('ratio-suggestion-note');
+  if (!noteEl) return;
+  const sug = _getLocalSuggestionByIncome(income);
+  noteEl.innerHTML = `<i class="fa-solid fa-lightbulb" style="color:#2563EB;"></i> <strong>Gợi ý (${sug.bracket}):</strong> ${sug.needs}% / ${sug.wants}% / ${sug.savings}% — ${sug.reason}`;
+}
+
+function refreshRatioSummary() {
+  const income = Math.max(0, Number(document.getElementById('ratio-income-input')?.value || 0));
+  const needs = Number(document.getElementById('ratio-pct-needs')?.value || 0);
+  const wants = Number(document.getElementById('ratio-pct-wants')?.value || 0);
+  const savings = Number(document.getElementById('ratio-pct-savings')?.value || 0);
+  const totalPct = needs + wants + savings;
+  const totalVnd = Math.round((income * totalPct) / 100);
+
+  const pctBadge = document.getElementById('ratio-total-pct');
+  const vndBadge = document.getElementById('ratio-total-vnd');
+  const msgEl = document.getElementById('ratio-total-msg');
+  const autoBtn = document.getElementById('btn-autobalance-ratio');
+  const saveBtn = document.getElementById('btn-save-budget-ratio');
+  const box = document.getElementById('ratio-summary-box');
+
+  if (pctBadge) pctBadge.textContent = `${totalPct}%`;
+  if (vndBadge) vndBadge.textContent = `${totalVnd.toLocaleString('vi-VN')}đ / ${Math.round(income).toLocaleString('vi-VN')}đ`;
+
+  const valid = totalPct === 100 && income > 0;
+  if (box) {
+    box.style.background = valid ? '#ECFDF5' : '#FEF2F2';
+    box.style.borderColor = valid ? '#A7F3D0' : '#FECACA';
+  }
+  if (pctBadge) pctBadge.style.color = valid ? '#059669' : '#DC2626';
+  if (msgEl) {
+    if (income <= 0) {
+      msgEl.textContent = 'Vui lòng nhập thu nhập hàng tháng lớn hơn 0đ.';
+      msgEl.style.color = '#DC2626';
+    } else if (totalPct === 100) {
+      msgEl.textContent = 'Tổng phân bổ hợp lệ (100% thu nhập).';
+      msgEl.style.color = '#059669';
+    } else {
+      const diff = 100 - totalPct;
+      msgEl.textContent = diff > 0 ? `Còn thiếu ${diff}% chưa phân bổ.` : `Đang vượt quá ${Math.abs(diff)}% thu nhập.`;
+      msgEl.style.color = '#DC2626';
+    }
+  }
+  if (autoBtn) autoBtn.style.display = totalPct === 100 ? 'none' : 'inline-flex';
+  if (saveBtn) {
+    saveBtn.disabled = !valid;
+    saveBtn.style.opacity = valid ? '1' : '0.55';
+  }
+}
+
+function openBudgetRatioModal() {
+  const modal = document.getElementById('modal-budget-ratio');
+  if (!modal) {
+    if (window.showToast) window.showToast('Vui lòng đăng nhập để tự chia ngân sách!', 'info');
+    return;
+  }
+  const inc = Number(modal.dataset.income || 18000000);
+  const needs = Number(modal.dataset.needs || 50);
+  const wants = Number(modal.dataset.wants || 30);
+  const savings = Number(modal.dataset.savings || 20);
+  _applyRatioValues(needs, wants, savings, inc);
+  openModal('modal-budget-ratio');
+}
+
+function closeBudgetRatioModal() {
+  closeModal('modal-budget-ratio');
+}
+
+function syncRatioFromPct(bucket, rawVal) {
+  const pct = Math.max(0, Math.min(100, Math.round(Number(rawVal) || 0)));
+  const rng = document.getElementById(`ratio-range-${bucket}`);
+  const pctEl = document.getElementById(`ratio-pct-${bucket}`);
+  const vndEl = document.getElementById(`ratio-vnd-${bucket}`);
+  const fmtEl = document.getElementById(`ratio-vnd-fmt-${bucket}`);
+  const income = Math.max(0, Number(document.getElementById('ratio-income-input')?.value || 0));
+  if (rng) rng.value = pct;
+  if (pctEl) pctEl.value = pct;
+  const vnd = Math.round((income * pct) / 100);
+  if (vndEl) vndEl.value = vnd;
+  if (fmtEl) fmtEl.textContent = vnd.toLocaleString('vi-VN') + 'đ';
+  refreshRatioSummary();
+}
+
+function syncRatioFromVnd(bucket, rawVal) {
+  const vnd = Math.max(0, Number(rawVal) || 0);
+  const income = Math.max(0, Number(document.getElementById('ratio-income-input')?.value || 0));
+  const pct = income > 0 ? Math.max(0, Math.min(100, Math.round((vnd / income) * 100))) : 0;
+  const rng = document.getElementById(`ratio-range-${bucket}`);
+  const pctEl = document.getElementById(`ratio-pct-${bucket}`);
+  const fmtEl = document.getElementById(`ratio-vnd-fmt-${bucket}`);
+  if (rng) rng.value = pct;
+  if (pctEl) pctEl.value = pct;
+  if (fmtEl) fmtEl.textContent = Math.round(vnd).toLocaleString('vi-VN') + 'đ';
+  refreshRatioSummary();
+}
+
+function onRatioIncomeInput() {
+  const income = Math.max(0, Number(document.getElementById('ratio-income-input')?.value || 0));
+  ['needs', 'wants', 'savings'].forEach((k) => {
+    const pct = Math.max(0, Math.min(100, Math.round(Number(document.getElementById(`ratio-pct-${k}`)?.value || 0))));
+    const vnd = Math.round((income * pct) / 100);
+    const vndEl = document.getElementById(`ratio-vnd-${k}`);
+    const fmtEl = document.getElementById(`ratio-vnd-fmt-${k}`);
+    if (vndEl) vndEl.value = vnd;
+    if (fmtEl) fmtEl.textContent = vnd.toLocaleString('vi-VN') + 'đ';
+  });
+  _updateRatioSuggestionHint(income);
+  refreshRatioSummary();
+}
+
+function applyRatioPreset(needs, wants, savings, label) {
+  _applyRatioValues(needs, wants, savings);
+  if (label && window.showToast) {
+    window.showToast(`Đã áp dụng tỷ lệ ${needs}/${wants}/${savings} (${label})`, 'info');
+  }
+}
+
+async function suggestRatioForIncomeInput() {
+  const income = Math.max(0, Number(document.getElementById('ratio-income-input')?.value || 0));
+  if (income <= 0) {
+    if (window.showToast) window.showToast('Vui lòng nhập thu nhập lớn hơn 0đ!', 'error');
+    return;
+  }
+  let sug = _getLocalSuggestionByIncome(income);
+  try {
+    const res = await fetch(`/api/user/budget-suggestion?income=${encodeURIComponent(income)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.suggestion) sug = data.suggestion;
+    }
+  } catch (e) {
+    // Fallback sang gợi ý cục bộ
+  }
+  _applyRatioValues(sug.needs, sug.wants, sug.savings);
+  const noteEl = document.getElementById('ratio-suggestion-note');
+  if (noteEl) {
+    noteEl.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color:#2563EB;"></i> <strong>Gợi ý (${sug.bracket}):</strong> ${sug.needs}% / ${sug.wants}% / ${sug.savings}% — ${sug.reason}`;
+  }
+  if (window.showToast) {
+    window.showToast(`Đã áp dụng gợi ý ${sug.needs}/${sug.wants}/${sug.savings} cho thu nhập ${income.toLocaleString('vi-VN')}đ`, 'success');
+  }
+}
+
+function autoBalanceRatio() {
+  let needs = Math.max(0, Math.min(100, Math.round(Number(document.getElementById('ratio-pct-needs')?.value || 0))));
+  let wants = Math.max(0, Math.min(100, Math.round(Number(document.getElementById('ratio-pct-wants')?.value || 0))));
+  let savings = 0;
+  if (needs + wants <= 100) {
+    savings = 100 - needs - wants;
+  } else {
+    const sumNW = needs + wants;
+    needs = Math.round((needs / sumNW) * 100);
+    wants = 100 - needs;
+    savings = 0;
+  }
+  _applyRatioValues(needs, wants, savings);
+}
+
+async function submitBudgetRatio() {
+  const income = Math.max(0, Math.round(Number(document.getElementById('ratio-income-input')?.value || 0)));
+  const needs = Math.round(Number(document.getElementById('ratio-pct-needs')?.value || 0));
+  const wants = Math.round(Number(document.getElementById('ratio-pct-wants')?.value || 0));
+  const savings = Math.round(Number(document.getElementById('ratio-pct-savings')?.value || 0));
+
+  if (income <= 0) {
+    if (window.showToast) window.showToast('Thu nhập hàng tháng phải lớn hơn 0đ!', 'error');
+    return;
+  }
+  if (needs + wants + savings !== 100) {
+    if (window.showToast) window.showToast(`Tổng tỷ lệ phải bằng 100% (hiện tại ${needs + wants + savings}%)!`, 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-save-budget-ratio');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+  }
+  try {
+    const res = await fetch('/api/user/budget-ratio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        monthly_income: income,
+        needs: needs,
+        wants: wants,
+        savings: savings
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const modal = document.getElementById('modal-budget-ratio');
+      if (modal) {
+        modal.dataset.income = income;
+        modal.dataset.needs = needs;
+        modal.dataset.wants = wants;
+        modal.dataset.savings = savings;
+      }
+      closeBudgetRatioModal();
+      if (window.showToast) {
+        window.showToast(`✅ Đã lưu thu nhập ${income.toLocaleString('vi-VN')}đ (${needs}/${wants}/${savings})!`, 'success');
+      }
+      setTimeout(() => window.location.reload(), 650);
+    } else {
+      if (window.showToast) window.showToast(data.message || 'Không thể lưu cấu hình ngân sách!', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    if (window.showToast) window.showToast('Lỗi kết nối khi lưu tỷ lệ ngân sách!', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu ngân sách';
+    }
+  }
+}
+
 // Global exports
 window.openSimulateTxnModal = openSimulateTxnModal;
 window.closeSimulateTxnModal = closeSimulateTxnModal;
@@ -517,4 +790,14 @@ window.submitSimulateTxn = submitSimulateTxn;
 window.replayPushFromSimResult = replayPushFromSimResult;
 window.quickFireWebhookPreset = quickFireWebhookPreset;
 window.toggleDesktopDemoPanel = toggleDesktopDemoPanel;
+window.openBudgetRatioModal = openBudgetRatioModal;
+window.closeBudgetRatioModal = closeBudgetRatioModal;
+window.syncRatioFromPct = syncRatioFromPct;
+window.syncRatioFromVnd = syncRatioFromVnd;
+window.onRatioIncomeInput = onRatioIncomeInput;
+window.applyRatioPreset = applyRatioPreset;
+window.suggestRatioForIncomeInput = suggestRatioForIncomeInput;
+window.autoBalanceRatio = autoBalanceRatio;
+window.submitBudgetRatio = submitBudgetRatio;
+window.refreshRatioSummary = refreshRatioSummary;
 

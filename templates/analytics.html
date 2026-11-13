@@ -33,13 +33,18 @@
       </div>
     </div>
 
-    <!-- 50/30/20 Chart Card -->
+    <!-- Custom Budget Allocation Chart Card -->
     <div class="chart-card">
-      <div class="chart-card-title">
-        <i class="fa-solid fa-chart-pie" style="color:var(--accent);"></i>
-        Quy tắc 50/30/20
+      <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <i class="fa-solid fa-chart-pie" style="color:var(--accent);"></i>
+          Ngân sách tự chia ({{ health.target_ratio.needs }}/{{ health.target_ratio.wants }}/{{ health.target_ratio.savings }})
+        </span>
+        <button type="button" onclick="openBudgetRatioModal()" style="background:var(--accent-light);border:1px solid var(--border-accent);color:var(--accent);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;cursor:pointer;">
+          <i class="fa-solid fa-sliders"></i> Tự chia lại
+        </button>
       </div>
-      <div class="chart-card-sub">So sánh chi tiêu thực tế với chuẩn tài chính cá nhân</div>
+      <div class="chart-card-sub">So sánh chi tiêu thực tế với mục tiêu bạn đặt trên thu nhập {{ "{:,.0f}".format(health.income) }}đ</div>
 
       <div class="chart-wrap">
         <canvas id="ruleChart"></canvas>
@@ -53,12 +58,14 @@
               <span class="dot-color" style="background:#3b82f6;"></span>
               Thiết yếu (Needs)
             </span>
-            <span class="budget-row-val">{{ health.needs.percentage }}% / chuẩn 50%</span>
+            <span class="budget-row-val {% if health.needs.percentage > health.target_ratio.needs %}text-danger{% else %}text-secondary{% endif %}">
+              {{ health.needs.percentage }}% / mục tiêu {{ health.target_ratio.needs }}%{% if health.needs.percentage > health.target_ratio.needs %} ⚠️{% endif %}
+            </span>
           </div>
           <div class="progress-bar">
             <div class="progress-fill progress-fill-needs" data-pct="{{ [health.needs.percentage, 100]|min }}"></div>
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.needs.amount) }}đ</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.needs.amount) }}đ / hạn mức {{ "{:,.0f}".format(health.target_ratio.needs_amount) }}đ</div>
         </div>
         <!-- Wants -->
         <div class="budget-row">
@@ -67,14 +74,14 @@
               <span class="dot-color" style="background:#f59e0b;"></span>
               Mong muốn (Wants)
             </span>
-            <span class="budget-row-val {% if health.wants.percentage > 30 %}text-danger{% else %}text-secondary{% endif %}">
-              {{ health.wants.percentage }}% / chuẩn 30%{% if health.wants.percentage > 30 %} ⚠️{% endif %}
+            <span class="budget-row-val {% if health.wants.percentage > health.target_ratio.wants %}text-danger{% else %}text-secondary{% endif %}">
+              {{ health.wants.percentage }}% / mục tiêu {{ health.target_ratio.wants }}%{% if health.wants.percentage > health.target_ratio.wants %} ⚠️{% endif %}
             </span>
           </div>
           <div class="progress-bar">
             <div class="progress-fill progress-fill-wants" data-pct="{{ [health.wants.percentage, 100]|min }}"></div>
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.wants.amount) }}đ</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.wants.amount) }}đ / hạn mức {{ "{:,.0f}".format(health.target_ratio.wants_amount) }}đ</div>
         </div>
         <!-- Savings -->
         <div class="budget-row">
@@ -83,14 +90,14 @@
               <span class="dot-color" style="background:#22c55e;"></span>
               Tiết kiệm (Savings)
             </span>
-            <span class="budget-row-val {% if health.savings.percentage < 20 %}text-danger{% else %}text-success{% endif %}">
-              {{ health.savings.percentage }}% / chuẩn 20%{% if health.savings.percentage < 20 %} ❌{% else %} ✅{% endif %}
+            <span class="budget-row-val {% if health.savings.percentage < health.target_ratio.savings %}text-danger{% else %}text-success{% endif %}">
+              {{ health.savings.percentage }}% / mục tiêu {{ health.target_ratio.savings }}%{% if health.savings.percentage < health.target_ratio.savings %} ❌{% else %} ✅{% endif %}
             </span>
           </div>
           <div class="progress-bar">
             <div class="progress-fill progress-fill-savings" data-pct="{{ [health.savings.percentage, 100]|min }}"></div>
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.savings.amount) }}đ</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ "{:,.0f}".format(health.savings.amount) }}đ / mục tiêu {{ "{:,.0f}".format(health.target_ratio.savings_amount) }}đ</div>
         </div>
       </div>
     </div>
@@ -160,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.width = el.getAttribute('data-pct') + '%';
   });
 
-  // Doughnut chart 50/30/20
+  // Doughnut chart tỷ lệ ngân sách tự chia
   const ctx1 = document.getElementById('ruleChart');
   if (ctx1) {
     new Chart(ctx1, {

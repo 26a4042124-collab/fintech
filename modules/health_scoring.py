@@ -129,6 +129,44 @@ def detect_internal_transfers(transactions):
 
     return matched_pairs
 
+def suggest_ratio_by_income(monthly_income):
+    """
+    Gợi ý tỷ lệ phân bổ ngân sách khởi điểm dựa theo bậc thu nhập thực tế (VNĐ/tháng).
+    Người dùng luôn có quyền tự điều chỉnh lại theo hoàn cảnh cá nhân.
+    """
+    try:
+        income = float(monthly_income or 0)
+    except (ValueError, TypeError):
+        income = 18000000
+
+    if income <= 0:
+        income = 18000000
+
+    if income < 12000000:
+        return {
+            "needs": 65,
+            "wants": 20,
+            "savings": 15,
+            "bracket": "Thu nhập khởi điểm (< 12 triệu)",
+            "reason": "Ưu tiên chi phí sinh hoạt & ăn ở tối thiểu (65%), vẫn duy trì kỷ luật tích lũy 15%."
+        }
+    elif income < 25000000:
+        return {
+            "needs": 55,
+            "wants": 25,
+            "savings": 20,
+            "bracket": "Thu nhập trung bình khá (12 – 25 triệu)",
+            "reason": "Cân bằng giữa nhu cầu thiết yếu (55%), chất lượng sống (25%) và quỹ dự phòng 20%."
+        }
+    else:
+        return {
+            "needs": 40,
+            "wants": 25,
+            "savings": 35,
+            "bracket": "Thu nhập khá/cao (≥ 25 triệu)",
+            "reason": "Tỷ trọng chi phí cứng giảm dần, nên đẩy mạnh tỷ lệ tích sản & đầu tư lên 35%."
+        }
+
 def compute_financial_health(
     enriched_transactions, 
     total_income=18000000, 
@@ -138,15 +176,20 @@ def compute_financial_health(
     savings_goals=None
 ):
     """
-    Thuật toán nâng cao tính toán Sức khỏe tài chính, Phân bổ ngân sách linh hoạt,
+    Thuật toán nâng cao tính toán Sức khỏe tài chính, Phân bổ ngân sách cá nhân hóa theo thu nhập,
     Dự báo dòng tiền cuối tháng, Quản lý hạn mức danh mục & Làm tròn tiền lẻ Micro-investing.
     """
+    income_suggestion = suggest_ratio_by_income(total_income)
     if target_ratio is None:
-        target_ratio = {"needs": 50, "wants": 30, "savings": 20}
+        target_ratio = {
+            "needs": income_suggestion["needs"],
+            "wants": income_suggestion["wants"],
+            "savings": income_suggestion["savings"]
+        }
     
-    bench_needs = target_ratio.get("needs", 50)
-    bench_wants = target_ratio.get("wants", 30)
-    bench_savings = target_ratio.get("savings", 20)
+    bench_needs = target_ratio.get("needs", income_suggestion["needs"])
+    bench_wants = target_ratio.get("wants", income_suggestion["wants"])
+    bench_savings = target_ratio.get("savings", income_suggestion["savings"])
 
     if round_up_config is None:
         round_up_config = {"enabled": True, "step": 10000, "accumulated_total": 0}
@@ -434,6 +477,9 @@ def compute_financial_health(
         f"Bạn có thể chuyển ngay vào hũ Mục tiêu tài chính để kích hoạt lãi kép micro-investing!"
     ]
 
+    target_needs_amt = int(round(income_val * (bench_needs / 100.0)))
+    target_wants_amt = int(round(income_val * (bench_wants / 100.0)))
+
     return {
         "income": income_val,
         "total_expense": total_expense,
@@ -441,22 +487,29 @@ def compute_financial_health(
         "target_ratio": {
             "needs": bench_needs,
             "wants": bench_wants,
-            "savings": bench_savings
+            "savings": bench_savings,
+            "needs_amount": target_needs_amt,
+            "wants_amount": target_wants_amt,
+            "savings_amount": target_savings
         },
+        "income_suggestion": income_suggestion,
         "needs": {
             "amount": total_needs,
             "percentage": pct_needs,
-            "benchmark_pct": bench_needs
+            "benchmark_pct": bench_needs,
+            "target_amount": target_needs_amt
         },
         "wants": {
             "amount": total_wants,
             "percentage": pct_wants,
-            "benchmark_pct": bench_wants
+            "benchmark_pct": bench_wants,
+            "target_amount": target_wants_amt
         },
         "savings": {
             "amount": total_savings,
             "percentage": pct_savings,
-            "benchmark_pct": bench_savings
+            "benchmark_pct": bench_savings,
+            "target_amount": target_savings
         },
         "health_score": score,
         "health_status": status_label,

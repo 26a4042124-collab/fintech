@@ -184,8 +184,8 @@
         "bank_name": "Vietcombank",
         "account_no": "1028475938",
         "status": "ACTIVE",
-        "granted_at": "2026-10-01",
-        "expires_at": "2026-12-30",
+        "granted_at": "2026-11-13",
+        "expires_at": "2027-02-11",
         "scopes": [
           "read_balance",
           "read_transactions",
@@ -193,7 +193,7 @@
         ],
         "compliance": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN",
         "standard": "Open API v2.1 (Thông tư 64/2024/TT-NHNN)",
-        "valid_until": "2026-12-30"
+        "valid_until": "2027-02-11"
       },
       {
         "consent_id": "CONSENT_TCB_01",

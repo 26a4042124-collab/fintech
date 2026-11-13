@@ -123,7 +123,7 @@
           {% else %}score-danger{% endif %}">
           {{ health.health_status }}
         </span>
-        <div class="score-tip">Tiết kiệm đang ở <strong>{{ health.savings.percentage }}%</strong> — chuẩn là 20%. <a href="{{ url_for('analytics') }}" style="color:var(--accent);font-weight:700;text-decoration:none;">Xem Analytics →</a></div>
+        <div class="score-tip">Tiết kiệm đang ở <strong>{{ health.savings.percentage }}%</strong> — mục tiêu bạn đặt: <strong>{{ health.target_ratio.savings }}%</strong> ({{ "{:,.0f}".format(health.target_ratio.savings_amount) }}đ). <a href="#" onclick="openBudgetRatioModal(); return false;" style="color:var(--accent);font-weight:700;text-decoration:none;">Tự chia →</a></div>
       </div>
     </div>
 
