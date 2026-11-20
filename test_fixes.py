@@ -1,8 +1,9 @@
 import json
 import unittest
+from unittest.mock import patch
 from modules.ai_categorizer import categorize_transaction, process_all_transactions
 from modules.health_scoring import compute_financial_health
-from modules.chatbot_ai import generate_chatbot_response
+from modules.chatbot_ai import generate_chatbot_response, mask_pii
 from app import app
 
 class TestFinLabFixes(unittest.TestCase):
@@ -119,6 +120,104 @@ class TestFinLabFixes(unittest.TestCase):
         self.assertEqual(chat_res.status_code, 200)
         chat_data = chat_res.get_json()
         self.assertIn("Tổng đã chi", chat_data.get("reply", ""))
+        self.assertIn("meta", chat_data)
+        self.assertTrue(chat_data["meta"].get("pii_masked"))
+
+    def test_08_pii_masking_decree_13(self):
+        """TECH-11: Đảm bảo mask_pii() ẩn danh sạch PII theo NĐ 13 và không làm hỏng số tiền VNĐ"""
+        user_profile = {
+            "full_name": "Nguyễn Văn A",
+            "username": "nguyen_van_a",
+            "email": "nguyenvana.fintech@example.com",
+            "phone": "0988776655",
+        }
+        consents = [
+            {"bank_name": "Vietcombank", "account_no": "1028475938", "status": "ACTIVE"},
+            {"bank_name": "Techcombank", "account_no": "19038475920", "status": "ACTIVE"},
+        ]
+        raw_text = (
+            "Tôi là Nguyễn Văn A (Nguyen Van A), email nguyenvana.fintech@example.com, "
+            "SĐT 0988776655, CCCD 001204012345, STK 1028475938 và TK 19038475920, "
+            "thẻ 4532-1234-5678-9012. Thu nhập 18,000,000đ, vừa uống cà phê 45000đ."
+        )
+        masked, fields = mask_pii(raw_text, user_profile=user_profile, consents=consents)
+
+        # Khẳng định KHÔNG còn dữ liệu định danh cá nhân
+        for secret in [
+            "Nguyễn Văn A",
+            "Nguyen Van A",
+            "nguyenvana.fintech@example.com",
+            "0988776655",
+            "001204012345",
+            "1028475938",
+            "19038475920",
+            "4532-1234-5678-9012",
+        ]:
+            self.assertNotIn(secret, masked, f"PII '{secret}' bị lọt qua mask_pii()!")
+
+        # Khẳng định giữ nguyên số tiền VNĐ để AI không tính sai
+        self.assertIn("18,000,000đ", masked)
+        self.assertIn("45000đ", masked)
+        self.assertIn("[KHACH_HANG]", masked)
+        self.assertIn("[SDT_AN_DANH]", masked)
+        self.assertIn("[STK_AN_DANH]", masked)
+        self.assertIn("[EMAIL_AN_DANH]", masked)
+        self.assertIn("[CCCD_AN_DANH]", masked)
+        self.assertIn("[SO_THE_AN_DANH]", masked)
+        self.assertGreaterEqual(len(fields), 5)
+
+    def test_09_chatbot_hybrid_rag_and_offline_fallback(self):
+        """TECH-11: Kiểm chứng Hybrid RAG gửi prompt đã ẩn danh PII, tôn trọng Consent & Fallback Offline"""
+        with open("data/mock_transactions.json", "r", encoding="utf-8") as f:
+            txns = json.load(f)
+        enriched = process_all_transactions(txns)
+        health = compute_financial_health(enriched)
+        health["consents"] = [
+            {"bank_name": "Vietcombank", "account_no": "1028475938", "status": "ACTIVE"}
+        ]
+        user_profile = {
+            "full_name": "Nguyễn Văn A",
+            "phone": "0988776655",
+            "email": "nguyenvana.fintech@example.com",
+            "open_banking_consent": {"ai_analytics": True},
+        }
+        prompt_with_pii = "Tôi là Nguyễn Văn A, SĐT 0988776655, STK 1028475938. Tháng này tôi tiêu bao nhiêu?"
+
+        # 1. Mock Gemini online: kiểm tra payload gửi lên Gemini KHÔNG chứa bất kỳ PII nào
+        captured = {}
+        def fake_gemini(masked_q, safe_ctx, masked_draft):
+            captured["q"] = masked_q
+            captured["ctx"] = safe_ctx
+            captured["draft"] = masked_draft
+            return "Trả lời từ Gemini Hybrid dựa trên số liệu Python.", "gemini-3.5-flash-lite"
+
+        with patch("modules.chatbot_ai._call_gemini_hybrid", side_effect=fake_gemini):
+            reply, meta = generate_chatbot_response(
+                prompt_with_pii, health, user_profile=user_profile, use_llm=True, return_meta=True
+            )
+        self.assertEqual(meta["engine"], "gemini-hybrid (gemini-3.5-flash-lite)")
+        self.assertIn("Gemini Hybrid", reply)
+        combined_outbound = captured["q"] + captured["ctx"] + captured["draft"]
+        for secret in ["Nguyễn Văn A", "0988776655", "1028475938", "nguyenvana.fintech@example.com"]:
+            self.assertNotIn(secret, combined_outbound)
+
+        # 2. Mô phỏng mất mạng / 503 (Gemini trả về None, None): rơi êm về Rule-Based Offline
+        with patch("modules.chatbot_ai._call_gemini_hybrid", return_value=(None, None)):
+            reply_off, meta_off = generate_chatbot_response(
+                prompt_with_pii, health, user_profile=user_profile, use_llm=True, return_meta=True
+            )
+        self.assertEqual(meta_off["engine"], "rule-based-offline")
+        self.assertEqual(meta_off["fallback_reason"], "api_unavailable_or_no_key")
+        self.assertIn("Tổng đã chi", reply_off)
+
+        # 3. Khi user tắt quyền AI Analytics theo NĐ 13: không gọi LLM bên ngoài
+        user_no_ai = dict(user_profile, open_banking_consent={"ai_analytics": False})
+        with patch("modules.chatbot_ai._call_gemini_hybrid") as mock_llm:
+            _, meta_no_ai = generate_chatbot_response(
+                prompt_with_pii, health, user_profile=user_no_ai, use_llm=True, return_meta=True
+            )
+            mock_llm.assert_not_called()
+        self.assertEqual(meta_no_ai["fallback_reason"], "ai_consent_disabled")
 
 if __name__ == "__main__":
     unittest.main()

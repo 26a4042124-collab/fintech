@@ -2004,8 +2004,33 @@ def api_chat():
     enriched_txns, health_data = get_financial_data()
     user = get_current_user() or session.get('user', {})
     health_data['consents'] = user.get('consents', [])
-    ai_reply = generate_chatbot_response(user_message, health_data)
-    return jsonify({"reply": ai_reply})
+
+    use_llm = (
+        not app.config.get('TESTING', False)
+        and os.environ.get('FINLAB_CHATBOT_OFFLINE', '0') != '1'
+        and ('unittest' not in sys.modules)
+        and ('pytest' not in sys.modules)
+    )
+    ai_reply, meta = generate_chatbot_response(
+        user_message,
+        health_data,
+        user_profile=user,
+        use_llm=use_llm,
+        return_meta=True,
+    )
+
+    if use_llm:
+        masked_summary = ", ".join(meta.get("masked_fields") or []) or "Không phát hiện PII thô"
+        log_action(
+            actor=user.get('username') or user.get('id', 'user'),
+            action='AI Chatbot Hybrid (Ẩn danh PII - NĐ 13)',
+            target=meta.get('engine', 'rule-based-offline'),
+            result='Success',
+            details=f"Đã che: [{masked_summary}] | Prompt gửi AI: {meta.get('masked_question', '')[:120]}",
+            ip=request.remote_addr or '127.0.0.1',
+        )
+
+    return jsonify({"reply": ai_reply, "meta": meta})
 
 @app.route('/api/transactions', methods=['GET'])
 @login_required

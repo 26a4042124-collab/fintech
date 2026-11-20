@@ -649,7 +649,20 @@
       })
       .then(r => r.json())
       .then(data => {
-        loadDiv.innerHTML = formatAiMarkdown(data.reply || 'Xin lỗi, tôi chưa nhận diện được yêu cầu này!');
+        let badgeHtml = '';
+        if (data.meta) {
+          const isGemini = String(data.meta.engine || '').includes('gemini');
+          const bg = isGemini ? '#ECFDF5' : '#F1F5F9';
+          const color = isGemini ? '#059669' : '#64748B';
+          const maskedList = Array.isArray(data.meta.masked_fields) && data.meta.masked_fields.length > 0
+            ? ` • Đã che: ${escapeHtmlMain(data.meta.masked_fields.join(', '))}`
+            : '';
+          const label = isGemini
+            ? `🛡️ Gemini Hybrid • Ẩn danh PII (NĐ 13)${maskedList}`
+            : `⚡ Chế độ Offline an toàn${maskedList}`;
+          badgeHtml = `<div style="margin-top:6px;padding-top:5px;border-top:1px dashed #E2E8F0;font-size:10px;color:${color};"><span style="background:${bg};padding:2px 7px;border-radius:99px;font-weight:700;display:inline-block;">${label}</span></div>`;
+        }
+        loadDiv.innerHTML = formatAiMarkdown(data.reply || 'Xin lỗi, tôi chưa nhận diện được yêu cầu này!') + badgeHtml;
         box.scrollTop = box.scrollHeight;
       })
       .catch(() => {
