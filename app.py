@@ -5,6 +5,7 @@ import json
 import re
 import socket
 import io
+import uuid
 from datetime import datetime, timedelta
 
 if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
@@ -21,14 +22,16 @@ except ImportError:
     pass
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-import qrcode
+try:
+    import qrcode
+except ImportError:
+    qrcode = None
 from modules.auth import (
     authenticate_user, 
     register_user, 
     user_exists_by_phone,
     get_user_by_id, 
     get_all_users, 
-    load_users,
     update_user_field,
     update_user,
     reset_user_password, 
@@ -54,34 +57,77 @@ from modules.ai_categorizer import (
 from modules.health_scoring import compute_financial_health, suggest_ratio_by_income
 from modules.chatbot_ai import generate_chatbot_response
 from modules.otp_service import generate_otp, send_otp_email, verify_otp
+from modules.database import (
+    SavingsGoal,
+    SessionLocal,
+    SystemSetting,
+    Transaction,
+    User,
+    Wallet,
+    session_scope,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'finlab_canva_redesign_secret_2026')
 
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'system_settings.json')
-AUDIT_FILE = os.path.join(os.path.dirname(__file__), 'data', 'audit_logs.json')
-
 def load_system_settings():
-    if not os.path.exists(SETTINGS_FILE):
-        return {
-            "app_name": "FinLab PFM & Open Banking",
-            "app_version": "v2.5 Enterprise",
-            "currency": "VNĐ",
-            "date_format": "DD/MM/YYYY",
-            "session_timeout_minutes": 60,
-            "min_password_length": 6,
-            "open_banking_sandbox": True,
-            "compliance_standard": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN"
-        }
-    try:
-        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    settings = {}
+    with SessionLocal() as db:
+        for item in db.query(SystemSetting).all():
+            if item.data_type == "BOOL":
+                settings[item.key] = item.value.lower() == "true"
+            elif item.data_type == "INT":
+                settings[item.key] = int(item.value)
+            elif item.data_type == "JSON":
+                settings[item.key] = json.loads(item.value)
+            else:
+                settings[item.key] = item.value
+    return settings or {
+        "app_name": "FinLab PFM & Open Banking",
+        "app_version": "v2.5 Enterprise",
+        "currency": "VNĐ",
+        "date_format": "DD/MM/YYYY",
+        "session_timeout_minutes": 60,
+        "min_password_length": 6,
+        "open_banking_sandbox": True,
+        "compliance_standard": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN"
+    }
 
 def save_system_settings(settings):
-    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(settings, f, ensure_ascii=False, indent=2)
+    descriptions = {
+        "app_name": "Tên ứng dụng",
+        "app_version": "Phiên bản ứng dụng",
+        "currency": "Đơn vị tiền tệ hiển thị",
+        "date_format": "Định dạng ngày",
+        "session_timeout_minutes": "Thời hạn phiên đăng nhập",
+        "min_password_length": "Độ dài mật khẩu tối thiểu",
+        "open_banking_sandbox": "Chế độ Open Banking sandbox",
+        "compliance_standard": "Chuẩn tuân thủ",
+    }
+    with SessionLocal() as db:
+        try:
+            for key, value in settings.items():
+                if isinstance(value, bool):
+                    data_type, stored = "BOOL", "true" if value else "false"
+                elif isinstance(value, int):
+                    data_type, stored = "INT", str(value)
+                elif isinstance(value, (dict, list)):
+                    data_type, stored = "JSON", json.dumps(value, ensure_ascii=False)
+                else:
+                    data_type, stored = "STRING", str(value)
+                item = db.get(SystemSetting, key)
+                if item is None:
+                    item = SystemSetting(key=key, value=stored, updated_at=datetime.now().isoformat())
+                    db.add(item)
+                item.value = stored
+                item.data_type = data_type
+                item.description = descriptions.get(key)
+                item.updated_at = datetime.now().isoformat(timespec="seconds")
+                item.updated_by = session.get("user", {}).get("username")
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
 def get_current_user():
     if 'user' not in session:
@@ -110,8 +156,8 @@ def get_financial_data():
     user = get_current_user() or session.get('user', {})
     monthly_income = user.get('monthly_income', 18000000)
     user_consents = user.get('consents', [])
-    raw_txns = fetch_open_banking_transactions(user_consents=user_consents)
-    custom_txns = user.get('custom_transactions') or session.get('custom_transactions', [])
+    raw_txns = fetch_open_banking_transactions(user_consents=user_consents, user_id=user.get('id'))
+    custom_txns = [] if user.get('id') else (user.get('custom_transactions') or session.get('custom_transactions', []))
     all_txns = list(custom_txns) + list(raw_txns)
     enriched_txns = process_all_transactions(all_txns)
     enriched_txns_sorted = sorted(enriched_txns, key=lambda x: x.get('timestamp', ''), reverse=True)
@@ -708,9 +754,13 @@ def admin_api_save_settings():
 @app.route('/admin/api/audit-logs/export')
 @admin_required
 def admin_api_export_audit_logs():
-    if os.path.exists(AUDIT_FILE):
-        return send_file(AUDIT_FILE, as_attachment=True, download_name="finlab_audit_logs.json")
-    return jsonify({"error": "File not found"}), 404
+    payload = json.dumps(load_audit_logs(), ensure_ascii=False, indent=2).encode("utf-8")
+    return send_file(
+        io.BytesIO(payload),
+        mimetype="application/json",
+        as_attachment=True,
+        download_name="finlab_audit_logs.json",
+    )
 
 # ==========================================================================
 # 5. USER PFM REST APIS (CUSTOM RATIOS, GOALS, ROUND-UP, LIMITS, CONSENT)
@@ -955,38 +1005,38 @@ def api_round_up_transfer():
     data = request.get_json() or {}
     target_goal_id = data.get('goal_id')
     user = get_current_user()
-    
-    round_up_cfg = user.get('round_up', {})
-    acc_total = round_up_cfg.get('accumulated_total', 0)
-    
-    if acc_total <= 0:
-        return jsonify({"success": False, "message": "Heo đất chưa có số dư để chuyển!"}), 400
-        
-    goals = user.get('savings_goals', [])
-    target_goal = next((g for g in goals if g['id'] == target_goal_id), None) if target_goal_id else (goals[0] if goals else None)
-    
-    if target_goal:
-        target_goal['current_amount'] = target_goal.get('current_amount', 0) + acc_total
-        update_user_field(user['id'], 'savings_goals', goals)
-        goal_name = target_goal['name']
-    else:
-        goal_name = "Quỹ tiết kiệm chung"
-        
-    round_up_cfg['accumulated_total'] = 0
-    updated_user = update_user_field(user['id'], 'round_up', round_up_cfg)
-    session['user'] = updated_user
+    with session_scope() as db:
+        db_user = db.get(User, user["id"])
+        if db_user is None:
+            return jsonify({"success": False, "message": "Người dùng không tồn tại!"}), 404
+        acc_total = db_user.round_up_accumulated
+        if acc_total <= 0:
+            return jsonify({"success": False, "message": "Heo đất chưa có số dư để chuyển!"}), 400
+        goal_query = db.query(SavingsGoal).filter(SavingsGoal.user_id == user["id"])
+        if target_goal_id:
+            goal_query = goal_query.filter(SavingsGoal.id == str(target_goal_id))
+        elif db_user.round_up_goal_id:
+            goal_query = goal_query.filter(SavingsGoal.id == db_user.round_up_goal_id)
+        target_goal = goal_query.order_by(SavingsGoal.id).first()
+        if target_goal is None:
+            return jsonify({"success": False, "message": "Vui lòng chọn một mục tiêu tiết kiệm hợp lệ!"}), 400
+        target_goal.current_amount += acc_total
+        db_user.round_up_accumulated = 0
+        goal_name = target_goal.goal_name
+        transferred_amount = acc_total
+    session['user'] = get_user_by_id(user["id"])
     
     log_action(
         actor=user['username'],
         action="Chuyển tiền lẻ Heo đất",
         target=goal_name,
         result="Success",
-        details=f"Chuyển {acc_total:,.0f} VNĐ vào mục tiêu"
+        details=f"Chuyển {transferred_amount:,.0f} VNĐ vào mục tiêu"
     )
     
     return jsonify({
         "success": True, 
-        "message": f"Đã chuyển thành công {acc_total:,.0f} VNĐ từ Heo đất vào '{goal_name}'!",
+        "message": f"Đã chuyển thành công {transferred_amount:,.0f} VNĐ từ Heo đất vào '{goal_name}'!",
         "accumulated_total": 0
     })
 
@@ -1651,16 +1701,14 @@ def api_profile_change_password():
     if not new_password or len(new_password) < 4:
         return jsonify({"status": "error", "message": "Mật khẩu mới phải có ít nhất 4 ký tự!"}), 400
 
-    users = load_users()
-    matched = next((u for u in users if u['id'] == user_id), None)
+    matched = get_user_by_id(user_id)
     if not matched:
         return jsonify({"status": "error", "message": "Người dùng không tồn tại!"}), 404
-
-    current_stored_pwd = matched.get('password', '')
-    if old_password and current_stored_pwd and old_password != current_stored_pwd and old_password not in ('password123', 'admin123', '123456'):
+    auth_check = authenticate_user(user.get("username"), old_password)
+    if not auth_check.get("success"):
         return jsonify({"status": "error", "message": "Mật khẩu hiện tại không chính xác!"}), 400
 
-    update_user_field(user_id, 'password', new_password)
+    reset_user_password(user_id, new_password)
     log_action(
         actor=user['username'],
         action="Đổi mật khẩu tài khoản",
@@ -2037,8 +2085,10 @@ def api_chat():
 def api_transactions():
     bank_filter = request.args.get('bank', 'ALL')
     user = get_current_user() or session.get('user', {})
-    raw_txns = fetch_open_banking_transactions(bank_filter, user_consents=user.get('consents', []))
-    custom_txns = user.get('custom_transactions') or session.get('custom_transactions', [])
+    raw_txns = fetch_open_banking_transactions(
+        bank_filter, user_consents=user.get('consents', []), user_id=user.get('id')
+    )
+    custom_txns = [] if user.get('id') else (user.get('custom_transactions') or session.get('custom_transactions', []))
     all_txns = list(custom_txns) + list(raw_txns)
     enriched = process_all_transactions(all_txns)
     return jsonify({"total": len(enriched), "transactions": enriched})
@@ -2161,7 +2211,7 @@ def api_delete_wallet(wallet_id):
 @app.route('/api/wallets/transfer', methods=['POST'])
 @login_required
 def api_transfer_wallet():
-    """Chuyển tiền giữa 2 ví trong users.json."""
+    """Atomically update wallet balances and record both sides of a transfer."""
     data = request.get_json() or {}
     from_id = (data.get('fromId') or '').strip()
     to_id   = (data.get('toId')   or '').strip()
@@ -2174,32 +2224,52 @@ def api_transfer_wallet():
         return jsonify({"success": False, "error": "Thiếu thông tin ví!"}), 400
     if from_id == to_id:
         return jsonify({"success": False, "error": "Ví nguồn và ví đích không được giống nhau!"}), 400
-    if amount <= 0:
+    if amount <= 0 or not amount.is_integer():
         return jsonify({"success": False, "error": "Số tiền phải lớn hơn 0!"}), 400
 
     user = get_current_user() or session['user']
     user_id = user['id']
-    wallets_list = user.get('wallets') or session.get('user_wallets', [])
-    from_w = next((w for w in wallets_list if w['id'] == from_id), None)
-    to_w   = next((w for w in wallets_list if w['id'] == to_id),   None)
-    if not from_w:
-        return jsonify({"success": False, "error": "Không tìm thấy ví nguồn!"}), 404
-    if not to_w:
-        return jsonify({"success": False, "error": "Không tìm thấy ví đích!"}), 404
-    if (float(from_w.get('currentBalance', 0)) < amount):
-        return jsonify({"success": False, "error": f"Số dư ví '{from_w['name']}' không đủ!"}), 400
-
-    from_w['currentBalance'] = float(from_w.get('currentBalance', 0)) - amount
-    to_w['currentBalance']   = float(to_w.get('currentBalance',   0)) + amount
-    from_w['updatedAt'] = to_w['updatedAt'] = time.strftime('%Y-%m-%dT%H:%M:%S')
-    
-    update_user_field(user_id, 'wallets', wallets_list)
-    session['user_wallets'] = wallets_list
+    with session_scope() as db:
+        from_w = db.query(Wallet).filter_by(id=from_id, user_id=user_id).with_for_update().first()
+        to_w = db.query(Wallet).filter_by(id=to_id, user_id=user_id).with_for_update().first()
+        if not from_w:
+            return jsonify({"success": False, "error": "Không tìm thấy ví nguồn!"}), 404
+        if not to_w:
+            return jsonify({"success": False, "error": "Không tìm thấy ví đích!"}), 404
+        if from_w.current_balance < int(amount):
+            return jsonify({"success": False, "error": f"Số dư ví '{from_w.wallet_name}' không đủ!"}), 400
+        from_w.current_balance -= int(amount)
+        to_w.current_balance += int(amount)
+        transfer_time = datetime.now().isoformat(timespec="seconds")
+        transfer_id = uuid.uuid4().hex
+        db.add_all([
+            Transaction(
+                id=f"TRANSFER_{transfer_id}_OUT",
+                wallet_id=from_w.id,
+                timestamp=transfer_time,
+                type="OUTFLOW",
+                amount=int(amount),
+                description=f"Chuyển nội bộ đến {to_w.wallet_name}",
+                source="MANUAL",
+            ),
+            Transaction(
+                id=f"TRANSFER_{transfer_id}_IN",
+                wallet_id=to_w.id,
+                timestamp=transfer_time,
+                type="INFLOW",
+                amount=int(amount),
+                description=f"Chuyển nội bộ từ {from_w.wallet_name}",
+                source="MANUAL",
+            ),
+        ])
+        from_balance = from_w.current_balance
+        to_balance = to_w.current_balance
+    session['user_wallets'] = get_user_by_id(user_id).get("wallets", [])
     session.modified = True
     return jsonify({
         "success": True,
-        "fromBalance": from_w['currentBalance'],
-        "toBalance":   to_w['currentBalance'],
+        "fromBalance": from_balance,
+        "toBalance": to_balance,
     })
 
 # ==========================================================================
@@ -2220,6 +2290,9 @@ def generate_qr_code():
     port = int(os.environ.get('PORT', 5000))
     mobile_url = f'http://{local_ip}:{port}'
     
+    if qrcode is None:
+        return jsonify({'error': 'Thư viện qrcode chưa được cài đặt. Chạy: pip install qrcode'}), 501
+
     # Tạo QR code
     qr = qrcode.QRCode(
         version=1,

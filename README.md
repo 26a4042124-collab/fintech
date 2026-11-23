@@ -27,12 +27,13 @@ fintech/
 ├── requirements.txt            # Danh sách thư viện Python (Flask)
 ├── README.md                   # Hướng dẫn chi tiết sử dụng & thuyết trình
 │
-├── data/                       # Dữ liệu JSON (Zero Database Dependency)
+├── data/                       # Dữ liệu nguồn JSON và SQLite finlab.db
 │   ├── users.json              # Danh sách tài khoản người dùng, cấu hình & consents
 │   ├── mock_transactions.json  # Lịch sử giao dịch giả lập từ VCB, TCB, MB
 │   └── audit_logs.json         # Nhật ký hệ thống & an ninh tuân thủ Nghị định 13
 │
 ├── modules/                    # Các module nghiệp vụ fintech
+│   ├── database.py             # SQLAlchemy models, SQLite engine & transaction sessions
 │   ├── auth.py                 # Xác thực, phân quyền RBAC, user management & audit
 │   ├── open_banking.py         # Giả lập Open Banking API, OAuth 2.0 & Consent check
 │   ├── ai_categorizer.py       # AI NLP phân loại giao dịch & gắn nhãn rổ chi tiêu
@@ -51,6 +52,25 @@ fintech/
     ├── dashboard.html          # Bảng điều khiển PFM người dùng toàn diện
     └── admin.html              # Bảng điều khiển Quản trị viên (Admin Portal)
 ```
+
+---
+
+## 🗄️ SQLite & migrate dữ liệu
+
+Ứng dụng dùng SQLite tại `data/finlab.db`. Trước lần chạy đầu, sao chép `.env.example` thành `.env` và đặt các khóa bí mật riêng:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Đặt kết quả vào `FINLAB_CRYPTO_KEY`; đặt một chuỗi ngẫu nhiên dài khác vào `FINLAB_ACCOUNT_HMAC_KEY`. Không dùng khóa mẫu hoặc đưa `.env` vào Git. Sau đó chạy một lần:
+
+```bash
+python migrate_json_to_sql.py
+python app.py
+```
+
+Script từ chối nhập đè CSDL đã có dữ liệu. Nó nhập baseline 35 giao dịch từ `mock_transactions.json` và kiểm tra tổng thu nhập ròng/số dư là `4.451.000đ`; `mock_transactions_3months.json` là bộ dữ liệu thay thế nên không được cộng vào baseline này. Mật khẩu được lưu dưới dạng PBKDF2 hash; token và số tài khoản được mã hóa trước khi lưu.
 
 ---
 

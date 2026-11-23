@@ -1,10 +1,9 @@
 import json
-import os
 import re
 import unicodedata
 from datetime import datetime
 
-CATEGORIES_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'categories.json')
+from modules.database import Category, SessionLocal
 
 def remove_accents(input_str):
     """Loại bỏ dấu tiếng Việt để đối sánh từ khóa linh hoạt."""
@@ -68,22 +67,52 @@ DEFAULT_RULES = {
 }
 
 def load_categories():
-    if not os.path.exists(CATEGORIES_FILE):
-        return []
-    try:
-        with open(CATEGORIES_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return []
+    with SessionLocal() as db:
+        rows = db.query(Category).order_by(Category.category_name).all()
+        return [{
+            "id": row.id,
+            "name": row.category_name,
+            "category_name": row.category_name,
+            "type": row.type,
+            "bucket": row.bucket,
+            "keywords": json.loads(row.keywords_json or "[]"),
+            "icon": row.icon,
+            "color": row.color,
+            "is_default": bool(row.is_default),
+            "is_hidden": bool(row.is_hidden),
+        } for row in rows]
 
 def save_categories(categories):
-    try:
-        with open(CATEGORIES_FILE, 'w', encoding='utf-8') as f:
-            json.dump(categories, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as e:
-        print(f"Error saving categories: {e}")
-        return False
+    with SessionLocal() as db:
+        try:
+            existing = {row.id: row for row in db.query(Category).all()}
+            incoming_ids = set()
+            for item in categories:
+                category_id = str(item.get("id") or "")
+                name = str(item.get("name") or item.get("category_name") or "").strip()
+                if not category_id or not name:
+                    raise ValueError("Each category must have an id and name.")
+                row = existing.get(category_id)
+                if row is None:
+                    row = Category(id=category_id)
+                    db.add(row)
+                row.category_name = name
+                row.type = str(item.get("type") or "EXPENSE").upper()
+                row.bucket = str(item.get("bucket") or "WANTS").upper()
+                row.keywords_json = json.dumps(item.get("keywords") or [], ensure_ascii=False)
+                row.icon = item.get("icon")
+                row.color = item.get("color")
+                row.is_default = int(bool(item.get("is_default", row.is_default if row in existing.values() else 0)))
+                row.is_hidden = int(bool(item.get("is_hidden", False)))
+                incoming_ids.add(category_id)
+            for category_id, row in existing.items():
+                if category_id not in incoming_ids:
+                    row.is_hidden = 1
+            db.commit()
+            return True
+        except Exception:
+            db.rollback()
+            raise
 
 def is_night_time(timestamp_str):
     """
@@ -126,7 +155,7 @@ def compute_match_confidence(desc_upper, desc_ascii, kw_upper, kw_ascii, source_
         bonus = coverage * 0.08
         return min(0.94, max(0.80, round(base + bonus, 2)))
 
-def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
+def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW", categories=None):
     """
     Mô hình AI/NLP xử lý ngôn ngữ tự nhiên:
     Đọc từ điển động từ categories.json -> gán nhãn danh mục và 3 rổ ngân sách (Needs/Wants/Savings).
@@ -134,7 +163,8 @@ def categorize_transaction(description, timestamp_str="", txn_type="OUTFLOW"):
     """
     desc_upper = description.upper()
     desc_ascii = remove_accents(desc_upper)
-    categories = load_categories()
+    if categories is None:
+        categories = load_categories()
 
     # Nhận diện subscription sớm để tránh false-positives
     is_sub_desc = any(sk in desc_ascii for sk in ["NETFLIX", "SPOTIFY", "APPLE.COM/BILL", "ICLOUD", "YOUTUBE PREMIUM", "CHATGPT"])

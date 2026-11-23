@@ -1,10 +1,15 @@
 import json
 import os
 import time
+import base64
+import hashlib
+import hmac
 from datetime import datetime, timedelta
+from cryptography.fernet import Fernet
+
+from modules.database import SessionLocal, Transaction, Wallet
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'mock_transactions.json')
-USERS_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'users.json')
 
 # Danh mục các tổ chức tín dụng & trung gian thanh toán hỗ trợ Open Banking API
 AVAILABLE_PROVIDERS = [
@@ -148,6 +153,46 @@ AVAILABLE_PROVIDERS = [
 # Backward compatibility alias
 AVAILABLE_BANKS = AVAILABLE_PROVIDERS
 
+
+def _fernet():
+    key = os.environ.get("FINLAB_CRYPTO_KEY")
+    if not key:
+        raise RuntimeError("FINLAB_CRYPTO_KEY must be configured to encrypt financial data.")
+    try:
+        return Fernet(key.encode("ascii"))
+    except (ValueError, UnicodeEncodeError) as exc:
+        raise RuntimeError("FINLAB_CRYPTO_KEY is not a valid Fernet key.") from exc
+
+
+def encrypt_access_token(token):
+    if token in (None, ""):
+        return None
+    return _fernet().encrypt(str(token).encode("utf-8"))
+
+
+def decrypt_access_token(encrypted_token):
+    if encrypted_token in (None, b""):
+        return None
+    return _fernet().decrypt(bytes(encrypted_token)).decode("utf-8")
+
+
+def encrypt_account_number(account_number):
+    if account_number in (None, ""):
+        return None
+    return _fernet().encrypt(str(account_number).encode("utf-8"))
+
+
+def account_number_hmac(provider_code, account_number):
+    if account_number in (None, ""):
+        return None
+    secret = os.environ.get("FINLAB_ACCOUNT_HMAC_KEY")
+    if not secret:
+        raise RuntimeError(
+            "FINLAB_ACCOUNT_HMAC_KEY must be configured to detect duplicate bank accounts."
+        )
+    canonical = f"{str(provider_code).strip().upper()}:{str(account_number).strip()}"
+    return hmac.new(secret.encode("utf-8"), canonical.encode("utf-8"), hashlib.sha256).hexdigest()
+
 def get_available_banks(user_consents=None):
     """
     Trả về danh sách các ngân hàng & ví điện tử,
@@ -190,24 +235,73 @@ def get_provider_by_id(provider_id):
             return p
     return None
 
-def fetch_open_banking_transactions(bank_filter=None, user_consents=None):
+def fetch_open_banking_transactions(bank_filter=None, user_consents=None, user_id=None):
     """
     Giả lập gọi Open Banking RESTful API (GET /api/v1/accounts/transactions)
     Có kiểm tra ủy quyền dữ liệu (Consent Check) tuân thủ Nghị định 13/2023/NĐ-CP.
     Nếu quyền 'read_transactions' bị thu hồi (Revoked) hoặc ngân hàng chưa được cấp phép,
     giao dịch từ ngân hàng đó sẽ bị lọc bỏ.
     """
-    if not os.path.exists(DATA_FILE):
-        return []
-        
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        try:
-            transactions = json.load(f)
-        except Exception:
+    if user_id is None:
+        if not os.path.exists(DATA_FILE):
             return []
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            transactions = json.load(f)
+    else:
+        consent_by_id = {
+            str(c.get("consent_id")): c
+            for c in (user_consents or [])
+            if c.get("consent_id")
+        }
+        with SessionLocal() as db:
+            rows = (
+                db.query(Transaction, Wallet)
+                .join(Wallet, Transaction.wallet_id == Wallet.id)
+                .filter(Wallet.user_id == user_id)
+                .order_by(Transaction.timestamp.desc())
+                .all()
+            )
+            transactions = []
+            for txn, wallet in rows:
+                consent = consent_by_id.get(str(wallet.consent_id)) if wallet.consent_id else None
+                if txn.source == "OPEN_BANKING":
+                    if user_consents is not None:
+                        if not consent or consent.get("status") != "ACTIVE":
+                            continue
+                        scopes = consent.get("scopes", [])
+                        has_tx_scope = (
+                            "read_transactions" in scopes
+                            if isinstance(scopes, list)
+                            else bool(scopes.get("read_transactions", False))
+                        )
+                        if not has_tx_scope:
+                            continue
+                bank_name = (
+                    (consent or {}).get("bank_name")
+                    or (consent or {}).get("provider_name")
+                    or wallet.wallet_name
+                )
+                bank_code = (
+                    (consent or {}).get("bank_id")
+                    or (consent or {}).get("provider_code")
+                    or wallet.provider_code
+                    or ""
+                )
+                transactions.append({
+                    "id": txn.id,
+                    "timestamp": txn.timestamp,
+                    "bank": bank_name,
+                    "bank_id": bank_code,
+                    "account_number": wallet.account_no_masked or "",
+                    "type": txn.type,
+                    "amount": txn.amount,
+                    "description": txn.description or "",
+                    "reference_code": txn.reference_code,
+                    "source": txn.source,
+                })
 
     # Kiểm tra Consent nếu danh sách ủy quyền được truyền vào
-    if user_consents is not None:
+    if user_id is None and user_consents is not None:
         allowed_bank_keywords = []
         for consent in user_consents:
             scopes = consent.get("scopes", {})
