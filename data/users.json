@@ -227,7 +227,7 @@
         "bank_id": "VCB",
         "account_no": "•••• 5938",
         "initialBalance": 11500000,
-        "currentBalance": 2180000,
+        "currentBalance": 102180000.0,
         "managementMode": "connect",
         "connectionStatus": "connected",
         "consentId": "CONSENT_VCB_01",
@@ -235,7 +235,7 @@
         "color": "linear-gradient(135deg, #0A4D2E 0%, #006837 60%, #15803D 100%)",
         "createdAt": "2026-10-01T08:00:00",
         "updatedAt": "2026-10-26T08:00:00",
-        "lastSyncedAt": "2026-10-26 08:00"
+        "lastSyncedAt": "2026-11-17 10:30"
       },
       {
         "id": "W_OB_TCB_19038475920",
@@ -274,7 +274,72 @@
         "lastSyncedAt": "2026-10-26 08:00"
       }
     ],
-    "custom_transactions": []
+    "custom_transactions": [
+      {
+        "id": "TXN_OB_1794886249393",
+        "timestamp": "2026-11-17 10:30:49",
+        "bank": "Vietcombank",
+        "account_number": "••• .249",
+        "type": "INFLOW",
+        "amount": 25000000.0,
+        "description": "Nhận lương Tech Corp",
+        "reference_code": "MBB.20261117103049.249",
+        "ai_category": "Chi tiêu khác",
+        "ai_bucket": "WANTS",
+        "ai_confidence": 0.7,
+        "is_night_spending": false,
+        "is_subscription": false,
+        "source": "OPEN_BANKING_WEBHOOK"
+      },
+      {
+        "id": "TXN_OB_1794886248431",
+        "timestamp": "2026-11-17 10:30:48",
+        "bank": "Vietcombank",
+        "account_number": "••• .248",
+        "type": "INFLOW",
+        "amount": 25000000.0,
+        "description": "Nhận lương Tech Corp",
+        "reference_code": "MBB.20261117103048.248",
+        "ai_category": "Chi tiêu khác",
+        "ai_bucket": "WANTS",
+        "ai_confidence": 0.7,
+        "is_night_spending": false,
+        "is_subscription": false,
+        "source": "OPEN_BANKING_WEBHOOK"
+      },
+      {
+        "id": "TXN_OB_1794886247096",
+        "timestamp": "2026-11-17 10:30:47",
+        "bank": "Vietcombank",
+        "account_number": "••• .247",
+        "type": "INFLOW",
+        "amount": 25000000.0,
+        "description": "Nhận lương Tech Corp",
+        "reference_code": "MBB.20261117103047.247",
+        "ai_category": "Chi tiêu khác",
+        "ai_bucket": "WANTS",
+        "ai_confidence": 0.7,
+        "is_night_spending": false,
+        "is_subscription": false,
+        "source": "OPEN_BANKING_WEBHOOK"
+      },
+      {
+        "id": "TXN_OB_1794886241478",
+        "timestamp": "2026-11-17 10:30:41",
+        "bank": "Vietcombank",
+        "account_number": "••• .241",
+        "type": "INFLOW",
+        "amount": 25000000.0,
+        "description": "Nhận lương Tech Corp",
+        "reference_code": "MBB.20261117103041.241",
+        "ai_category": "Chi tiêu khác",
+        "ai_bucket": "WANTS",
+        "ai_confidence": 0.7,
+        "is_night_spending": false,
+        "is_subscription": false,
+        "source": "OPEN_BANKING_WEBHOOK"
+      }
+    ]
   },
   {
     "id": "usr_002",

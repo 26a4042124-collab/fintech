@@ -24,6 +24,143 @@
   <!-- Form Body -->
   <div class="page-content">
     
+    <!-- ===== KHU VỰC QUÉT HÓA ĐƠN ===== -->
+    <div class="ocr-scanner-section" id="ocr-scanner-section">
+      <div class="ocr-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="ocr-icon"><i class="fa-solid fa-camera-retro"></i></span>
+          <div>
+            <div style="font-size:14px;font-weight:800;color:var(--text-primary);">Quét hóa đơn tự động</div>
+            <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Chụp hoặc tải ảnh hóa đơn, AI sẽ tự động nhập liệu</div>
+          </div>
+        </div>
+        <button type="button" class="btn-toggle-ocr" onclick="toggleOcrSection()" id="btn-toggle-ocr">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+
+      <div class="ocr-body" id="ocr-body" style="display:none;">
+        <!-- Upload Area -->
+        <div class="ocr-upload-area" id="ocr-upload-area">
+          <input type="file" id="ocr-file-input" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
+          <input type="file" id="ocr-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handleCameraCapture(event)">
+          
+          <div class="ocr-upload-buttons">
+            <button type="button" class="ocr-upload-btn" onclick="document.getElementById('ocr-file-input').click()">
+              <i class="fa-solid fa-image"></i> Chọn ảnh
+            </button>
+            <button type="button" class="ocr-upload-btn camera" onclick="document.getElementById('ocr-camera-input').click()">
+              <i class="fa-solid fa-camera"></i> Chụp ảnh
+            </button>
+          </div>
+          
+          <div class="ocr-upload-hint">
+            Kéo thả ảnh hoặc nhấn để chọn / chụp
+          </div>
+        </div>
+
+        <!-- Preview & Result Area (hidden initially) -->
+        <div class="ocr-result-area" id="ocr-result-area" style="display:none;">
+          <!-- Source Banner -->
+          <div class="ocr-source-banner" id="ocr-source-banner"></div>
+
+          <!-- Thumbnail & Actions -->
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+            <img id="ocr-preview-img" src="" style="width:80px;height:80px;object-fit:cover;border-radius:12px;border:2px solid var(--border);">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-primary);" id="ocr-merchant-name">Đang xử lý...</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;" id="ocr-timestamp-display"></div>
+              <div style="margin-top:6px;display:flex;gap:6px;">
+                <button type="button" class="btn-ocr-action" onclick="chooseAnotherImage()">
+                  <i class="fa-solid fa-image"></i> Chọn ảnh khác
+                </button>
+                <button type="button" class="btn-ocr-action" onclick="resetOcrScanner()">
+                  <i class="fa-solid fa-rotate-right"></i> Quét lại
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Warnings -->
+          <div id="ocr-warnings-container"></div>
+
+          <!-- Edit Fields -->
+          <div class="ocr-edit-fields">
+            <div class="form-group-inline">
+              <label class="form-label-sm"><i class="fa-solid fa-store"></i> Cửa hàng</label>
+              <input type="text" id="ocr-edit-merchant" class="form-input-sm" placeholder="Tên cửa hàng">
+            </div>
+            <div class="form-group-inline">
+              <label class="form-label-sm"><i class="fa-solid fa-calendar"></i> Ngày giờ</label>
+              <input type="datetime-local" id="ocr-edit-timestamp" class="form-input-sm">
+            </div>
+            <div class="form-group-inline">
+              <label class="form-label-sm"><i class="fa-solid fa-wallet"></i> Ví thanh toán</label>
+              <select id="ocr-edit-wallet" class="form-input-sm">
+                <option value="Tiền mặt" selected>💵 Ví Tiền mặt</option>
+                <option value="Techcombank">💳 Techcombank Visa</option>
+                <option value="Vietcombank">🏦 Vietcombank</option>
+                <option value="MB Bank">🛡️ MB Bank</option>
+                <option value="Ví MoMo">📱 MoMo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="ocr-items-table-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-primary);">Danh sách món</div>
+              <button type="button" class="btn-add-item" onclick="addOcrItem()">
+                <i class="fa-solid fa-plus"></i> Thêm món
+              </button>
+            </div>
+            <table class="ocr-items-table" id="ocr-items-table">
+              <thead>
+                <tr>
+                  <th>Tên món</th>
+                  <th style="width:60px;">SL</th>
+                  <th style="width:100px;">Đơn giá</th>
+                  <th style="width:100px;">Thành tiền</th>
+                  <th style="width:120px;">Danh mục</th>
+                  <th style="width:40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="ocr-items-tbody">
+                <!-- Items will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total & Actions -->
+          <div class="ocr-total-bar">
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Tổng cộng:</div>
+            <div style="font-size:20px;font-weight:900;color:var(--accent);" id="ocr-total-display">0đ</div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button type="button" class="btn-ocr-cancel" onclick="cancelOcrReceipt()">
+              <i class="fa-solid fa-xmark"></i> Hủy
+            </button>
+            <button type="button" class="btn-ocr-confirm" id="btn-ocr-confirm" onclick="confirmOcrReceipt()" disabled>
+              <i class="fa-solid fa-check"></i> Xác nhận & Lưu
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="ocr-loading" id="ocr-loading" style="display:none;">
+          <div class="spinner-large"></div>
+          <div style="margin-top:12px;font-size:13px;font-weight:700;color:var(--text-primary);">Đang quét hóa đơn...</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Vui lòng chờ trong giây lát</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FORM NHẬP THỦ CÔNG (GIỮ NGUYÊN) ===== -->
+    <div class="manual-entry-divider">
+      <span>hoặc nhập thủ công</span>
+    </div>
+    
     <form method="POST" action="{{ url_for('add_transaction') }}" id="form-add-txn">
       <input type="hidden" name="type" id="input-txn-type" value="OUTFLOW">
       <input type="hidden" name="category" id="input-txn-category" value="Ăn uống">
@@ -530,6 +667,403 @@
   margin-top: 2px;
   line-height: 1.3;
 }
+
+/* =========================================================================
+   OCR Scanner Styles
+   ========================================================================= */
+.ocr-scanner-section {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F0 100%);
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.ocr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ocr-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #FF6B35, #E8632A);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.btn-toggle-ocr {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle-ocr.active {
+  transform: rotate(180deg);
+}
+
+.ocr-body {
+  padding: 0 16px 16px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ocr-upload-area {
+  background: white;
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ocr-upload-area:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.ocr-upload-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.ocr-upload-btn {
+  background: linear-gradient(135deg, #FF6B35, #E8632A);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(232, 99, 42, 0.3);
+}
+
+.ocr-upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(232, 99, 42, 0.4);
+}
+
+.ocr-upload-btn.camera {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.ocr-upload-btn.camera:hover {
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.ocr-upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.ocr-loading {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--bg-surface);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ocr-source-banner {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ocr-source-banner.gemini {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4F46E5;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.ocr-source-banner.fallback {
+  background: rgba(239, 68, 68, 0.12);
+  color: #DC2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.ocr-source-banner.local {
+  background: rgba(234, 179, 8, 0.12);
+  color: #CA8A04;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.btn-ocr-action {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-ocr-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.ocr-edit-fields {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.form-group-inline {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-label-sm {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.form-input-sm {
+  padding: 9px 11px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-input-sm:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.ocr-items-table-wrap {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.btn-add-item {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ocr-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ocr-items-table th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 8px 6px;
+  border-bottom: 2px solid var(--border);
+}
+
+.ocr-items-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--bg-surface);
+}
+
+.ocr-items-table input,
+.ocr-items-table select {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.ocr-items-table input:focus,
+.ocr-items-table select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.btn-delete-item {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.btn-delete-item:hover {
+  background: var(--danger-bg);
+}
+
+.ocr-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.btn-ocr-cancel,
+.btn-ocr-confirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-ocr-cancel {
+  background: white;
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-ocr-cancel:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.btn-ocr-confirm {
+  background: linear-gradient(135deg, #FF6B35, #E8632A);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 12px rgba(232, 99, 42, 0.3);
+}
+
+.btn-ocr-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-ocr-confirm:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(232, 99, 42, 0.4);
+}
+
+.manual-entry-divider {
+  text-align: center;
+  margin: 24px 0;
+  position: relative;
+}
+
+.manual-entry-divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border);
+}
+
+.manual-entry-divider span {
+  position: relative;
+  background: var(--bg-primary);
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ocr-warning-box {
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  color: #92400E;
+  line-height: 1.4;
+}
+
+.ocr-warning-box ul {
+  margin: 6px 0 0 16px;
+  padding: 0;
+}
+
+.ocr-warning-box li {
+  margin: 4px 0;
+}
 </style>
 {% endblock %}
 
@@ -717,5 +1251,389 @@ function applyDemoPrompt(promptText, amountNum, typeOverride) {
   }
   fetchAiCategorization(promptText);
 }
+
+// =========================================================================
+// OCR Scanner Logic
+// =========================================================================
+let ocrData = null;
+let ocrImagePreview = null;
+
+function toggleOcrSection() {
+  const body = document.getElementById('ocr-body');
+  const btn = document.getElementById('btn-toggle-ocr');
+  const isHidden = body.style.display === 'none';
+  
+  body.style.display = isHidden ? 'block' : 'none';
+  btn.classList.toggle('active', isHidden);
+}
+
+// Drag & drop support
+const uploadArea = document.getElementById('ocr-upload-area');
+if (uploadArea) {
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'var(--accent)';
+    uploadArea.style.background = 'var(--accent-light)';
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.borderColor = '';
+    uploadArea.style.background = '';
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '';
+    uploadArea.style.background = '';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  });
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) {
+    handleFile(file);
+  }
+}
+
+function handleCameraCapture(event) {
+  const file = event.target.files[0];
+  if (file) {
+    handleFile(file);
+  }
+}
+
+function handleFile(file) {
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    alert('Định dạng ảnh không hợp lệ! Chỉ chấp nhận: JPG, PNG, WEBP');
+    return;
+  }
+  
+  // Validate file size (8MB)
+  if (file.size > 8 * 1024 * 1024) {
+    alert('File quá lớn! Tối đa 8MB');
+    return;
+  }
+  
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    ocrImagePreview = e.target.result;
+    scanReceipt(file);
+  };
+  reader.readAsDataURL(file);
+}
+
+function scanReceipt(file) {
+  // Hide upload area, show loading
+  document.getElementById('ocr-upload-area').style.display = 'none';
+  document.getElementById('ocr-loading').style.display = 'block';
+  document.getElementById('ocr-result-area').style.display = 'none';
+  
+  const formData = new FormData();
+  formData.append('receipt', file);
+  
+  fetch('/api/ocr/scan-receipt', {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('ocr-loading').style.display = 'none';
+    
+    if (data.ok) {
+      ocrData = data.data;
+      renderOcrResult(data);
+    } else {
+      alert('Lỗi: ' + (data.error || 'Không thể quét hóa đơn'));
+      resetOcrScanner();
+    }
+  })
+  .catch(err => {
+    console.error('OCR error:', err);
+    document.getElementById('ocr-loading').style.display = 'none';
+    alert('Đã xảy ra lỗi khi quét hóa đơn. Vui lòng thử lại!');
+    resetOcrScanner();
+  });
+}
+
+function renderOcrResult(response) {
+  const data = response.data;
+  const source = response.source || 'unknown';
+  
+  // Show result area
+  document.getElementById('ocr-result-area').style.display = 'block';
+  
+  // Set preview image
+  document.getElementById('ocr-preview-img').src = ocrImagePreview;
+  
+  // Render source banner
+  const banner = document.getElementById('ocr-source-banner');
+  if (source === 'tesseract_ocr') {
+    banner.className = 'ocr-source-banner gemini';
+    banner.innerHTML = '<i class="fa-solid fa-check-circle"></i> Đã quét bằng Tesseract OCR - Vui lòng kiểm tra lại!';
+  } else if (source === 'gemini' || source === 'ocr_space_api' || source === 'easyocr' || source === 'paddle_ocr') {
+    banner.className = 'ocr-source-banner gemini';
+    banner.innerHTML = '<i class="fa-solid fa-sparkles"></i> Đã quét bằng OCR online - Vui lòng kiểm tra lại!';
+  } else if (source === 'local_ocr') {
+    banner.className = 'ocr-source-banner local';
+    banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> OCR cục bộ (độ tin cậy thấp) - Kiểm tra kỹ!';
+  } else if (source === 'manual_template') {
+    banner.className = 'ocr-source-banner local';
+    banner.innerHTML = '<i class="fa-solid fa-pencil"></i> Template - Vui lòng nhập dữ liệu thật từ hóa đơn!';
+  } else {
+    banner.className = 'ocr-source-banner fallback';
+    banner.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Dữ liệu mẫu - Hãy sửa lại cho đúng!';
+  }
+  
+  // Render warnings
+  const warningsContainer = document.getElementById('ocr-warnings-container');
+  if (response.warnings && response.warnings.length > 0) {
+    const warningHtml = `
+      <div class="ocr-warning-box">
+        <strong><i class="fa-solid fa-circle-info"></i> Cảnh báo:</strong>
+        <ul>
+          ${response.warnings.map(w => `<li>${w}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+    warningsContainer.innerHTML = warningHtml;
+  } else {
+    warningsContainer.innerHTML = '';
+  }
+  
+  // Fill edit fields
+  document.getElementById('ocr-edit-merchant').value = data.merchant || 'Không rõ';
+  
+  if (data.timestamp) {
+    // Convert ISO to datetime-local format
+    const dt = new Date(data.timestamp);
+    const localISO = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('ocr-edit-timestamp').value = localISO;
+    
+    const displayDate = dt.toLocaleString('vi-VN');
+    document.getElementById('ocr-timestamp-display').textContent = displayDate;
+  } else {
+    const now = new Date();
+    const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('ocr-edit-timestamp').value = localISO;
+    document.getElementById('ocr-timestamp-display').textContent = 'Vừa xong';
+  }
+  
+  document.getElementById('ocr-merchant-name').textContent = data.merchant || 'Không rõ';
+  
+  // Render items table
+  renderOcrItems(data.items || []);
+  
+  // Update total
+  updateOcrTotal();
+  
+  // Enable confirm button
+  validateOcrForm();
+}
+
+function renderOcrItems(items) {
+  const tbody = document.getElementById('ocr-items-tbody');
+  tbody.innerHTML = '';
+  
+  if (items.length === 0) {
+    // Add one empty row
+    addOcrItem();
+    return;
+  }
+  
+  items.forEach((item, idx) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><input type="text" class="ocr-item-name" value="${escapeHtml(item.name || '')}" oninput="updateOcrTotal();validateOcrForm()"></td>
+      <td><input type="number" class="ocr-item-qty" value="${item.quantity || 1}" min="1" oninput="updateOcrTotal();validateOcrForm()"></td>
+      <td><input type="number" class="ocr-item-price" value="${item.unit_price || 0}" min="0" oninput="updateOcrTotal();validateOcrForm()"></td>
+      <td><input type="number" class="ocr-item-amount" value="${item.amount || 0}" min="0" oninput="updateOcrTotal();validateOcrForm()"></td>
+      <td>
+        <select class="ocr-item-category" onchange="validateOcrForm()">
+          ${getCategoryOptions(item.category || 'Khác')}
+        </select>
+      </td>
+      <td>
+        <button type="button" class="btn-delete-item" onclick="deleteOcrItem(this)">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function getCategoryOptions(selected) {
+  const categories = ['Ăn uống', 'Cà phê', 'Đi lại', 'Mua sắm', 'Hóa đơn sinh hoạt', 'Giải trí', 'Sức khỏe', 'Giáo dục', 'Khác'];
+  return categories.map(cat => 
+    `<option value="${cat}" ${cat === selected ? 'selected' : ''}>${cat}</option>`
+  ).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function addOcrItem() {
+  const tbody = document.getElementById('ocr-items-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="text" class="ocr-item-name" placeholder="Tên món" oninput="updateOcrTotal();validateOcrForm()"></td>
+    <td><input type="number" class="ocr-item-qty" value="1" min="1" oninput="updateOcrTotal();validateOcrForm()"></td>
+    <td><input type="number" class="ocr-item-price" value="0" min="0" oninput="updateOcrTotal();validateOcrForm()"></td>
+    <td><input type="number" class="ocr-item-amount" value="0" min="0" oninput="updateOcrTotal();validateOcrForm()"></td>
+    <td>
+      <select class="ocr-item-category" onchange="validateOcrForm()">
+        ${getCategoryOptions('Khác')}
+      </select>
+    </td>
+    <td>
+      <button type="button" class="btn-delete-item" onclick="deleteOcrItem(this)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </td>
+  `;
+  tbody.appendChild(row);
+  updateOcrTotal();
+  validateOcrForm();
+}
+
+function deleteOcrItem(btn) {
+  const row = btn.closest('tr');
+  row.remove();
+  updateOcrTotal();
+  validateOcrForm();
+}
+
+function updateOcrTotal() {
+  const rows = document.querySelectorAll('#ocr-items-tbody tr');
+  let total = 0;
+  
+  rows.forEach(row => {
+    const amountInput = row.querySelector('.ocr-item-amount');
+    if (amountInput) {
+      total += parseInt(amountInput.value) || 0;
+    }
+  });
+  
+  document.getElementById('ocr-total-display').textContent = formatNumberVND(total.toString()) + 'đ';
+}
+
+function validateOcrForm() {
+  const rows = document.querySelectorAll('#ocr-items-tbody tr');
+  let hasValidItem = false;
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.ocr-item-name').value.trim();
+    const amount = parseInt(row.querySelector('.ocr-item-amount').value) || 0;
+    if (name && amount > 0) {
+      hasValidItem = true;
+    }
+  });
+  
+  const confirmBtn = document.getElementById('btn-ocr-confirm');
+  confirmBtn.disabled = !hasValidItem;
+}
+
+function chooseAnotherImage() {
+  resetOcrScanner();
+}
+
+function resetOcrScanner() {
+  ocrData = null;
+  ocrImagePreview = null;
+  document.getElementById('ocr-file-input').value = '';
+  document.getElementById('ocr-upload-area').style.display = 'block';
+  document.getElementById('ocr-loading').style.display = 'none';
+  document.getElementById('ocr-result-area').style.display = 'none';
+}
+
+function cancelOcrReceipt() {
+  if (confirm('Bạn có chắc muốn hủy? Dữ liệu đã quét sẽ bị mất.')) {
+    resetOcrScanner();
+  }
+}
+
+function confirmOcrReceipt() {
+  const confirmBtn = document.getElementById('btn-ocr-confirm');
+  if (confirmBtn.disabled) return;
+  
+  // Disable button to prevent double submit
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+  
+  // Collect data
+  const merchant = document.getElementById('ocr-edit-merchant').value.trim();
+  const timestamp = document.getElementById('ocr-edit-timestamp').value;
+  const wallet = document.getElementById('ocr-edit-wallet').value;
+  
+  const items = [];
+  const rows = document.querySelectorAll('#ocr-items-tbody tr');
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.ocr-item-name').value.trim();
+    const qty = parseInt(row.querySelector('.ocr-item-qty').value) || 1;
+    const price = parseInt(row.querySelector('.ocr-item-price').value) || 0;
+    const amount = parseInt(row.querySelector('.ocr-item-amount').value) || 0;
+    const category = row.querySelector('.ocr-item-category').value;
+    
+    if (name && amount > 0) {
+      items.push({
+        name: name,
+        quantity: qty,
+        unit_price: price,
+        amount: amount,
+        category: category
+      });
+    }
+  });
+  
+  if (items.length === 0) {
+    alert('Phải có ít nhất 1 món hợp lệ!');
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận & Lưu';
+    return;
+  }
+  
+  // Send to server
+  fetch('/api/ocr/confirm-receipt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      merchant: merchant,
+      timestamp: timestamp,
+      wallet: wallet,
+      items: items
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.message);
+      // Reload page to show updated transactions
+      window.location.href = '/transactions?added=1';
+    } else {
+      alert('Lỗi: ' + (data.message || 'Không thể lưu hóa đơn'));
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận & Lưu';
+    }
+  })
+  .catch(err => {
+    console.error('Confirm error:', err);
+    alert('Đã xảy ra lỗi khi lưu hóa đơn!');
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '<i class="fa-solid fa-check"></i> Xác nhận & Lưu';
+  });
+}
+
 </script>
 {% endblock %}

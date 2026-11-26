@@ -17,6 +17,8 @@ try:
     from dotenv import load_dotenv
     _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
     load_dotenv(dotenv_path=_env_path, override=True)
+    print(f"✓ Đã load .env từ: {_env_path}")
+    print(f"✓ GEMINI_API_KEY được load: {bool(os.environ.get('GEMINI_API_KEY'))}")
 except ImportError:
     pass
 
@@ -1264,6 +1266,269 @@ def api_ai_categorize():
         "emoji": emoji,
         "suggested_amount": suggested_amount,
         "is_subscription": raw_res.get("is_subscription", False)
+    })
+
+# ==========================================================================
+# 5b2. OCR Receipt Scanner (Quét hóa đơn bằng AI Vision)
+# ==========================================================================
+from modules.ocr_scanner import preprocess_image, scan_with_fallback, ReceiptProcessingError
+from werkzeug.utils import secure_filename
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+MAX_FILE_SIZE = 8 * 1024 * 1024  # 8MB
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/ocr/scan-receipt', methods=['POST'])
+@login_required
+def api_ocr_scan_receipt():
+    """
+    API quét hóa đơn từ ảnh upload hoặc camera.
+    Chỉ quét và trả dữ liệu, KHÔNG lưu vào DB.
+    """
+    user = get_current_user() or session['user']
+    
+    # Kiểm tra file upload
+    if 'receipt' not in request.files:
+        return jsonify({
+            "ok": False,
+            "error": "Vui lòng chọn ảnh hóa đơn để quét!"
+        }), 400
+    
+    file = request.files['receipt']
+    
+    if file.filename == '':
+        return jsonify({
+            "ok": False,
+            "error": "Chưa chọn file!"
+        }), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({
+            "ok": False,
+            "error": "Định dạng ảnh không hợp lệ! Chỉ chấp nhận: JPG, PNG, WEBP"
+        }), 400
+    
+    # Kiểm tra dung lượng
+    file.seek(0, 2)  # Seek to end
+    file_size = file.tell()
+    file.seek(0)  # Reset
+    
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({
+            "ok": False,
+            "error": f"File quá lớn! Tối đa {MAX_FILE_SIZE // (1024*1024)}MB"
+        }), 400
+    
+    try:
+        # Chuẩn hóa ảnh
+        from modules.simple_ocr import preprocess_image, scan_with_fallback
+        image_bytes = preprocess_image(file)
+        
+        # Lấy danh sách rổ chi tiêu từ categories
+        from modules.ai_categorizer import load_categories
+        categories = load_categories()
+        category_names = [c['name'] for c in categories if not c.get('is_hidden', False)]
+        
+        # Quét hóa đơn bằng OCR API miễn phí
+        result = scan_with_fallback(image_bytes, category_names)
+        
+        # Log audit
+        log_action(
+            actor=user.get('username', 'user'),
+            action="Quét hóa đơn OCR API",
+            target=result.get('merchant', 'Không rõ'),
+            result="Success",
+            details=f"Source: {result.get('source')}, {len(result.get('items', []))} món, tổng {result.get('total_amount', 0):,}đ"
+        )
+        
+        return jsonify({
+            "ok": True,
+            "data": result,
+            "warnings": result.get('warnings', []),
+            "source": result.get('source', 'unknown')
+        })
+        
+    except Exception as e:
+        logger.error(f"Lỗi OCR: {str(e)}")
+        return jsonify({
+            "ok": False,
+            "error": str(e) if "not hợp lệ" in str(e) else "Đã xảy ra lỗi khi xử lý hóa đơn"
+        }), 500
+
+
+@app.route('/api/ocr/camera-capture', methods=['POST'])
+@login_required
+def api_ocr_camera_capture():
+    """
+    API nhận ảnh từ camera (base64 format) và quét.
+    """
+    user = get_current_user() or session['user']
+    data = request.get_json() or {}
+    
+    image_base64 = data.get('image', '')
+    
+    if not image_base64:
+        return jsonify({
+            "ok": False,
+            "error": "Không có dữ liệu ảnh"
+        }), 400
+    
+    try:
+        import base64
+        # Decode base64
+        image_data = base64.b64decode(image_base64.split(',')[-1])
+        
+        from modules.simple_ocr import preprocess_image, scan_with_fallback
+        from modules.ai_categorizer import load_categories
+        
+        # Chuẩn hóa ảnh
+        image_bytes = preprocess_image(image_data)
+        
+        # Lấy categories
+        categories = load_categories()
+        category_names = [c['name'] for c in categories if not c.get('is_hidden', False)]
+        
+        # Quét
+        result = scan_with_fallback(image_bytes, category_names)
+        
+        log_action(
+            actor=user.get('username', 'user'),
+            action="Quét hóa đơn từ camera",
+            target=result.get('merchant', 'Không rõ'),
+            result="Success",
+            details=f"{len(result.get('items', []))} món, tổng {result.get('total_amount', 0):,}đ"
+        )
+        
+        return jsonify({
+            "ok": True,
+            "data": result,
+            "warnings": result.get('warnings', []),
+            "source": result.get('source', 'unknown')
+        })
+        
+    except Exception as e:
+        logger.error(f"Lỗi camera capture: {str(e)}")
+        return jsonify({
+            "ok": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/ocr/confirm-receipt', methods=['POST'])
+@login_required
+def api_ocr_confirm_receipt():
+    """
+    API lưu hóa đơn đã được người dùng xác nhận/sửa.
+    Tạo nhiều giao dịch (1 món = 1 transaction) và trừ ví.
+    """
+    user = get_current_user() or session['user']
+    data = request.get_json() or {}
+    
+    # Validate dữ liệu
+    merchant = (data.get('merchant') or 'Không rõ').strip()
+    timestamp_str = (data.get('timestamp') or '').strip()
+    items = data.get('items', [])
+    wallet = (data.get('wallet') or 'Tiền mặt').strip()
+    
+    if not items:
+        return jsonify({
+            "success": False,
+            "message": "Phải có ít nhất 1 món trong hóa đơn!"
+        }), 400
+    
+    # Parse timestamp
+    if timestamp_str:
+        try:
+            txn_datetime = datetime.fromisoformat(timestamp_str)
+            txn_timestamp = txn_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            txn_timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        txn_timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Reference code chung cho cả hóa đơn
+    ref_code = f"OCR.{int(time.time())}"
+    
+    # Validate từng món
+    valid_items = []
+    total_amount = 0
+    
+    for item in items:
+        try:
+            name = str(item.get('name', 'Không rõ')).strip()
+            amount = int(float(item.get('amount', 0)))
+            category = str(item.get('category', 'Khác')).strip()
+            
+            if amount <= 0:
+                continue
+            
+            # Load categories để kiểm tra category có hợp lệ
+            from modules.ai_categorizer import load_categories
+            all_cats = load_categories()
+            valid_categories = [c['name'] for c in all_cats if not c.get('is_hidden', False)]
+            
+            if category not in valid_categories:
+                category = 'Khác'
+            
+            valid_items.append({
+                'name': name,
+                'amount': amount,
+                'category': category
+            })
+            total_amount += amount
+            
+        except Exception as e:
+            logger.warning(f"Bỏ qua item không hợp lệ: {e}")
+            continue
+    
+    if not valid_items:
+        return jsonify({
+            "success": False,
+            "message": "Không có món hợp lệ nào để lưu!"
+        }), 400
+    
+    # Tạo giao dịch cho từng món
+    new_transactions = []
+    
+    for item in valid_items:
+        txn = {
+            "id": f"TXN_{int(time.time()*1000000)}_{len(new_transactions)}",
+            "timestamp": txn_timestamp,
+            "bank": wallet,
+            "account_number": "VÍ CÁ NHÂN",
+            "type": "OUTFLOW",
+            "amount": item['amount'],
+            "description": f"[OCR-{merchant}] {item['category']}: {item['name']}",
+            "reference_code": ref_code,
+            "source": "ocr"
+        }
+        new_transactions.append(txn)
+    
+    # Lưu vào DB (thêm vào đầu list)
+    current_txns = user.get('custom_transactions', [])
+    updated_txns = new_transactions + current_txns
+    
+    updated_user = update_user_field(user['id'], 'custom_transactions', updated_txns)
+    session['user'] = updated_user
+    session.modified = True
+    
+    # Log audit
+    log_action(
+        actor=user.get('username', 'user'),
+        action="Lưu hóa đơn OCR",
+        target=f"{merchant} - {ref_code}",
+        result="Success",
+        details=f"{len(valid_items)} món, tổng {total_amount:,}đ từ ví {wallet}"
+    )
+    
+    return jsonify({
+        "success": True,
+        "message": f"Đã lưu thành công {len(valid_items)} món từ hóa đơn {merchant}!",
+        "total_amount": total_amount,
+        "transaction_count": len(new_transactions),
+        "reference_code": ref_code
     })
 
 

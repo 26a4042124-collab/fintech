@@ -1,5 +1,395 @@
 [
   {
+    "id": "LOG_4950063",
+    "timestamp": "2026-11-18 13:55:50",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "Hóa đơn demo",
+    "result": "Success",
+    "details": "Source: manual_template, 1 món, tổng 50,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4935885",
+    "timestamp": "2026-11-18 13:55:35",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "Hóa đơn demo",
+    "result": "Success",
+    "details": "Source: manual_template, 1 món, tổng 50,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4928841",
+    "timestamp": "2026-11-18 13:55:28",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4928831",
+    "timestamp": "2026-11-18 13:55:28",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4567442",
+    "timestamp": "2026-11-18 13:49:27",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "Hóa đơn demo",
+    "result": "Success",
+    "details": "Source: manual_template, 1 món, tổng 50,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4270287",
+    "timestamp": "2026-11-18 13:44:30",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "HIGHLANDS COFFEE",
+    "result": "Success",
+    "details": "Source: fallback, 2 món, tổng 60,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4258360",
+    "timestamp": "2026-11-18 13:44:18",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "PHỞ BÒ BẰNG",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 55,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4240746",
+    "timestamp": "2026-11-18 13:44:00",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR API",
+    "target": "HIGHLANDS COFFEE",
+    "result": "Success",
+    "details": "Source: fallback, 2 món, tổng 60,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6476895",
+    "timestamp": "2026-11-18 11:34:36",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn PaddleOCR",
+    "target": "PETROLIMEX - CỬA HÀNG XĂG",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 250,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6370259",
+    "timestamp": "2026-11-18 11:32:50",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn PaddleOCR",
+    "target": "SHOPEE",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 185,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6362433",
+    "timestamp": "2026-11-18 11:32:42",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn PaddleOCR",
+    "target": "PETROLIMEX - CỬA HÀNG XĂG",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 250,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6356852",
+    "timestamp": "2026-11-18 11:32:36",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6356842",
+    "timestamp": "2026-11-18 11:32:36",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5783737",
+    "timestamp": "2026-11-18 11:23:03",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn PaddleOCR",
+    "target": "SHOPEE",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 185,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5771048",
+    "timestamp": "2026-11-18 11:22:51",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5771039",
+    "timestamp": "2026-11-18 11:22:51",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6493409",
+    "timestamp": "2026-11-17 10:34:53",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "SHOPEE / LAZADA",
+    "result": "Success",
+    "details": "Source: fallback, 2 món, tổng 185,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6488038",
+    "timestamp": "2026-11-17 10:34:48",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "HIGHLANDS COFFEE",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 75,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6484305",
+    "timestamp": "2026-11-17 10:34:44",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "PHỞ BÒ BẰNG",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 80,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6474588",
+    "timestamp": "2026-11-17 10:34:34",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "EVN - ĐIỆN LỰC",
+    "result": "Success",
+    "details": "Source: fallback, 1 món, tổng 850,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6249399",
+    "timestamp": "2026-11-17 10:30:49",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Vietcombank (MBB.20261117103049.249)",
+    "result": "Success",
+    "details": "Nhận lương Tech Corp (+25,000,000đ). AI tự động phân loại: Chi tiêu khác (Rổ: WANTS, Tin cậy: 70%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6248441",
+    "timestamp": "2026-11-17 10:30:48",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Vietcombank (MBB.20261117103048.248)",
+    "result": "Success",
+    "details": "Nhận lương Tech Corp (+25,000,000đ). AI tự động phân loại: Chi tiêu khác (Rổ: WANTS, Tin cậy: 70%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6247103",
+    "timestamp": "2026-11-17 10:30:47",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Vietcombank (MBB.20261117103047.247)",
+    "result": "Success",
+    "details": "Nhận lương Tech Corp (+25,000,000đ). AI tự động phân loại: Chi tiêu khác (Rổ: WANTS, Tin cậy: 70%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6241486",
+    "timestamp": "2026-11-17 10:30:41",
+    "actor": "nguyen_van_a",
+    "action": "Webhook Open Banking: Phát sinh giao dịch mới",
+    "target": "Vietcombank (MBB.20261117103041.241)",
+    "result": "Success",
+    "details": "Nhận lương Tech Corp (+25,000,000đ). AI tự động phân loại: Chi tiêu khác (Rổ: WANTS, Tin cậy: 70%)",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6186939",
+    "timestamp": "2026-11-17 10:29:46",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "PHỞ BÒ BẰNG",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 80,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6056425",
+    "timestamp": "2026-11-17 10:27:36",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6050497",
+    "timestamp": "2026-11-17 10:27:30",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_6050489",
+    "timestamp": "2026-11-17 10:27:30",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5969009",
+    "timestamp": "2026-11-17 10:26:09",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5152085",
+    "timestamp": "2026-11-17 10:12:32",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5127358",
+    "timestamp": "2026-11-17 10:12:07",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5116926",
+    "timestamp": "2026-11-17 10:11:56",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5116916",
+    "timestamp": "2026-11-17 10:11:56",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5064446",
+    "timestamp": "2026-11-17 10:11:04",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_5011368",
+    "timestamp": "2026-11-17 10:10:11",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4737605",
+    "timestamp": "2026-11-17 10:05:37",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4434866",
+    "timestamp": "2026-11-17 10:00:34",
+    "actor": "nguyen_van_a",
+    "action": "Quét hóa đơn OCR",
+    "target": "Quán Cà Phê Mẫu",
+    "result": "Success",
+    "details": "Source: fallback, 3 món, tổng 125,000đ",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4146511",
+    "timestamp": "2026-11-17 09:55:46",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập User",
+    "target": "Hệ thống FinLab",
+    "result": "Success",
+    "details": "Người dùng đăng nhập thành công vào vai trò USER",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "LOG_4146498",
+    "timestamp": "2026-11-17 09:55:46",
+    "actor": "nguyen_van_a",
+    "action": "Đăng nhập thành công",
+    "target": "FinLab App",
+    "result": "Success",
+    "details": "Đăng nhập qua định danh 'nguyen_van_a'",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": "LOG_371494",
     "timestamp": "2026-10-26 03:32:51",
     "actor": "nguyen_van_a",
