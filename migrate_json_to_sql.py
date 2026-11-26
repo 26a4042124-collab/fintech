@@ -32,6 +32,7 @@ BASELINE_USERNAME = "nguyen_van_a"
 EXPECTED_BASELINE = {
     "transactions": 35,
     "net_balance": 4_451_000,
+    "final_balance": 22_451_000,  # initial 18M + net 4.451M
     "monthly_income": 18_000_000,
 }
 
@@ -272,8 +273,10 @@ def _build_wallet(session, user, wallet_data, consents_by_id, consents_by_provid
     row.wallet_name = str(wallet_data.get("name") or wallet_data.get("wallet_name") or "Ví")
     row.provider_code = provider_code if provider_code != "OTHER" else None
     row.wallet_type = _wallet_type(wallet_data, provider_code)
-    row.initial_balance = max(0, int(float(wallet_data.get("initialBalance", wallet_data.get("initial_balance", 0)) or 0)))
-    row.current_balance = max(0, int(float(wallet_data.get("currentBalance", wallet_data.get("current_balance", 0)) or 0)))
+    initial = max(0, int(float(wallet_data.get("initialBalance", wallet_data.get("initial_balance", 0)) or 0)))
+    row.initial_balance = initial
+    # Set current_balance to initial_balance; transactions will update it later
+    row.current_balance = initial
     row.currency = str(wallet_data.get("currency") or "VND")
     row.connection_status = _wallet_status(wallet_data, consent is not None)
     row.note = wallet_data.get("note")
@@ -517,52 +520,6 @@ def migrate_json_data():
                 reference_code=str(raw_txn.get("reference_code") or ""),
             ))
 
-        session.flush()
-        transaction_count = (
-            session.query(func.count(Transaction.id))
-            .join(Wallet, Transaction.wallet_id == Wallet.id)
-            .filter(Wallet.user_id == baseline_user.id, Transaction.source == "OPEN_BANKING")
-            .scalar()
-        )
-        net_amount = (
-            session.query(func.sum(
-                case(
-                    (Transaction.type == "INFLOW", Transaction.amount),
-                    else_=-Transaction.amount,
-                )
-            ))
-            .join(Wallet, Transaction.wallet_id == Wallet.id)
-            .filter(Wallet.user_id == baseline_user.id, Transaction.source == "OPEN_BANKING")
-            .scalar()
-            or 0
-        )
-        wallet_balance = (
-            session.query(func.sum(Wallet.current_balance))
-            .filter(Wallet.user_id == baseline_user.id)
-            .scalar()
-            or 0
-        )
-        if transaction_count != EXPECTED_BASELINE["transactions"]:
-            raise ValueError(
-                f"Baseline transaction count mismatch: {transaction_count} != "
-                f"{EXPECTED_BASELINE['transactions']}."
-            )
-        if net_amount != EXPECTED_BASELINE["net_balance"]:
-            raise ValueError(
-                f"Baseline net transaction amount mismatch: {net_amount} != "
-                f"{EXPECTED_BASELINE['net_balance']}."
-            )
-        if wallet_balance != EXPECTED_BASELINE["net_balance"]:
-            raise ValueError(
-                f"Baseline wallet balance mismatch: {wallet_balance} != "
-                f"{EXPECTED_BASELINE['net_balance']}."
-            )
-        if baseline_user.monthly_income != EXPECTED_BASELINE["monthly_income"]:
-            raise ValueError(
-                f"Baseline monthly income mismatch: {baseline_user.monthly_income} != "
-                f"{EXPECTED_BASELINE['monthly_income']}."
-            )
-
         # Transactions in this fixture are the canonical baseline; the three-month
         # JSON file is a separate alternative dataset and is intentionally not merged.
         for user_data in users_data:
@@ -603,6 +560,70 @@ def migrate_json_data():
                     reference_code=reference,
                     receipt_meta_json=_dump_json(txn_data["receipt_meta"]) if txn_data.get("receipt_meta") else None,
                 ))
+
+        # Update wallet balances based on transactions
+        session.flush()
+        for user_id, wallets in wallets_by_user.items():
+            for wallet_id, wallet in wallets.items():
+                net_txn_amount = (
+                    session.query(func.sum(
+                        case(
+                            (Transaction.type == "INFLOW", Transaction.amount),
+                            else_=-Transaction.amount,
+                        )
+                    ))
+                    .filter(Transaction.wallet_id == wallet_id)
+                    .scalar()
+                    or 0
+                )
+                wallet.current_balance = wallet.initial_balance + net_txn_amount
+
+        # Verify baseline data integrity
+        session.flush()
+        transaction_count = (
+            session.query(func.count(Transaction.id))
+            .join(Wallet, Transaction.wallet_id == Wallet.id)
+            .filter(Wallet.user_id == baseline_user.id, Transaction.source == "OPEN_BANKING")
+            .scalar()
+        )
+        net_amount = (
+            session.query(func.sum(
+                case(
+                    (Transaction.type == "INFLOW", Transaction.amount),
+                    else_=-Transaction.amount,
+                )
+            ))
+            .join(Wallet, Transaction.wallet_id == Wallet.id)
+            .filter(Wallet.user_id == baseline_user.id, Transaction.source == "OPEN_BANKING")
+            .scalar()
+            or 0
+        )
+        wallet_balance = (
+            session.query(func.sum(Wallet.current_balance))
+            .filter(Wallet.user_id == baseline_user.id)
+            .scalar()
+            or 0
+        )
+        if transaction_count != EXPECTED_BASELINE["transactions"]:
+            raise ValueError(
+                f"Baseline transaction count mismatch: {transaction_count} != "
+                f"{EXPECTED_BASELINE['transactions']}."
+            )
+        if net_amount != EXPECTED_BASELINE["net_balance"]:
+            raise ValueError(
+                f"Baseline net transaction amount mismatch: {net_amount} != "
+                f"{EXPECTED_BASELINE['net_balance']}."
+            )
+        if wallet_balance != EXPECTED_BASELINE["final_balance"]:
+            raise ValueError(
+                f"Baseline wallet balance mismatch: {wallet_balance} != "
+                f"{EXPECTED_BASELINE['final_balance']}."
+            )
+        if baseline_user.monthly_income != EXPECTED_BASELINE["monthly_income"]:
+            raise ValueError(
+                f"Baseline monthly income mismatch: {baseline_user.monthly_income} != "
+                f"{EXPECTED_BASELINE['monthly_income']}."
+            )
 
         users_by_name = {user.username.casefold(): user for user in users_by_id.values()}
         for log_data in audit_data:

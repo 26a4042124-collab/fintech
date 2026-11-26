@@ -1635,5 +1635,25 @@ function confirmOcrReceipt() {
   });
 }
 
+// Camera Preview Integration
+const cameraBtn = document.getElementById('ocr-camera-input');
+if (cameraBtn) {
+  // Replace default camera input with preview
+  const cameraUploadBtn = document.querySelector('.ocr-upload-btn.camera');
+  if (cameraUploadBtn) {
+    cameraUploadBtn.onclick = function(e) {
+      e.preventDefault();
+      // Check if camera API is available
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        openCameraPreview();
+      } else {
+        // Fallback to file input with capture
+        document.getElementById('ocr-camera-input').click();
+      }
+    };
+  }
+}
+
 </script>
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
 {% endblock %}

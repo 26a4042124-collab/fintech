@@ -1,10 +1,16 @@
 """
-Module quét hóa đơn bằng EasyOCR (không cần API key, chạy local).
+Module quét hóa đơn bằng EasyOCR - OCR Local Offline 100%
 
 Chức năng chính:
-- Dùng EasyOCR để OCR hóa đơn
+- Dùng EasyOCR để OCR hóa đơn (không cần API key)
+- Chạy local, offline sau khi download model lần đầu
 - Phân tích và trích xuất dữ liệu có cấu trúc
-- Hỗ trợ tiếng Việt
+- Hỗ trợ tiếng Việt + tiếng Anh
+- Parse đa dạng format hóa đơn không cần template cố định
+
+Yêu cầu:
+- pip install easyocr pillow
+- Model tự download lần đầu (~300MB)
 """
 
 import os
@@ -116,7 +122,7 @@ def preprocess_image(file_or_bytes) -> bytes:
         raise ReceiptProcessingError(f"Không thể xử lý ảnh: {str(e)}")
 
 
-def scan_receipt_paddle(image_bytes: bytes, categories: Optional[List[str]] = None) -> Dict[str, Any]:
+def scan_receipt_easyocr(image_bytes: bytes, categories: Optional[List[str]] = None) -> Dict[str, Any]:
     """
     Quét hóa đơn bằng EasyOCR.
     
@@ -256,7 +262,8 @@ def _parse_receipt_text(text: str, categories: List[str]) -> Dict[str, Any]:
         'timestamp': timestamp,
         'category': category,
         'items': items,
-        'confidence': 0.75,  # PaddleOCR confidence
+        'confidence': 0.75,
+        'source': 'easyocr_local',
         'warnings': [
             'Dữ liệu OCR cục bộ - vui lòng kiểm tra kỹ trước khi lưu'
         ]
@@ -288,88 +295,39 @@ def _categorize_receipt(text_upper: str, categories: List[str]) -> str:
     return 'Khác'
 
 
-def scan_with_fallback_paddle(image_bytes: bytes, categories: Optional[List[str]] = None) -> Dict[str, Any]:
+def scan_with_fallback(image_bytes: bytes, categories: Optional[List[str]] = None) -> Dict[str, Any]:
     """
-    Hàm điều phối: Thử PaddleOCR, không bao giờ fail.
+    Hàm điều phối chính: Thử EasyOCR.
+    
+    Nếu thất bại, raise exception thay vì trả mock data.
+    Theo yêu cầu: "Không được trả về thông tin hóa đơn mẫu khi chưa thực hiện nhận diện ảnh"
+    
+    Args:
+        image_bytes: Ảnh đã chuẩn hóa
+        categories: Danh sách danh mục
+        
+    Returns:
+        dict: Dữ liệu OCR thực tế
+        
+    Raises:
+        RuntimeError: Khi OCR không khả dụng hoặc thất bại
     """
     categories = categories or DEFAULT_CATEGORIES
     
+    if not EASYOCR_AVAILABLE:
+        raise RuntimeError(
+            "EasyOCR chưa được cài đặt. Vui lòng chạy: pip install easyocr"
+        )
+    
     try:
-        result = scan_receipt_paddle(image_bytes, categories)
-        logger.info(f"PaddleOCR scan thành công: {result.get('merchant')}, {len(result.get('items', []))} món")
+        result = scan_receipt_easyocr(image_bytes, categories)
+        logger.info(f"EasyOCR scan thành công: {result.get('merchant')}, {len(result.get('items', []))} món")
         return result
         
     except Exception as e:
-        logger.error(f"PaddleOCR thất bại, dùng fallback: {e}")
-        return _get_fallback_sample(categories)
+        logger.error(f"EasyOCR thất bại: {e}")
+        raise RuntimeError(
+            f"Không thể nhận diện hóa đơn. Lỗi: {str(e)}\n"
+            "Vui lòng thử lại với ảnh rõ nét hơn hoặc nhập thủ công."
+        )
 
-
-def _get_fallback_sample(categories: List[str]) -> Dict[str, Any]:
-    """
-    Trả dữ liệu mẫu khi PaddleOCR thất bại.
-    """
-    import random
-    
-    samples = [
-        {
-            'merchant': 'HIGHLANDS COFFEE',
-            'items': [
-                {'name': 'Cà phê đá', 'qty': 2, 'price': 35000},
-                {'name': 'Bánh mì', 'qty': 1, 'price': 25000},
-                {'name': 'Nước suối', 'qty': 2, 'price': 15000},
-            ],
-            'category': 'Cà phê'
-        },
-        {
-            'merchant': 'PHỞ BÒ BẰNG',
-            'items': [
-                {'name': 'Phở bò tái nạm', 'qty': 2, 'price': 55000},
-                {'name': 'Bia Saigon', 'qty': 1, 'price': 25000},
-            ],
-            'category': 'Ăn uống'
-        },
-        {
-            'merchant': 'PETROLIMEX - CỬA HÀNG XĂG',
-            'items': [
-                {'name': 'Xăng RON 95', 'qty': 1, 'price': 250000},
-            ],
-            'category': 'Đi lại'
-        },
-        {
-            'merchant': 'SHOPEE',
-            'items': [
-                {'name': 'Áo thun cotton', 'qty': 1, 'price': 185000},
-            ],
-            'category': 'Mua sắm'
-        },
-    ]
-    
-    sample = random.choice(samples)
-    
-    items = []
-    total = 0
-    for item in sample['items']:
-        amount = item['price']
-        items.append({
-            'name': item['name'],
-            'quantity': item['qty'],
-            'unit_price': item['price'],
-            'amount': amount,
-            'category': sample['category']
-        })
-        total += amount
-    
-    return {
-        'merchant': sample['merchant'],
-        'total_amount': total,
-        'timestamp': datetime.now().isoformat(),
-        'category': sample['category'],
-        'items': items,
-        'confidence': 0.0,
-        'source': 'fallback',
-        'is_sample': True,
-        'warnings': [
-            '⚠️ Đây là dữ liệu mẫu - OCR thất bại',
-            'Vui lòng nhập/sửa lại thông tin cho đúng'
-        ]
-    }

@@ -15,6 +15,11 @@ try:
 except ImportError:
     raise ImportError("Cần cài đặt Pillow: pip install pillow")
 
+
+class ReceiptProcessingError(Exception):
+    """Lỗi xử lý ảnh hóa đơn"""
+    pass
+
 # Kiểm tra Tesseract
 TESSERACT_AVAILABLE = False
 try:
@@ -341,119 +346,43 @@ def scan_receipt_simple(image_bytes: bytes, categories: Optional[List[str]] = No
 
 def scan_with_fallback(image_bytes: bytes, categories: Optional[List[str]] = None) -> Dict[str, Any]:
     """
-    Thử OCR API, nếu lỗi thì fallback sang dữ liệu hợp lý
+    OCR hóa đơn - Ưu tiên Tesseract → OCR.space API
+    
+    Theo yêu cầu: "Không được trả về thông tin hóa đơn mẫu khi chưa thực hiện nhận diện ảnh"
+    Nếu OCR thất bại, raise exception thay vì trả mock data.
+    
+    Args:
+        image_bytes: Ảnh đã chuẩn hóa
+        categories: Danh sách danh mục
+        
+    Returns:
+        dict: Dữ liệu OCR thực tế
+        
+    Raises:
+        RuntimeError: Khi OCR không khả dụng hoặc thất bại
     """
     try:
         result = scan_receipt_simple(image_bytes, categories)
-        # Nếu OCR thành công
+        # OCR thành công
         return result
     except Exception as e:
-        logger.warning(f"OCR thất bại ({e}), tạo dữ liệu demo thông minh")
+        logger.error(f"OCR thất bại: {e}")
         
-        # Phân tích ảnh đơn giản để tạo demo phù hợp
-        categories = categories or DEFAULT_CATEGORIES
+        # Tạo thông báo lỗi chi tiết
+        error_msg = "Không thể nhận diện hóa đơn.\n\n"
         
-        try:
-            # Mở ảnh để phân tích màu/kích thước
-            from PIL import Image
-            img = Image.open(BytesIO(image_bytes))
-            width, height = img.size
-            
-            # Ảnh to (có thể là hóa đơn thật) → trả mẫu chi tiết hơn
-            if width * height > 500000:
-                merchant = "HÓA ĐƠN (Đọc từ ảnh)"
-                items = [
-                    {'name': 'Món 1', 'qty': 1, 'price': 45000, 'cat': categories[0]},
-                    {'name': 'Món 2', 'qty': 1, 'price': 35000, 'cat': categories[0]},
-                    {'name': 'Món 3', 'qty': 1, 'price': 25000, 'cat': categories[0]},
-                ]
-                note = "⚠️ OCR tạm thời không khả dụng - Vui lòng nhập thủ công"
-            else:
-                # Ảnh nhỏ → mẫu đơn giản
-                merchant = "Hóa đơn demo"
-                items = [
-                    {'name': 'Sản phẩm', 'qty': 1, 'price': 50000, 'cat': 'Khác'},
-                ]
-                note = "⚠️ Vui lòng nhập dữ liệu thật từ hóa đơn"
-                
-        except:
-            merchant = "Hóa đơn"
-            items = [
-                {'name': 'Món chính', 'qty': 1, 'price': 50000, 'cat': 'Khác'},
-            ]
-            note = "⚠️ Vui lòng nhập thông tin từ hóa đơn"
+        if not TESSERACT_AVAILABLE:
+            error_msg += "⚠️ Tesseract OCR chưa được cài đặt.\n"
+            error_msg += "Hướng dẫn cài đặt: Xem file CAI_DAT_TESSERACT.md\n\n"
         
-        # Tạo kết quả
-        result_items = []
-        total = 0
-        for item in items:
-            result_items.append({
-                'name': item['name'],
-                'quantity': item['qty'],
-                'unit_price': item['price'],
-                'amount': item['price'],
-                'category': item['cat']
-            })
-            total += item['price']
+        error_msg += "🔧 Giải pháp:\n"
+        error_msg += "1. Cài đặt Tesseract OCR để quét offline\n"
+        error_msg += "2. Kiểm tra kết nối internet để dùng OCR.space API\n"
+        error_msg += "3. Thử lại với ảnh rõ nét hơn\n"
+        error_msg += "4. Hoặc nhập thủ công bằng form bên dưới\n\n"
+        error_msg += f"Chi tiết lỗi: {str(e)}"
         
-        return {
-            'merchant': merchant,
-            'total_amount': total,
-            'timestamp': datetime.now().isoformat(),
-            'category': items[0]['cat'],
-            'items': result_items,
-            'confidence': 0.0,
-            'source': 'manual_template',
-            'is_sample': False,  # Không phải mẫu cố định
-            'warnings': [
-                note,
-                'Dữ liệu này chỉ là template - Hãy sửa lại cho đúng!'
-            ]
-        }
+        raise RuntimeError(error_msg)
 
 
-def _get_fallback(categories: List[str]) -> Dict[str, Any]:
-    """Dữ liệu mẫu khi thất bại"""
-    import random
-    
-    samples = [
-        {'merchant': 'HIGHLANDS COFFEE', 'items': [
-            {'name': 'Cà phê đá', 'qty': 2, 'price': 35000},
-            {'name': 'Bánh mì', 'qty': 1, 'price': 25000},
-        ], 'category': 'Cà phê'},
-        {'merchant': 'PHỞ BÒ BẰNG', 'items': [
-            {'name': 'Phở bò tái', 'qty': 2, 'price': 55000},
-        ], 'category': 'Ăn uống'},
-        {'merchant': 'PETROLIMEX', 'items': [
-            {'name': 'Xăng RON 95', 'qty': 1, 'price': 250000},
-        ], 'category': 'Đi lại'},
-    ]
-    
-    sample = random.choice(samples)
-    items = []
-    total = 0
-    
-    for item in sample['items']:
-        items.append({
-            'name': item['name'],
-            'quantity': item['qty'],
-            'unit_price': item['price'],
-            'amount': item['price'],
-            'category': sample['category']
-        })
-        total += item['price']
-    
-    return {
-        'merchant': sample['merchant'],
-        'total_amount': total,
-        'timestamp': datetime.now().isoformat(),
-        'category': sample['category'],
-        'items': items,
-        'confidence': 0.0,
-        'source': 'fallback',
-        'is_sample': True,
-        'warnings': [
-            '⚠️ Đây là dữ liệu mẫu - OCR thất bại',
-            'Vui lòng nhập/sửa lại cho đúng'
-        ]
-    }
+

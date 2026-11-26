@@ -103,6 +103,46 @@ def _user_dict(db, row):
         "consentId": wallet.consent_id,
         "note": wallet.note,
     } for wallet in row.wallets if wallet.connection_status != "ARCHIVED"]
+    
+    # Load custom transactions (MANUAL, OCR, PIS_SAVINGS) from Transaction table
+    from modules.database import Transaction
+    custom_txns = []
+    # Get all wallet IDs for this user
+    wallet_ids = [w.id for w in row.wallets]
+    
+    # Query transactions belonging to user's wallets OR without wallet (legacy/manual)
+    if wallet_ids:
+        transactions = db.query(Transaction).filter(
+            or_(
+                Transaction.wallet_id.in_(wallet_ids),
+                Transaction.wallet_id.is_(None)
+            ),
+            Transaction.source.in_(["MANUAL", "OCR", "PIS_SAVINGS"])
+        ).order_by(Transaction.timestamp.desc()).all()
+    else:
+        # User has no wallets, only get transactions without wallet
+        transactions = db.query(Transaction).filter(
+            Transaction.wallet_id.is_(None),
+            Transaction.source.in_(["MANUAL", "OCR", "PIS_SAVINGS"])
+        ).order_by(Transaction.timestamp.desc()).all()
+    
+    for txn in transactions:
+        custom_txns.append({
+            "id": txn.id,
+            "timestamp": txn.timestamp,
+            "bank": txn.wallet.wallet_name if txn.wallet else "Tiền mặt",
+            "wallet_id": txn.wallet_id,
+            "account_number": txn.wallet.account_no_masked if txn.wallet else "VÍ CÁ NHÂN",
+            "type": txn.type,
+            "amount": txn.amount,
+            "description": txn.description,
+            "category": txn.category.category_name if txn.category else None,
+            "category_id": txn.category_id,
+            "reference_code": txn.reference_code,
+            "source": txn.source,
+            "receipt_meta": _json_load(txn.receipt_meta_json, None)
+        })
+    
     return {
         "id": row.id,
         "username": row.username,
@@ -124,7 +164,7 @@ def _user_dict(db, row):
         "consents": consents,
         "connected_banks": [c["bank_name"] for c in consents if c["status"] == "ACTIVE"],
         "wallets": wallets,
-        "custom_transactions": [],
+        "custom_transactions": custom_txns,
         "open_banking_consent": {
             "view_balance": any("read_balance" in c["scopes"] for c in consents),
             "view_history": any("read_transactions" in c["scopes"] for c in consents),
@@ -420,10 +460,35 @@ def _sync_wallets(db, row, items, consent_accounts=None):
 
 
 def _sync_transactions(db, row, items):
-    from modules.database import Transaction
+    from modules.database import Transaction, Category
 
     wallets = {wallet.id: wallet for wallet in row.wallets}
     by_name = {wallet.wallet_name.casefold(): wallet for wallet in row.wallets}
+    
+    # Tạo default wallet nếu user chưa có
+    default_wallet = by_name.get("tiền mặt") or by_name.get("cash")
+    if not default_wallet and not wallets:
+        # Tạo wallet mặc định "Tiền mặt"
+        from modules.database import Wallet
+        import uuid
+        from datetime import datetime
+        default_wallet = Wallet(
+            id=f"wallet_{uuid.uuid4().hex[:12]}",
+            user_id=row.id,
+            wallet_name="Tiền mặt",
+            wallet_type="CASH",
+            initial_balance=0,
+            current_balance=0,
+            currency="VND",
+            connection_status="MANUAL",
+            created_at=datetime.now().isoformat(),
+            updated_at=datetime.now().isoformat()
+        )
+        db.add(default_wallet)
+        db.flush()  # Get the ID
+        wallets[default_wallet.id] = default_wallet
+        by_name["tiền mặt"] = default_wallet
+    
     for item in items if isinstance(items, list) else []:
         txn_id = str(item.get("id") or "")
         if not txn_id:
@@ -436,6 +501,11 @@ def _sync_transactions(db, row, items):
             db.add(txn)
         bank = str(item.get("bank") or item.get("provider") or "").casefold()
         wallet = wallets.get(str(item.get("wallet_id") or "")) or by_name.get(bank)
+        
+        # Nếu không tìm thấy wallet, dùng default wallet
+        if not wallet:
+            wallet = default_wallet or list(wallets.values())[0] if wallets else None
+        
         txn.wallet_id = wallet.id if wallet else None
         txn.timestamp = str(item.get("timestamp") or txn.timestamp)
         txn.type = str(item.get("type") or "OUTFLOW").upper()
@@ -445,6 +515,13 @@ def _sync_transactions(db, row, items):
         txn.source = source if source in ("OPEN_BANKING", "MANUAL", "OCR", "PIS_SAVINGS") else "MANUAL"
         txn.reference_code = item.get("reference_code")
         txn.receipt_meta_json = json.dumps(item.get("receipt_meta"), ensure_ascii=False) if item.get("receipt_meta") else None
+        
+        # Map category name to category_id
+        category_name = item.get("category")
+        if category_name:
+            category = db.query(Category).filter(Category.category_name == str(category_name)).first()
+            if category:
+                txn.category_id = category.id
 
 
 def _sync_budgets(db, row, values):

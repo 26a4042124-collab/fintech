@@ -1429,7 +1429,9 @@ def api_ai_categorize():
 # ==========================================================================
 # 5b2. OCR Receipt Scanner (Quét hóa đơn bằng AI Vision)
 # ==========================================================================
-from modules.ocr_scanner import preprocess_image, scan_with_fallback, ReceiptProcessingError
+# 5b2. OCR Receipt Scanner (Quét hóa đơn bằng Tesseract OCR - Local Offline)
+# ==========================================================================
+from modules.simple_ocr import preprocess_image, scan_with_fallback, ReceiptProcessingError
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
@@ -1480,8 +1482,7 @@ def api_ocr_scan_receipt():
         }), 400
     
     try:
-        # Chuẩn hóa ảnh
-        from modules.simple_ocr import preprocess_image, scan_with_fallback
+        # Chuẩn hóa ảnh - dùng EasyOCR local
         image_bytes = preprocess_image(file)
         
         # Lấy danh sách rổ chi tiêu từ categories
@@ -1489,13 +1490,13 @@ def api_ocr_scan_receipt():
         categories = load_categories()
         category_names = [c['name'] for c in categories if not c.get('is_hidden', False)]
         
-        # Quét hóa đơn bằng OCR API miễn phí
+        # Quét hóa đơn bằng EasyOCR local (offline)
         result = scan_with_fallback(image_bytes, category_names)
         
         # Log audit
         log_action(
             actor=user.get('username', 'user'),
-            action="Quét hóa đơn OCR API",
+            action="Quét hóa đơn EasyOCR",
             target=result.get('merchant', 'Không rõ'),
             result="Success",
             details=f"Source: {result.get('source')}, {len(result.get('items', []))} món, tổng {result.get('total_amount', 0):,}đ"
@@ -1505,14 +1506,14 @@ def api_ocr_scan_receipt():
             "ok": True,
             "data": result,
             "warnings": result.get('warnings', []),
-            "source": result.get('source', 'unknown')
+            "source": result.get('source', 'easyocr_local')
         })
         
     except Exception as e:
         logger.error(f"Lỗi OCR: {str(e)}")
         return jsonify({
             "ok": False,
-            "error": str(e) if "not hợp lệ" in str(e) else "Đã xảy ra lỗi khi xử lý hóa đơn"
+            "error": str(e)
         }), 500
 
 
@@ -1538,22 +1539,21 @@ def api_ocr_camera_capture():
         # Decode base64
         image_data = base64.b64decode(image_base64.split(',')[-1])
         
-        from modules.simple_ocr import preprocess_image, scan_with_fallback
         from modules.ai_categorizer import load_categories
         
-        # Chuẩn hóa ảnh
+        # Chuẩn hóa ảnh - dùng EasyOCR
         image_bytes = preprocess_image(image_data)
         
         # Lấy categories
         categories = load_categories()
         category_names = [c['name'] for c in categories if not c.get('is_hidden', False)]
         
-        # Quét
+        # Quét bằng EasyOCR
         result = scan_with_fallback(image_bytes, category_names)
         
         log_action(
             actor=user.get('username', 'user'),
-            action="Quét hóa đơn từ camera",
+            action="Quét hóa đơn từ camera (EasyOCR)",
             target=result.get('merchant', 'Không rõ'),
             result="Success",
             details=f"{len(result.get('items', []))} món, tổng {result.get('total_amount', 0):,}đ"
@@ -1563,7 +1563,7 @@ def api_ocr_camera_capture():
             "ok": True,
             "data": result,
             "warnings": result.get('warnings', []),
-            "source": result.get('source', 'unknown')
+            "source": result.get('source', 'easyocr_local')
         })
         
     except Exception as e:
@@ -1658,9 +1658,10 @@ def api_ocr_confirm_receipt():
             "account_number": "VÍ CÁ NHÂN",
             "type": "OUTFLOW",
             "amount": item['amount'],
-            "description": f"[OCR-{merchant}] {item['category']}: {item['name']}",
+            "description": f"[OCR-{merchant}] {item['name']}",
+            "category": item['category'],
             "reference_code": ref_code,
-            "source": "ocr"
+            "source": "OCR"
         }
         new_transactions.append(txn)
     
