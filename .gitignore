@@ -2,6 +2,9 @@ __pycache__/
 *.pyc
 *.pyo
 .env
+data/finlab.db
+data/finlab.db-shm
+data/finlab.db-wal
 .venv/
 venv/
 *.egg-info/

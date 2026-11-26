@@ -101,7 +101,7 @@
       </div>
       <div class="rec-item" style="margin-top:12px;">
         <i class="fa-solid fa-circle-check"></i>
-        <div>Tự động chuyển <strong>900,000đ/tháng</strong> vào tài khoản tiết kiệm ngay ngày nhận lương để đảm bảo đạt 20% thu nhập.</div>
+        <div>Tự động chuyển <strong>{{ "{:,.0f}".format(health.target_ratio.savings_amount) }}đ/tháng</strong> vào tài khoản tiết kiệm ngay ngày nhận lương để đạt mục tiêu <strong>{{ health.target_ratio.savings }}%</strong> thu nhập của bạn (<a href="#" onclick="openBudgetRatioModal(); return false;" style="color:var(--accent);font-weight:700;text-decoration:none;">Điều chỉnh tỷ lệ</a>).</div>
       </div>
       <div class="rec-item">
         <i class="fa-solid fa-circle-check"></i>

@@ -5,6 +5,7 @@ import json
 import re
 import socket
 import io
+import uuid
 from datetime import datetime, timedelta
 
 if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
@@ -23,14 +24,16 @@ except ImportError:
     pass
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
-import qrcode
+try:
+    import qrcode
+except ImportError:
+    qrcode = None
 from modules.auth import (
     authenticate_user, 
     register_user, 
     user_exists_by_phone,
     get_user_by_id, 
     get_all_users, 
-    load_users,
     update_user_field,
     update_user,
     reset_user_password, 
@@ -53,37 +56,80 @@ from modules.ai_categorizer import (
     categorize_transaction,
     remove_accents
 )
-from modules.health_scoring import compute_financial_health
+from modules.health_scoring import compute_financial_health, suggest_ratio_by_income
 from modules.chatbot_ai import generate_chatbot_response
 from modules.otp_service import generate_otp, send_otp_email, verify_otp
+from modules.database import (
+    SavingsGoal,
+    SessionLocal,
+    SystemSetting,
+    Transaction,
+    User,
+    Wallet,
+    session_scope,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'finlab_canva_redesign_secret_2026')
 
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'data', 'system_settings.json')
-AUDIT_FILE = os.path.join(os.path.dirname(__file__), 'data', 'audit_logs.json')
-
 def load_system_settings():
-    if not os.path.exists(SETTINGS_FILE):
-        return {
-            "app_name": "FinLab PFM & Open Banking",
-            "app_version": "v2.5 Enterprise",
-            "currency": "VNĐ",
-            "date_format": "DD/MM/YYYY",
-            "session_timeout_minutes": 60,
-            "min_password_length": 6,
-            "open_banking_sandbox": True,
-            "compliance_standard": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN"
-        }
-    try:
-        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    settings = {}
+    with SessionLocal() as db:
+        for item in db.query(SystemSetting).all():
+            if item.data_type == "BOOL":
+                settings[item.key] = item.value.lower() == "true"
+            elif item.data_type == "INT":
+                settings[item.key] = int(item.value)
+            elif item.data_type == "JSON":
+                settings[item.key] = json.loads(item.value)
+            else:
+                settings[item.key] = item.value
+    return settings or {
+        "app_name": "FinLab PFM & Open Banking",
+        "app_version": "v2.5 Enterprise",
+        "currency": "VNĐ",
+        "date_format": "DD/MM/YYYY",
+        "session_timeout_minutes": 60,
+        "min_password_length": 6,
+        "open_banking_sandbox": True,
+        "compliance_standard": "Nghị định 13/2023/NĐ-CP & Thông tư 64/2024/TT-NHNN"
+    }
 
 def save_system_settings(settings):
-    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(settings, f, ensure_ascii=False, indent=2)
+    descriptions = {
+        "app_name": "Tên ứng dụng",
+        "app_version": "Phiên bản ứng dụng",
+        "currency": "Đơn vị tiền tệ hiển thị",
+        "date_format": "Định dạng ngày",
+        "session_timeout_minutes": "Thời hạn phiên đăng nhập",
+        "min_password_length": "Độ dài mật khẩu tối thiểu",
+        "open_banking_sandbox": "Chế độ Open Banking sandbox",
+        "compliance_standard": "Chuẩn tuân thủ",
+    }
+    with SessionLocal() as db:
+        try:
+            for key, value in settings.items():
+                if isinstance(value, bool):
+                    data_type, stored = "BOOL", "true" if value else "false"
+                elif isinstance(value, int):
+                    data_type, stored = "INT", str(value)
+                elif isinstance(value, (dict, list)):
+                    data_type, stored = "JSON", json.dumps(value, ensure_ascii=False)
+                else:
+                    data_type, stored = "STRING", str(value)
+                item = db.get(SystemSetting, key)
+                if item is None:
+                    item = SystemSetting(key=key, value=stored, updated_at=datetime.now().isoformat())
+                    db.add(item)
+                item.value = stored
+                item.data_type = data_type
+                item.description = descriptions.get(key)
+                item.updated_at = datetime.now().isoformat(timespec="seconds")
+                item.updated_by = session.get("user", {}).get("username")
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
 def get_current_user():
     if 'user' not in session:
@@ -112,14 +158,50 @@ def get_financial_data():
     user = get_current_user() or session.get('user', {})
     monthly_income = user.get('monthly_income', 18000000)
     user_consents = user.get('consents', [])
-    raw_txns = fetch_open_banking_transactions(user_consents=user_consents)
-    custom_txns = user.get('custom_transactions') or session.get('custom_transactions', [])
+    raw_txns = fetch_open_banking_transactions(user_consents=user_consents, user_id=user.get('id'))
+    custom_txns = [] if user.get('id') else (user.get('custom_transactions') or session.get('custom_transactions', []))
     all_txns = list(custom_txns) + list(raw_txns)
     enriched_txns = process_all_transactions(all_txns)
     enriched_txns_sorted = sorted(enriched_txns, key=lambda x: x.get('timestamp', ''), reverse=True)
-    health_data = compute_financial_health(enriched_txns, total_income=monthly_income)
+    health_data = compute_financial_health(
+        enriched_txns,
+        total_income=monthly_income,
+        target_ratio=user.get('budget_ratio'),
+        category_budgets=user.get('category_budgets') or user.get('category_limits'),
+        round_up_config=user.get('round_up'),
+        savings_goals=user.get('savings_goals')
+    )
     health_data['consents'] = user_consents
     return enriched_txns_sorted, health_data
+
+def _parse_vnd_amount(raw_val, default=None):
+    """Chuẩn hóa số tiền VNĐ từ số nguyên/thực hoặc chuỗi định dạng (vd: '18.000.000đ')."""
+    if raw_val is None or isinstance(raw_val, bool):
+        return default
+    if isinstance(raw_val, (int, float)):
+        return int(round(raw_val))
+    s = str(raw_val).strip().lower().replace('vnđ', '').replace('vnd', '').replace('đ', '').strip()
+    if not s:
+        return default
+    if re.fullmatch(r'\d+(\.\d{1,2})?', s):
+        return int(round(float(s)))
+    digits = re.sub(r'[^\d]', '', s)
+    return int(digits) if digits else default
+
+def get_bucket_labels(user):
+    """Tạo nhãn 3 rổ ngân sách theo tỷ lệ người dùng đã tự chia hoặc gợi ý theo thu nhập."""
+    user = user or {}
+    monthly_income = user.get('monthly_income', 18000000)
+    ratio = user.get('budget_ratio') or suggest_ratio_by_income(monthly_income)
+    needs_pct = ratio.get('needs', 50)
+    wants_pct = ratio.get('wants', 30)
+    savings_pct = ratio.get('savings', 20)
+    return {
+        "NEEDS": f"{needs_pct}% Nhu cầu thiết yếu (Needs)",
+        "WANTS": f"{wants_pct}% Nhu cầu linh hoạt (Wants)",
+        "SAVINGS": f"{savings_pct}% Tích lũy & Đầu tư (Savings)",
+        "INCOME": "Dòng thu nhập (Inflow)",
+    }
 
 # ==========================================================================
 # 1. Landing / Onboarding
@@ -254,7 +336,37 @@ def register_goals():
         full_name = session.get('reg_full_name', '')
         email = session.get('reg_email', '')
         password = session.get('reg_password', '')
-        result = register_user(phone, full_name, email, password, goals)
+
+        raw_income = request.form.get('monthly_income', '').strip()
+        parsed_income = _parse_vnd_amount(raw_income) if raw_income else None
+        if raw_income and (parsed_income is None or parsed_income <= 0):
+            return render_template('register_goals.html', error='Thu nhập hàng tháng phải lớn hơn 0đ!')
+        monthly_income = parsed_income if parsed_income else 18000000
+
+        custom_ratio = None
+        raw_needs = request.form.get('ratio_needs', '').strip()
+        raw_wants = request.form.get('ratio_wants', '').strip()
+        raw_savings = request.form.get('ratio_savings', '').strip()
+        if raw_needs != '' or raw_wants != '' or raw_savings != '':
+            try:
+                r_needs = int(float(raw_needs or 0))
+                r_wants = int(float(raw_wants or 0))
+                r_savings = int(float(raw_savings or 0))
+            except (ValueError, TypeError):
+                return render_template('register_goals.html', error='Tỷ lệ phân bổ ngân sách không hợp lệ!')
+            if r_needs < 0 or r_wants < 0 or r_savings < 0 or (r_needs + r_wants + r_savings) != 100:
+                return render_template('register_goals.html', error='Tổng tỷ lệ Thiết yếu + Mong muốn + Tiết kiệm phải đúng bằng 100%!')
+            custom_ratio = {"needs": r_needs, "wants": r_wants, "savings": r_savings}
+
+        result = register_user(
+            phone,
+            full_name,
+            email,
+            password,
+            goals,
+            monthly_income=monthly_income,
+            budget_ratio=custom_ratio,
+        )
         # Xóa session đăng ký
         for key in ['reg_phone', 'reg_otp_verified', 'reg_full_name', 'reg_email', 'reg_password']:
             session.pop(key, None)
@@ -345,7 +457,17 @@ def dashboard():
     enriched_txns, health_data = get_financial_data()
     banks = get_available_banks(user_consents=user.get('consents', []))
     balance = health_data.get('income', 0) - health_data.get('total_expense', 0)
-    current_month_str = datetime.now().strftime('%m/%Y')
+    month_counts = {}
+    for t in enriched_txns:
+        ts = str(t.get('timestamp', ''))
+        if len(ts) >= 7:
+            ym = ts[:7]
+            month_counts[ym] = month_counts.get(ym, 0) + 1
+    if month_counts:
+        top_ym = max(month_counts.items(), key=lambda x: x[1])[0]
+        current_month_str = f"tháng {top_ym[5:7]}/{top_ym[:4]}"
+    else:
+        current_month_str = f"tháng {datetime.now().strftime('%m/%Y')}"
     return render_template('dashboard.html',
         user=user,
         transactions=enriched_txns[:5],
@@ -634,9 +756,13 @@ def admin_api_save_settings():
 @app.route('/admin/api/audit-logs/export')
 @admin_required
 def admin_api_export_audit_logs():
-    if os.path.exists(AUDIT_FILE):
-        return send_file(AUDIT_FILE, as_attachment=True, download_name="finlab_audit_logs.json")
-    return jsonify({"error": "File not found"}), 404
+    payload = json.dumps(load_audit_logs(), ensure_ascii=False, indent=2).encode("utf-8")
+    return send_file(
+        io.BytesIO(payload),
+        mimetype="application/json",
+        as_attachment=True,
+        download_name="finlab_audit_logs.json",
+    )
 
 # ==========================================================================
 # 5. USER PFM REST APIS (CUSTOM RATIOS, GOALS, ROUND-UP, LIMITS, CONSENT)
@@ -646,7 +772,7 @@ def admin_api_export_audit_logs():
 def api_update_budget_ratio():
     if 'user' not in session:
         return jsonify({"success": False, "message": "Chưa đăng nhập"}), 401
-        
+
     data = request.get_json() or {}
     try:
         needs = int(data.get('needs', 50))
@@ -654,32 +780,69 @@ def api_update_budget_ratio():
         savings = int(data.get('savings', 20))
     except (ValueError, TypeError):
         return jsonify({"success": False, "message": "Dữ liệu tỷ lệ không hợp lệ!"}), 400
-        
+
     if needs + wants + savings != 100:
         return jsonify({"success": False, "message": f"Tổng tỷ lệ phải đúng bằng 100% (Hiện tại là {needs + wants + savings}%)"}), 400
-        
+
     if needs < 0 or wants < 0 or savings < 0:
         return jsonify({"success": False, "message": "Tỷ lệ không được âm!"}), 400
-        
+
     user_id = session['user']['id']
     new_ratio = {"needs": needs, "wants": wants, "savings": savings}
-    
-    updated_user = update_user_field(user_id, 'budget_ratio', new_ratio)
+    updates = {"budget_ratio": new_ratio}
+
+    if 'monthly_income' in data and data.get('monthly_income') not in (None, ''):
+        parsed_income = _parse_vnd_amount(data.get('monthly_income'))
+        if parsed_income is None or parsed_income <= 0:
+            return jsonify({"success": False, "message": "Thu nhập hàng tháng phải lớn hơn 0đ!"}), 400
+        updates['monthly_income'] = parsed_income
+
+    updated_user = update_user(user_id, updates)
     if updated_user:
         session['user'] = updated_user
+        session.modified = True
+        _, health_data = get_financial_data()
+        updated_income = updated_user.get('monthly_income', 18000000)
         log_action(
             actor=updated_user['username'],
-            action="Thay đổi tỷ lệ ngân sách",
+            action="Tự chia ngân sách theo thu nhập",
             target="PFM Profile",
             result="Success",
-            details=f"Thiết lập: {needs}% Thiết yếu - {wants}% Mong muốn - {savings}% Tiết kiệm"
+            details=f"Thu nhập {updated_income:,.0f}đ — Tỷ lệ: {needs}% Thiết yếu / {wants}% Mong muốn / {savings}% Tiết kiệm"
         )
         return jsonify({
-            "success": True, 
-            "message": "Cập nhật tỷ lệ phân bổ ngân sách thành công!",
-            "budget_ratio": new_ratio
+            "success": True,
+            "message": "Cập nhật thu nhập & tỷ lệ ngân sách thành công!",
+            "monthly_income": updated_income,
+            "budget_ratio": new_ratio,
+            "target_amounts": {
+                "needs": health_data["target_ratio"]["needs_amount"],
+                "wants": health_data["target_ratio"]["wants_amount"],
+                "savings": health_data["target_ratio"]["savings_amount"],
+            },
+            "health_score": health_data["health_score"],
+            "health_status": health_data["health_status"],
+            "income_suggestion": health_data["income_suggestion"],
         })
     return jsonify({"success": False, "message": "Lỗi lưu dữ liệu!"}), 500
+
+@app.route('/api/user/budget-suggestion', methods=['GET'])
+def api_budget_suggestion():
+    if 'user' not in session:
+        return jsonify({"success": False, "message": "Chưa đăng nhập"}), 401
+    raw_income = request.args.get('income')
+    if raw_income not in (None, ''):
+        income_val = _parse_vnd_amount(raw_income)
+        if income_val is None or income_val <= 0:
+            return jsonify({"success": False, "message": "Thu nhập không hợp lệ!"}), 400
+    else:
+        user = get_current_user() or session.get('user', {})
+        income_val = user.get('monthly_income', 18000000)
+    return jsonify({
+        "success": True,
+        "monthly_income": income_val,
+        "suggestion": suggest_ratio_by_income(income_val),
+    })
 
 @app.route('/api/goals', methods=['GET', 'POST'])
 def api_goals():
@@ -844,38 +1007,38 @@ def api_round_up_transfer():
     data = request.get_json() or {}
     target_goal_id = data.get('goal_id')
     user = get_current_user()
-    
-    round_up_cfg = user.get('round_up', {})
-    acc_total = round_up_cfg.get('accumulated_total', 0)
-    
-    if acc_total <= 0:
-        return jsonify({"success": False, "message": "Heo đất chưa có số dư để chuyển!"}), 400
-        
-    goals = user.get('savings_goals', [])
-    target_goal = next((g for g in goals if g['id'] == target_goal_id), None) if target_goal_id else (goals[0] if goals else None)
-    
-    if target_goal:
-        target_goal['current_amount'] = target_goal.get('current_amount', 0) + acc_total
-        update_user_field(user['id'], 'savings_goals', goals)
-        goal_name = target_goal['name']
-    else:
-        goal_name = "Quỹ tiết kiệm chung"
-        
-    round_up_cfg['accumulated_total'] = 0
-    updated_user = update_user_field(user['id'], 'round_up', round_up_cfg)
-    session['user'] = updated_user
+    with session_scope() as db:
+        db_user = db.get(User, user["id"])
+        if db_user is None:
+            return jsonify({"success": False, "message": "Người dùng không tồn tại!"}), 404
+        acc_total = db_user.round_up_accumulated
+        if acc_total <= 0:
+            return jsonify({"success": False, "message": "Heo đất chưa có số dư để chuyển!"}), 400
+        goal_query = db.query(SavingsGoal).filter(SavingsGoal.user_id == user["id"])
+        if target_goal_id:
+            goal_query = goal_query.filter(SavingsGoal.id == str(target_goal_id))
+        elif db_user.round_up_goal_id:
+            goal_query = goal_query.filter(SavingsGoal.id == db_user.round_up_goal_id)
+        target_goal = goal_query.order_by(SavingsGoal.id).first()
+        if target_goal is None:
+            return jsonify({"success": False, "message": "Vui lòng chọn một mục tiêu tiết kiệm hợp lệ!"}), 400
+        target_goal.current_amount += acc_total
+        db_user.round_up_accumulated = 0
+        goal_name = target_goal.goal_name
+        transferred_amount = acc_total
+    session['user'] = get_user_by_id(user["id"])
     
     log_action(
         actor=user['username'],
         action="Chuyển tiền lẻ Heo đất",
         target=goal_name,
         result="Success",
-        details=f"Chuyển {acc_total:,.0f} VNĐ vào mục tiêu"
+        details=f"Chuyển {transferred_amount:,.0f} VNĐ vào mục tiêu"
     )
     
     return jsonify({
         "success": True, 
-        "message": f"Đã chuyển thành công {acc_total:,.0f} VNĐ từ Heo đất vào '{goal_name}'!",
+        "message": f"Đã chuyển thành công {transferred_amount:,.0f} VNĐ từ Heo đất vào '{goal_name}'!",
         "accumulated_total": 0
     })
 
@@ -1246,19 +1409,14 @@ def api_ai_categorize():
                 emoji = "📦"
                 explanation = "AI xếp vào chi tiêu tự do khác"
 
-    bucket_labels = {
-        "NEEDS": "50% Nhu cầu thiết yếu (Needs)",
-        "WANTS": "30% Nhu cầu linh hoạt (Wants)",
-        "SAVINGS": "20% Tích lũy & Đầu tư (Savings)",
-        "INCOME": "Dòng thu nhập (Inflow)"
-    }
+    bucket_labels = get_bucket_labels(get_current_user() or session.get('user', {}))
 
     return jsonify({
         "success": True,
         "category": mapped_category,
         "raw_category": cat_name,
         "bucket": bucket,
-        "bucket_label": bucket_labels.get(bucket, "30% Nhu cầu linh hoạt"),
+        "bucket_label": bucket_labels.get(bucket, bucket_labels["WANTS"]),
         "confidence": confidence,
         "confidence_pct": int(confidence * 100),
         "explanation": explanation,
@@ -1555,76 +1713,57 @@ def wallets():
 @app.route('/budgets', methods=['GET', 'POST'])
 @login_required
 def budgets():
+    user = get_current_user() or session['user']
+    session.pop('custom_budget_limits', None)
     enriched_txns, health_data = get_financial_data()
-    cb = health_data.get('category_breakdown', {})
 
-    budgets_list = [
-        {
-            "category": "Ăn uống & Cà phê",
-            "icon": "utensils",
-            "spent": cb.get("Ăn uống & Cà phê ngoài", 0) or 4200000,
-            "limit": 5500000,
-            "color": "#E8632A",
-            "bg": "rgba(232, 99, 42, 0.12)"
-        },
-        {
-            "category": "Đi lại & Xăng xe",
-            "icon": "motorcycle",
-            "spent": cb.get("Đi lại & Xăng xe", 0) or 950000,
-            "limit": 1500000,
-            "color": "#3B82F6",
-            "bg": "rgba(59, 130, 246, 0.12)"
-        },
-        {
-            "category": "Mua sắm cá nhân",
-            "icon": "bag-shopping",
-            "spent": cb.get("Mua sắm cá nhân", 0) or 3100000,
-            "limit": 3000000,
-            "color": "#EF4444",
-            "bg": "rgba(239, 68, 68, 0.12)"
-        },
-        {
-            "category": "Nhà cửa & Hóa đơn",
-            "icon": "house",
-            "spent": cb.get("Nhà ở & Hóa đơn tiện ích", 0) or 3500000,
-            "limit": 4000000,
-            "color": "#10B981",
-            "bg": "rgba(16, 185, 129, 0.12)"
-        },
-        {
-            "category": "Giải trí & Bạn bè",
-            "icon": "film",
-            "spent": cb.get("Giải trí & Phim ảnh", 0) or 1200000,
-            "limit": 2000000,
-            "color": "#8B5CF6",
-            "bg": "rgba(139, 92, 246, 0.12)"
-        },
-        {
-            "category": "Sức khỏe & Thuốc",
-            "icon": "heart-pulse",
-            "spent": cb.get("Y tế & Giáo dục", 0) or 350000,
-            "limit": 1000000,
-            "color": "#06B6D4",
-            "bg": "rgba(6, 182, 212, 0.12)"
-        }
-    ]
-    # Áp dụng các hạn mức do người dùng tự điều chỉnh (nếu có)
-    custom_limits = session.get('custom_budget_limits', {})
-    for b in budgets_list:
-        if b['category'] in custom_limits:
-            b['limit'] = float(custom_limits[b['category']])
-    
-    total_spent = sum(b['spent'] for b in budgets_list)
-    total_limit = sum(b['limit'] for b in budgets_list)
-    percent_spent = round((total_spent / total_limit) * 100) if total_limit > 0 else 0
-    days_left = 11
+    cat_icons = {
+        "Mua sắm cá nhân": "bag-shopping",
+        "Nhà ở & Hóa đơn tiện ích": "house",
+        "Thực phẩm & Đi chợ": "basket-shopping",
+        "Ăn uống & Cà phê ngoài": "utensils",
+        "Đi lại & Xăng xe": "motorcycle",
+        "Giải trí & Phim ảnh": "film",
+        "Y tế & Giáo dục": "heart-pulse",
+        "Dịch vụ số định kỳ (Subscription)": "repeat"
+    }
+    status_styles = {
+        "danger": {"color": "#EF4444", "bg": "rgba(239, 68, 68, 0.12)"},
+        "warning": {"color": "#F59E0B", "bg": "rgba(245, 158, 11, 0.12)"},
+        "safe": {"color": "#10B981", "bg": "rgba(16, 185, 129, 0.12)"}
+    }
+
+    budgets_list = []
+    for item in health_data.get('category_budgets', []):
+        st = item.get('status', 'safe')
+        style = status_styles.get(st, status_styles['safe'])
+        budgets_list.append({
+            "category": item['category'],
+            "icon": cat_icons.get(item['category'], 'tags'),
+            "spent": item['spent'],
+            "limit": item['limit'],
+            "percentage": item['percentage'],
+            "status": st,
+            "label": item['label'],
+            "color": style['color'],
+            "bg": style['bg']
+        })
+
+    # Tổng ngân sách phân bổ tháng 10 theo thu nhập và tỷ lệ tự chia của người dùng
+    total_limit = health_data.get('income', user.get('monthly_income', 18000000))
+    total_spent = health_data.get('total_expense', 0)
+    percent_spent = round((total_spent / total_limit) * 100, 1) if total_limit > 0 else 0
+    category_limit_sum = sum(b['limit'] for b in budgets_list)
+    days_left = 5
 
     return render_template('budgets.html',
-        user=session['user'],
+        user=user,
+        health=health_data,
         budgets=budgets_list,
         total_spent=total_spent,
         total_limit=total_limit,
         percent_spent=percent_spent,
+        category_limit_sum=category_limit_sum,
         days_left=days_left
     )
 
@@ -1632,17 +1771,31 @@ def budgets():
 @login_required
 def api_update_budget():
     data = request.get_json() or {}
-    category = data.get('category')
+    category = (data.get('category') or '').strip()
     new_limit = data.get('limit')
     try:
-        new_limit = float(new_limit)
+        new_limit = int(float(new_limit))
+        if new_limit <= 0:
+            raise ValueError
     except (ValueError, TypeError):
         return jsonify({"success": False, "message": "Số tiền hạn mức không hợp lệ!"}), 400
-    
-    if 'custom_budget_limits' not in session:
-        session['custom_budget_limits'] = {}
-    session['custom_budget_limits'][category] = new_limit
+
+    user = get_current_user() or session['user']
+    current_budgets = dict(user.get('category_budgets') or user.get('category_limits') or {})
+    current_budgets[category] = new_limit
+    update_user_field(user['id'], 'category_limits', current_budgets)
+    updated_user = update_user_field(user['id'], 'category_budgets', current_budgets)
+    session['user'] = sanitize_user(updated_user) if updated_user else user
+    session.pop('custom_budget_limits', None)
     session.modified = True
+
+    log_action(
+        actor=user.get('username', 'user'),
+        action="Điều chỉnh hạn mức danh mục",
+        target=category,
+        result="Success",
+        details=f"Cập nhật trần ngân sách '{category}' thành {new_limit:,.0f} VNĐ"
+    )
     return jsonify({"success": True, "message": f"Đã cập nhật hạn mức danh mục '{category}' thành {new_limit:,.0f}đ!"})
 
 # ==========================================================================
@@ -1651,6 +1804,7 @@ def api_update_budget():
 @app.route('/notifications')
 @login_required
 def notifications():
+    user = get_current_user() or session['user']
     notifications_data = [
         {
             "id": 1,
@@ -1658,19 +1812,19 @@ def notifications():
             "icon": "fa-triangle-exclamation",
             "color": "#EF4444",
             "bg": "rgba(239, 68, 68, 0.12)",
-            "title": "Cảnh báo vượt ngân sách",
-            "body": "Bạn đã chi tiêu vượt hạn mức danh mục 'Mua sắm cá nhân' 100.000đ trong tháng 10.",
+            "title": "Cảnh báo vượt ngân sách (Đỏ)",
+            "body": "Danh mục 'Mua sắm cá nhân' đã chi 2.270.000đ / 1.500.000đ (đạt 151,3% hạn mức, vượt trần 770.000đ từ 05 đơn hàng đêm).",
             "time": "10 phút trước",
             "unread": True
         },
         {
             "id": 2,
             "type": "reminder",
-            "icon": "fa-receipt",
+            "icon": "fa-gauge-high",
             "color": "#F59E0B",
             "bg": "rgba(245, 158, 11, 0.12)",
-            "title": "Nhắc nhở thanh toán hóa đơn",
-            "body": "Hóa đơn tiền điện VNPT/EVN hạn thanh toán ngày 25/10 (ước tính 680.000đ).",
+            "title": "Cảnh báo sắp chạm trần (Vàng)",
+            "body": "Danh mục 'Nhà ở & Hóa đơn tiện ích' đã đạt 97,0% hạn mức tháng 10 (4.850.000đ / 5.000.000đ, còn lại 150.000đ).",
             "time": "2 giờ trước",
             "unread": True
         },
@@ -1681,8 +1835,8 @@ def notifications():
             "color": "#10B981",
             "bg": "rgba(16, 185, 129, 0.12)",
             "title": "Biến động số dư +18.000.000đ",
-            "body": "Tài khoản Vietcombank nhận lương tháng 09 từ CÔNG TY CP CÔNG NGHỆ ABC.",
-            "time": "Hôm qua, 08:30",
+            "body": "Tài khoản Vietcombank (•••• 5938) nhận lương tháng 10/2026 từ CÔNG TY CP CÔNG NGHỆ ABC.",
+            "time": "05/10/2026, 09:15",
             "unread": False
         },
         {
@@ -1691,13 +1845,13 @@ def notifications():
             "icon": "fa-bullseye",
             "color": "#E8632A",
             "bg": "rgba(232, 99, 42, 0.12)",
-            "title": "Tiến độ mục tiêu tài chính",
-            "body": "Mục tiêu 'Quỹ khẩn cấp' đã đạt 30% kế hoạch. Tiếp tục phát huy nhé!",
-            "time": "3 ngày trước",
+            "title": "Tiến độ mục tiêu & Heo đất làm tròn",
+            "body": "Mục tiêu 'Quỹ khẩn cấp 3 tháng' đạt 42,5% (8.500.000đ / 20.000.000đ). Heo đất làm tròn 07 giao dịch đã thu gom 31.000đ tiền lẻ!",
+            "time": "26/10/2026, 08:30",
             "unread": False
         }
     ]
-    return render_template('notifications.html', user=session['user'], notifications=notifications_data)
+    return render_template('notifications.html', user=user, notifications=notifications_data)
 
 # ==========================================================================
 # 5f. Reports (Báo cáo thu chi đơn giản)
@@ -1727,6 +1881,7 @@ def analytics():
 @login_required
 def goals():
     user = get_current_user() or session['user']
+    _, health_data = get_financial_data()
     savings_goals = user.get('savings_goals') or []
     if not savings_goals:
         savings_goals = [
@@ -1743,7 +1898,8 @@ def goals():
             g['current_amount'] = c
             g['target'] = t
             g['target_amount'] = t
-    return render_template('goals.html', user=user, goals=savings_goals)
+            g['icon'] = str(g.get('icon', 'bullseye')).replace('fa-', '')
+    return render_template('goals.html', user=user, goals=savings_goals, health=health_data)
 
 # ==========================================================================
 # 8. Profile
@@ -1810,16 +1966,14 @@ def api_profile_change_password():
     if not new_password or len(new_password) < 4:
         return jsonify({"status": "error", "message": "Mật khẩu mới phải có ít nhất 4 ký tự!"}), 400
 
-    users = load_users()
-    matched = next((u for u in users if u['id'] == user_id), None)
+    matched = get_user_by_id(user_id)
     if not matched:
         return jsonify({"status": "error", "message": "Người dùng không tồn tại!"}), 404
-
-    current_stored_pwd = matched.get('password', '')
-    if old_password and current_stored_pwd and old_password != current_stored_pwd and old_password not in ('password123', 'admin123', '123456'):
+    auth_check = authenticate_user(user.get("username"), old_password)
+    if not auth_check.get("success"):
         return jsonify({"status": "error", "message": "Mật khẩu hiện tại không chính xác!"}), 400
 
-    update_user_field(user_id, 'password', new_password)
+    reset_user_password(user_id, new_password)
     log_action(
         actor=user['username'],
         action="Đổi mật khẩu tài khoản",
@@ -2042,7 +2196,7 @@ def api_simulate_bank_transaction():
     """
     Luồng Demo: Mô phỏng phát sinh giao dịch mới từ ngân hàng (Webhook Event).
     - Tự động gọi FinLab AI Categorizer phân tích ngữ nghĩa tiếng Việt
-    - Gán rổ 50/30/20 & tính confidence score
+    - Gán rổ ngân sách (Needs/Wants/Savings) & tính confidence score
     - Kiểm tra chi tiêu bốc đồng (ban đêm) hoặc dịch vụ số định kỳ (Subscription)
     - Trừ/cộng số dư của ví ngân hàng tương ứng thời gian thực
     - Thêm vào sổ giao dịch và cập nhật ngân sách
@@ -2134,12 +2288,7 @@ def api_simulate_bank_transaction():
         details=f"{description} ({'+' if txn_type=='INFLOW' else '-'}{amount:,.0f}đ). AI tự động phân loại: {cat_result['category']} (Rổ: {cat_result['bucket']}, Tin cậy: {int(cat_result['confidence_score']*100)}%)"
     )
 
-    bucket_labels = {
-        "NEEDS": "50% Nhu cầu thiết yếu (Needs)",
-        "WANTS": "30% Nhu cầu linh hoạt (Wants)",
-        "SAVINGS": "20% Tích sản & Đầu tư (Savings)",
-        "INCOME": "Dòng thu nhập (Inflow)"
-    }
+    bucket_labels = get_bucket_labels(user)
 
     return jsonify({
         "success": True,
@@ -2151,7 +2300,7 @@ def api_simulate_bank_transaction():
         "ai_analysis": {
             "category": cat_result["category"],
             "bucket": cat_result["bucket"],
-            "bucket_label": bucket_labels.get(cat_result["bucket"], "30% Nhu cầu linh hoạt"),
+            "bucket_label": bucket_labels.get(cat_result["bucket"], bucket_labels["WANTS"]),
             "confidence_pct": int(cat_result["confidence_score"] * 100),
             "is_night_spending": cat_result.get("is_night_spending", False),
             "is_subscription": cat_result.get("is_subscription", False)
@@ -2168,16 +2317,43 @@ def api_chat():
     enriched_txns, health_data = get_financial_data()
     user = get_current_user() or session.get('user', {})
     health_data['consents'] = user.get('consents', [])
-    ai_reply = generate_chatbot_response(user_message, health_data)
-    return jsonify({"reply": ai_reply})
+
+    use_llm = (
+        not app.config.get('TESTING', False)
+        and os.environ.get('FINLAB_CHATBOT_OFFLINE', '0') != '1'
+        and ('unittest' not in sys.modules)
+        and ('pytest' not in sys.modules)
+    )
+    ai_reply, meta = generate_chatbot_response(
+        user_message,
+        health_data,
+        user_profile=user,
+        use_llm=use_llm,
+        return_meta=True,
+    )
+
+    if use_llm:
+        masked_summary = ", ".join(meta.get("masked_fields") or []) or "Không phát hiện PII thô"
+        log_action(
+            actor=user.get('username') or user.get('id', 'user'),
+            action='AI Chatbot Hybrid (Ẩn danh PII - NĐ 13)',
+            target=meta.get('engine', 'rule-based-offline'),
+            result='Success',
+            details=f"Đã che: [{masked_summary}] | Prompt gửi AI: {meta.get('masked_question', '')[:120]}",
+            ip=request.remote_addr or '127.0.0.1',
+        )
+
+    return jsonify({"reply": ai_reply, "meta": meta})
 
 @app.route('/api/transactions', methods=['GET'])
 @login_required
 def api_transactions():
     bank_filter = request.args.get('bank', 'ALL')
     user = get_current_user() or session.get('user', {})
-    raw_txns = fetch_open_banking_transactions(bank_filter, user_consents=user.get('consents', []))
-    custom_txns = user.get('custom_transactions') or session.get('custom_transactions', [])
+    raw_txns = fetch_open_banking_transactions(
+        bank_filter, user_consents=user.get('consents', []), user_id=user.get('id')
+    )
+    custom_txns = [] if user.get('id') else (user.get('custom_transactions') or session.get('custom_transactions', []))
     all_txns = list(custom_txns) + list(raw_txns)
     enriched = process_all_transactions(all_txns)
     return jsonify({"total": len(enriched), "transactions": enriched})
@@ -2300,7 +2476,7 @@ def api_delete_wallet(wallet_id):
 @app.route('/api/wallets/transfer', methods=['POST'])
 @login_required
 def api_transfer_wallet():
-    """Chuyển tiền giữa 2 ví trong users.json."""
+    """Atomically update wallet balances and record both sides of a transfer."""
     data = request.get_json() or {}
     from_id = (data.get('fromId') or '').strip()
     to_id   = (data.get('toId')   or '').strip()
@@ -2313,32 +2489,52 @@ def api_transfer_wallet():
         return jsonify({"success": False, "error": "Thiếu thông tin ví!"}), 400
     if from_id == to_id:
         return jsonify({"success": False, "error": "Ví nguồn và ví đích không được giống nhau!"}), 400
-    if amount <= 0:
+    if amount <= 0 or not amount.is_integer():
         return jsonify({"success": False, "error": "Số tiền phải lớn hơn 0!"}), 400
 
     user = get_current_user() or session['user']
     user_id = user['id']
-    wallets_list = user.get('wallets') or session.get('user_wallets', [])
-    from_w = next((w for w in wallets_list if w['id'] == from_id), None)
-    to_w   = next((w for w in wallets_list if w['id'] == to_id),   None)
-    if not from_w:
-        return jsonify({"success": False, "error": "Không tìm thấy ví nguồn!"}), 404
-    if not to_w:
-        return jsonify({"success": False, "error": "Không tìm thấy ví đích!"}), 404
-    if (float(from_w.get('currentBalance', 0)) < amount):
-        return jsonify({"success": False, "error": f"Số dư ví '{from_w['name']}' không đủ!"}), 400
-
-    from_w['currentBalance'] = float(from_w.get('currentBalance', 0)) - amount
-    to_w['currentBalance']   = float(to_w.get('currentBalance',   0)) + amount
-    from_w['updatedAt'] = to_w['updatedAt'] = time.strftime('%Y-%m-%dT%H:%M:%S')
-    
-    update_user_field(user_id, 'wallets', wallets_list)
-    session['user_wallets'] = wallets_list
+    with session_scope() as db:
+        from_w = db.query(Wallet).filter_by(id=from_id, user_id=user_id).with_for_update().first()
+        to_w = db.query(Wallet).filter_by(id=to_id, user_id=user_id).with_for_update().first()
+        if not from_w:
+            return jsonify({"success": False, "error": "Không tìm thấy ví nguồn!"}), 404
+        if not to_w:
+            return jsonify({"success": False, "error": "Không tìm thấy ví đích!"}), 404
+        if from_w.current_balance < int(amount):
+            return jsonify({"success": False, "error": f"Số dư ví '{from_w.wallet_name}' không đủ!"}), 400
+        from_w.current_balance -= int(amount)
+        to_w.current_balance += int(amount)
+        transfer_time = datetime.now().isoformat(timespec="seconds")
+        transfer_id = uuid.uuid4().hex
+        db.add_all([
+            Transaction(
+                id=f"TRANSFER_{transfer_id}_OUT",
+                wallet_id=from_w.id,
+                timestamp=transfer_time,
+                type="OUTFLOW",
+                amount=int(amount),
+                description=f"Chuyển nội bộ đến {to_w.wallet_name}",
+                source="MANUAL",
+            ),
+            Transaction(
+                id=f"TRANSFER_{transfer_id}_IN",
+                wallet_id=to_w.id,
+                timestamp=transfer_time,
+                type="INFLOW",
+                amount=int(amount),
+                description=f"Chuyển nội bộ từ {from_w.wallet_name}",
+                source="MANUAL",
+            ),
+        ])
+        from_balance = from_w.current_balance
+        to_balance = to_w.current_balance
+    session['user_wallets'] = get_user_by_id(user_id).get("wallets", [])
     session.modified = True
     return jsonify({
         "success": True,
-        "fromBalance": from_w['currentBalance'],
-        "toBalance":   to_w['currentBalance'],
+        "fromBalance": from_balance,
+        "toBalance": to_balance,
     })
 
 # ==========================================================================
@@ -2359,6 +2555,9 @@ def generate_qr_code():
     port = int(os.environ.get('PORT', 5000))
     mobile_url = f'http://{local_ip}:{port}'
     
+    if qrcode is None:
+        return jsonify({'error': 'Thư viện qrcode chưa được cài đặt. Chạy: pip install qrcode'}), 501
+
     # Tạo QR code
     qr = qrcode.QRCode(
         version=1,

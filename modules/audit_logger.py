@@ -1,63 +1,79 @@
-import json
-import os
-import time
+import uuid
 from datetime import datetime
 
-AUDIT_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'audit_logs.json')
+from modules.database import AuditLog, SessionLocal, User
+
+
+def _entry(row):
+    return {
+        "id": row.id,
+        "timestamp": row.timestamp,
+        "actor": row.actor_name,
+        "action": row.action,
+        "target": row.target,
+        "result": row.result,
+        "details": row.details or "",
+        "ip": row.ip or "",
+    }
+
 
 def load_audit_logs():
-    if not os.path.exists(AUDIT_FILE):
-        return []
-    try:
-        with open(AUDIT_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return []
+    with SessionLocal() as db:
+        rows = db.query(AuditLog).order_by(AuditLog.timestamp.desc(), AuditLog.id.desc()).all()
+        return [_entry(row) for row in rows]
+
 
 def save_audit_logs(logs):
-    try:
-        with open(AUDIT_FILE, 'w', encoding='utf-8') as f:
-            json.dump(logs, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f"Error saving audit log: {e}")
+    """Compatibility import helper used to restore or seed audit history."""
+    with SessionLocal() as db:
+        try:
+            for item in logs:
+                row = db.get(AuditLog, str(item.get("id") or ""))
+                if row is None:
+                    row = AuditLog(id=str(item.get("id") or f"LOG_{uuid.uuid4().hex}"))
+                    db.add(row)
+                actor = str(item.get("actor") or "system")
+                user = db.query(User).filter(User.username == actor).first()
+                row.user_id = user.id if user else None
+                row.actor_name = actor
+                row.action = str(item.get("action") or "UNKNOWN")
+                row.target = str(item.get("target") or "system")
+                row.result = str(item.get("result") or "Success")
+                row.details = str(item.get("details") or "")
+                row.ip = item.get("ip")
+                row.timestamp = str(item.get("timestamp") or datetime.now().isoformat(timespec="seconds"))
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
 
 def log_action(actor, action, target, result="Success", details="", ip="127.0.0.1"):
-    """
-    Ghi nhận nhật ký sự kiện hệ thống tuân thủ Nghị định 13/2023/NĐ-CP
-    actor: Tên người dùng / Admin thực hiện
-    action: Hành động (ví dụ: 'Đăng nhập Admin', 'Khóa tài khoản', 'Thêm danh mục'...)
-    target: Đối tượng bị tác động (User ID, Category ID, System...)
-    result: 'Success' hoặc 'Failed'
-    details: Ghi chú ngắn gọn
-    ip: Địa chỉ IP
-    """
-    logs = load_audit_logs()
-    
-    event_entry = {
-        "id": f"LOG_{int(time.time() * 1000) % 10000000}",
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "actor": actor or "system",
-        "action": action,
-        "target": target or "system",
-        "result": result,
-        "details": details,
-        "ip": ip
-    }
-    
-    # Đưa sự kiện mới nhất lên đầu danh sách
-    logs.insert(0, event_entry)
-    
-    # Giới hạn tối đa 500 bản ghi để giữ dung lượng nhẹ
-    if len(logs) > 500:
-        logs = logs[:500]
-        
-    save_audit_logs(logs)
-    return event_entry
+    actor_name = str(actor or "system")
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.username == actor_name).first()
+        entry = AuditLog(
+            id=f"LOG_{uuid.uuid4().hex}",
+            user_id=user.id if user else None,
+            actor_name=actor_name,
+            action=str(action),
+            target=str(target or "system"),
+            result=str(result),
+            details=str(details or ""),
+            ip=ip,
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        db.add(entry)
+        db.commit()
+        return _entry(entry)
+
 
 def get_audit_logs(limit=100, action_filter=None, actor_filter=None):
-    logs = load_audit_logs()
-    if action_filter and action_filter != 'ALL':
-        logs = [l for l in logs if l.get('action') == action_filter]
-    if actor_filter:
-        logs = [l for l in logs if actor_filter.lower() in l.get('actor', '').lower()]
-    return logs[:limit]
+    with SessionLocal() as db:
+        query = db.query(AuditLog)
+        if action_filter and action_filter != "ALL":
+            query = query.filter(AuditLog.action == action_filter)
+        if actor_filter:
+            query = query.filter(AuditLog.actor_name.ilike(f"%{actor_filter}%"))
+        rows = query.order_by(AuditLog.timestamp.desc(), AuditLog.id.desc()).limit(limit).all()
+        return [_entry(row) for row in rows]
