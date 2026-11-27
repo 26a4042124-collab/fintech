@@ -1431,7 +1431,7 @@ def api_ai_categorize():
 # ==========================================================================
 # 5b2. OCR Receipt Scanner (Quét hóa đơn bằng Tesseract OCR - Local Offline)
 # ==========================================================================
-from modules.simple_ocr import preprocess_image, scan_with_fallback, ReceiptProcessingError
+from modules.ocr import preprocess_image, scan_with_fallback, ReceiptProcessingError
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}

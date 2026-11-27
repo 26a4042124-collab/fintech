@@ -11,7 +11,8 @@ from pathlib import Path
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Ground truth cho test images
 GROUND_TRUTH = {
@@ -65,12 +66,12 @@ def test_comprehensive():
     
     # Import module
     print("\n[1] Import OCR module...")
-    from modules.simple_ocr import preprocess_image, scan_with_fallback, TESSERACT_AVAILABLE
+    from modules.ocr import preprocess_image, scan_with_fallback, TESSERACT_AVAILABLE
     print(f"✓ Import thành công (Tesseract: {TESSERACT_AVAILABLE})")
     
     # Find test images
     print("\n[2] Load test images và ground truth...")
-    image_dir = Path(__file__).parent / 'static' / 'images'
+    image_dir = Path(__file__).parent.parent / 'static' / 'images'
     
     results_summary = []
     

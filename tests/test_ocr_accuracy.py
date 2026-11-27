@@ -12,7 +12,8 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_current_ocr():
     """Test OCR hiện tại"""
@@ -23,7 +24,7 @@ def test_current_ocr():
     # Import module OCR
     print("\n[1] Import OCR module...")
     try:
-        from modules.simple_ocr import preprocess_image, scan_with_fallback, TESSERACT_AVAILABLE
+        from modules.ocr import preprocess_image, scan_with_fallback, TESSERACT_AVAILABLE
         print(f"✓ Import thành công")
         print(f"  - Tesseract available: {TESSERACT_AVAILABLE}")
     except Exception as e:
@@ -32,7 +33,7 @@ def test_current_ocr():
     
     # Kiểm tra ảnh test
     print("\n[2] Tìm ảnh test...")
-    image_dir = Path(__file__).parent / 'static' / 'images'
+    image_dir = Path(__file__).parent.parent / 'static' / 'images'
     test_images = list(image_dir.glob('hd*.jpg')) + list(image_dir.glob('hd*.png'))
     
     if not test_images:
